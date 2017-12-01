@@ -1,0 +1,21 @@
+{
+  "name": "jelly",
+  "version": "1.0.0",
+  "description": "jelly is squishy",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "flow-bin": "^0.59.0",
+    "flow-typed": "^2.2.3",
+    "jest": "^21.2.1",
+    "prettier": "^1.8.2"
+  },
+  "scripts": {
+    "check-all": "flow && jest && yarn format-check",
+    "format": "prettier --write '**/*.js'",
+    "format-check": "prettier -l '**/*.js'"
+  }
+}
