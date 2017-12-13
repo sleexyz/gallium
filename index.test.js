@@ -1,82 +1,125 @@
 // @flow
-import * as Parser from "./";
+import { parse, parseName, parseNumLit, parseSemi } from "./";
 
 describe("parseName", () => {
   it("parses names", () => {
-    const result = Parser.parseName("foo 1");
+    const input = "foo 1";
+    const result = parseName(input);
     expect(result.data).toEqual({
-      value: { type: "Name", data: "foo" },
+      value: {
+        type: "Name",
+        space: "",
+        data: "foo"
+      },
       rest: " 1"
     });
   });
 
-  it("fails on incomplete data", () => {
-    const result = Parser.parseName(" foo 1");
-    expect(result.data).toEqual("not a name");
+  it("recognizes whitespace", () => {
+    const input = "   foo 1";
+    const result = parseName(input);
+    expect(result.data).toEqual({
+      value: {
+        type: "Name",
+        space: "   ",
+        data: "foo"
+      },
+      rest: " 1"
+    });
   });
 });
 
 describe("parseNumLit", () => {
   it("parses numeric literals", () => {
-    const result = Parser.parseNumLit("100 asdf");
+    const input = "100 asdf";
+    const result = parseNumLit(input);
     expect(result.data).toEqual({
-      value: { type: "NumLit", data: 100 },
+      value: { type: "NumLit", space: "", data: 100 },
       rest: " asdf"
     });
   });
 
-  it("fails on incomplete data", () => {
-    const result = Parser.parseNumLit(" 100");
-    expect(result.data).toEqual("not a number");
+  it("recognizes whitespace", () => {
+    const input = "  100 asdf";
+    const result = parseNumLit(input);
+    expect(result.data).toEqual({
+      value: { type: "NumLit", space: "  ", data: 100 },
+      rest: " asdf"
+    });
   });
 });
 
 describe("parseSemi", () => {
   it("parses semicolons with no spaces", () => {
-    const result = Parser.parseSemi("foo;bar");
+    const input = `foo;bar`;
+    const result = parseSemi(input);
     expect(result.data).toEqual({
       value: {
         type: "Semi",
-        data: {
-          left: { type: "Name", data: "foo" },
-          right: { type: "Name", data: "bar" }
-        }
+        data: undefined,
+        space: "",
+        children: [
+          { type: "Name", space: "", data: "foo" },
+          { type: "Name", space: "", data: "bar" }
+        ]
       },
       rest: ""
     });
   });
 
   it("parses semicolons with spaces", () => {
-    const result = Parser.parseSemi("foo  ;  bar");
+    const input = `foo  ;  bar`;
+    const result = parseSemi(input);
     expect(result.data).toEqual({
       value: {
         type: "Semi",
-        data: {
-          left: { type: "Name", data: "foo" },
-          right: { type: "Name", data: "bar" }
-        }
+        data: undefined,
+        space: "  ",
+        children: [
+          { type: "Name", space: "", data: "foo" },
+          { type: "Name", space: "  ", data: "bar" }
+        ]
       },
       rest: ""
     });
   });
 
   it("can parses multiple semicolons", () => {
-    const result = Parser.parseSemi("foo  ;  bar ; baz");
+    const input = `foo  ;  bar  ; baz`;
+    const result = parseSemi(input);
     expect(result.data).toEqual({
       value: {
         type: "Semi",
-        data: {
-          left: { type: "Name", data: "foo" },
-          right: {
+        data: undefined,
+        space: "  ",
+        children: [
+          { type: "Name", space: "", data: "foo" },
+          {
             type: "Semi",
-            data: {
-              left: { type: "Name", data: "bar" },
-              right: { type: "Name", data: "baz" }
-            }
+            data: undefined,
+            space: "  ",
+            children: [
+              { type: "Name", space: "  ", data: "bar" },
+              { type: "Name", space: " ", data: "baz" }
+            ]
           }
-        }
+        ]
       },
       rest: ""
     });
   });
+});
+
+describe("round trip identity laws", () => {
+  function testRoundTrip(input: string) {
+    test(JSON.stringify(input), () => {
+      const output = parse(input);
+      expect(output.print()).toBe(input);
+    });
+  }
+  testRoundTrip("foo");
+  testRoundTrip("foo;bar");
+  testRoundTrip("foo ; bar");
+  testRoundTrip(" foo ; bar");
+  testRoundTrip("baz; foo; bar; asdf");
 });

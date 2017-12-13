@@ -1,35 +1,56 @@
 // @flow
 
-/*
-   Syntax:
+type AST = AST_<any>;
 
-   note 2
-   fast 2
-   and
-     note 1
-     fast 3
-   and
-     note 1 ; fast 4
-*/
+interface AST_<P> {
+  type: string;
+  space: string;
+  data: P;
+  children?: Array<AST>;
+  print(): string;
+}
 
-type AST = Name | Semi | NumLit;
-type Name = {
-  type: "Name",
-  data: string
-};
-
-type Semi = {
-  type: "Semi",
-  data: {
-    left: AST,
-    right: AST
+class Name implements AST_<string> {
+  type = "Name";
+  data: string;
+  space: string;
+  constructor(data: string, space: string) {
+    this.data = data;
+    this.space = space;
   }
-};
+  print() {
+    return `${this.space}${this.data}`;
+  }
+}
 
-type NumLit = {
-  type: "NumLit",
-  data: number
-};
+class Semi implements AST_<void> {
+  type = "Semi";
+  data = undefined;
+  children: Array<AST>;
+  space: string;
+  constructor(children: [AST, AST], space: string) {
+    this.children = [...children];
+    this.space = space;
+  }
+  print() {
+    return `${this.children[0].print()}${
+      this.space
+    };${this.children[1].print()}`;
+  }
+}
+
+class NumLit implements AST_<number> {
+  type = "NumLit";
+  data: number;
+  space: string;
+  constructor(data: number, space: string) {
+    this.data = data;
+    this.space = space;
+  }
+  print() {
+    return `${this.space}${this.data}`;
+  }
+}
 
 type Parser<A> = string => Result<A, any>;
 
@@ -87,41 +108,38 @@ function mapRest<A>(x: Parser<A>, f: string => string): Parser<A> {
   };
 }
 
-export const parseName: Parser<AST> = input => {
-  const match = input.match(/^[a-zA-Z]+/);
-  if (!match) {
-    return new Fail("not a name");
-  }
-  const name = match[0];
-  const rest = input.substring(name.length);
-  return new Success({
-    value: { type: "Name", data: name },
-    rest
-  });
-};
+export const parseName: Parser<AST> = input =>
+  bind(getWhitespace, whitespace => {
+    return input => {
+      const match = input.match(/^[a-zA-Z]+/);
+      if (!match) {
+        return new Fail("not a name");
+      }
+      const name = match[0];
+      const rest = input.substring(name.length);
+      return new Success({
+        value: new Name(name, whitespace),
+        rest
+      });
+    };
+  })(input);
 
 export const parseNumLit: Parser<AST> = input => {
-  const match = input.match(/^[0-9]+/);
-  if (!match) {
-    return new Fail("not a number");
-  }
-  const numString = match[0];
-  const rest = input.substring(numString.length);
-  return new Success({
-    value: { type: "NumLit", data: parseInt(numString) },
-    rest
-  });
+  return bind(getWhitespace, whitespace => {
+    return input => {
+      const match = input.match(/^[0-9]+/);
+      if (!match) {
+        return new Fail("not a number");
+      }
+      const numString = match[0];
+      const rest = input.substring(numString.length);
+      return new Success({
+        value: new NumLit(parseInt(numString), whitespace),
+        rest
+      });
+    };
+  })(input);
 };
-
-function isDone<A>(result: Parser<A>): boolean {
-  if (!(result instanceof Success)) {
-    return false;
-  }
-  if (result.data.rest !== "") {
-    return false;
-  }
-  return true;
-}
 
 export const constant = (substring: string): Parser<void> => input => {
   const i = input.indexOf(substring);
@@ -146,34 +164,53 @@ export function alternate<O>(options: Array<Parser<O>>): Parser<O> {
   };
 }
 
-export const parseTerm0: Parser<AST> = input => {
-  return alternate([parseSemi, parseName, parseNumLit])(input);
+const parseTerm0: Parser<AST> = input => {
+  return alternate([parseSemi, parseTerm1])(input);
 };
 
-export const parseTerm1: Parser<AST> = input => {
+const parseTerm1: Parser<AST> = input => {
   return alternate([parseName, parseNumLit])(input);
 };
 
-export const whitespace = <A>(parser: Parser<A>): Parser<A> => {
-  return input => {
-    const match = input.match(/^\s*/);
-    if (!match) {
-      return new Fail("no whitespace");
-    }
-    return parser(input.substring(match[0].length));
-  };
+export function parse(input: string): AST {
+  const result = parseTerm0(input);
+  if (!(result instanceof Success)) {
+    throw new Error(`Parse Error: ${result.data.value}`);
+  }
+  return result.data.value;
+}
+
+const getWhitespace: Parser<string> = input => {
+  const match = input.match(/^\s*/);
+  if (!match) {
+    return new Success({
+      rest: input,
+      value: ""
+    });
+  }
+  return new Success({
+    rest: input.substring(match[0].length),
+    value: match[0]
+  });
 };
 
-export const parseSemi: Parser<AST> = bind(parseTerm1, left => {
-  return bind(whitespace(constant(";")), () => {
-    return map(whitespace(parseTerm0), right => {
+export function collectWhitespaceBefore<A>(
+  parser: Parser<A>
+): Parser<{ value: A, whitespace: string }> {
+  return bind(getWhitespace, whitespace => {
+    return map(parser, value => {
       return {
-        type: "Semi",
-        data: {
-          left,
-          right
-        }
+        value,
+        whitespace
       };
+    });
+  });
+}
+
+export const parseSemi: Parser<AST> = bind(parseTerm1, left => {
+  return bind(collectWhitespaceBefore(constant(";")), ({ whitespace }) => {
+    return map(parseTerm0, right => {
+      return new Semi([left, right], whitespace);
     });
   });
 });
