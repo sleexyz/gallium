@@ -182,7 +182,7 @@ export function parse(input: string): AST {
   return result.data.value;
 }
 
-const getWhitespace: Parser<string> = input => {
+const optionalWhitespace: Parser<string> = input => {
   const match = input.match(/^\s*/);
   if (!match) {
     return new Success({
@@ -195,19 +195,6 @@ const getWhitespace: Parser<string> = input => {
     value: match[0]
   });
 };
-
-export function collectWhitespaceBefore<A>(
-  parser: Parser<A>
-): Parser<{ value: A, whitespace: string }> {
-  return bind(getWhitespace, whitespace => {
-    return map(parser, value => {
-      return {
-        value,
-        whitespace
-      };
-    });
-  });
-}
 
 export const parseList: Parser<AST> = bind(constant("("), () => {
   return map(
@@ -225,7 +212,7 @@ function parseListAux({
   children: Array<AST>,
   spaces: Array<string>
 }): Parser<{ children: Array<AST>, spaces: Array<string> }> {
-  return bind(getWhitespace, space => {
+  return bind(optionalWhitespace, space => {
     return alternate([
       map(constant(")"), () => {
         return { children, spaces: [...spaces, space] };

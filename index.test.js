@@ -79,6 +79,7 @@ describe("pretty printing", () => {
       expect(output.pretty().print()).toBe(expected);
     });
   }
+  testPretty("()", "()");
   testPretty("(foo)", "(foo)");
   testPretty("( foo )", "(foo)");
   testPretty("(foo bar)", "(foo bar)");
