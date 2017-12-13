@@ -61,69 +61,81 @@ class NumLit implements AST {
   }
 }
 
-type Parser<A> = string => { value: A, rest: string };
+type State = {
+  indentation: number,
+  text: string
+};
+
+type Parser<A> = State => { value: A, state: State };
 
 function bind<A, B>(x: Parser<A>, f: A => Parser<B>): Parser<B> {
-  return input => {
-    const { value, rest } = x(input);
-    return f(value)(rest);
+  return state1 => {
+    const { value, state } = x(state1);
+    return f(value)(state);
   };
 }
 
 function map<A, B>(x: Parser<A>, f: A => B): Parser<B> {
-  return input => {
-    const { value, rest } = x(input);
+  return state1 => {
+    const { value, state } = x(state1);
     return {
       value: f(value),
-      rest
+      state
     };
   };
 }
 
 class ParseError extends Error {}
 
-export const parseName: Parser<AST> = input => {
-  const match = input.match(/^[a-zA-Z]+/);
+export const parseName: Parser<AST> = state => {
+  const match = state.text.match(/^[a-zA-Z]+/);
   if (!match) {
     throw new ParseError("not a name");
   }
   const name = match[0];
-  const rest = input.substring(name.length);
   return {
     value: new Name(name),
-    rest
+    state: {
+      ...state,
+      text: state.text.substring(name.length)
+    }
   };
 };
 
-export const parseNumLit: Parser<AST> = input => {
-  const match = input.match(/^[0-9]+/);
+export const parseNumLit: Parser<AST> = state => {
+  const match = state.text.match(/^[0-9]+/);
   if (!match) {
     throw new ParseError("not a number");
   }
   const numString = match[0];
-  const rest = input.substring(numString.length);
   return {
     value: new NumLit(parseInt(numString)),
-    rest
+    state: {
+      ...state,
+      text: state.text.substring(numString.length)
+    }
   };
 };
 
-export const constant = (substring: string): Parser<void> => input => {
-  const i = input.indexOf(substring);
+export const constant = (substring: string): Parser<void> => state => {
+  const i = state.text.indexOf(substring);
   if (i != 0) {
     throw new ParseError("could not find constant");
   }
   return {
     value: undefined,
-    rest: input.substring(i + substring.length)
+    state: {
+      ...state,
+      text: state.text.substring(i + substring.length)
+    }
   };
 };
 
 export function alternate<O>(options: Array<Parser<O>>): Parser<O> {
-  return input => {
+  return state => {
     for (const f of options) {
       try {
-        return f(input);
+        return f(state);
       } catch (e) {}
     }
     throw new ParseError("alternation failed");
@@ -138,20 +150,23 @@ const parseTerm1: Parser<AST> = input => {
   return alternate([parseList, parseName, parseNumLit])(input);
 };
 
-export function parse(input: string): AST {
-  return parseTerm0(input).value;
+export function parse(state: State): AST {
+  return parseTerm0(state).value;
 }
 
-const optionalWhitespace: Parser<string> = input => {
-  const match = input.match(/^\s*/);
+const optionalWhitespace: Parser<string> = state => {
+  const match = state.text.match(/^\s*/);
   if (!match) {
     return {
-      rest: input,
+      state,
       value: ""
     };
   }
   return {
-    rest: input.substring(match[0].length),
+    state: {
+      ...state,
+      text: state.text.substring(match[0].length)
+    },
     value: match[0]
   };
 };
