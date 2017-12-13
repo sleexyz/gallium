@@ -1,7 +1,7 @@
 {
-  "name": "jelly",
-  "version": "1.0.0",
-  "description": "jelly is squishy",
+  "name": "gallium",
+  "version": "0.1.0",
+  "description": "liquid metal",
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
