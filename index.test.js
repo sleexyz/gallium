@@ -1,5 +1,5 @@
 // @flow
-import { parse, parseName, parseNumLit, parseSemi } from "./";
+import { parse, parseName, parseNumLit, parseList } from "./";
 
 describe("parseName", () => {
   it("parses names", () => {
@@ -8,24 +8,16 @@ describe("parseName", () => {
     expect(result.data).toEqual({
       value: {
         type: "Name",
-        space: "",
         data: "foo"
       },
       rest: " 1"
     });
   });
 
-  it("recognizes whitespace", () => {
+  it("fails on whitespace", () => {
     const input = "   foo 1";
     const result = parseName(input);
-    expect(result.data).toEqual({
-      value: {
-        type: "Name",
-        space: "   ",
-        data: "foo"
-      },
-      rest: " 1"
-    });
+    expect(result.data).toEqual("not a name");
   });
 });
 
@@ -34,75 +26,31 @@ describe("parseNumLit", () => {
     const input = "100 asdf";
     const result = parseNumLit(input);
     expect(result.data).toEqual({
-      value: { type: "NumLit", space: "", data: 100 },
+      value: { type: "NumLit", data: 100 },
       rest: " asdf"
     });
   });
 
-  it("recognizes whitespace", () => {
+  it("fails on whitespace", () => {
     const input = "  100 asdf";
     const result = parseNumLit(input);
-    expect(result.data).toEqual({
-      value: { type: "NumLit", space: "  ", data: 100 },
-      rest: " asdf"
-    });
+    expect(result.data).toEqual("not a number");
   });
 });
 
-describe("parseSemi", () => {
-  it("parses semicolons with no spaces", () => {
-    const input = `foo;bar`;
-    const result = parseSemi(input);
+describe("parseList", () => {
+  it("parses lists", () => {
+    const input = `(foo 1 2 1)`;
+    const result = parseList(input);
     expect(result.data).toEqual({
       value: {
-        type: "Semi",
-        data: undefined,
-        space: "",
+        type: "List",
+        spaces: ["", " ", " ", " ", ""],
         children: [
-          { type: "Name", space: "", data: "foo" },
-          { type: "Name", space: "", data: "bar" }
-        ]
-      },
-      rest: ""
-    });
-  });
-
-  it("parses semicolons with spaces", () => {
-    const input = `foo  ;  bar`;
-    const result = parseSemi(input);
-    expect(result.data).toEqual({
-      value: {
-        type: "Semi",
-        data: undefined,
-        space: "  ",
-        children: [
-          { type: "Name", space: "", data: "foo" },
-          { type: "Name", space: "  ", data: "bar" }
-        ]
-      },
-      rest: ""
-    });
-  });
-
-  it("can parses multiple semicolons", () => {
-    const input = `foo  ;  bar  ; baz`;
-    const result = parseSemi(input);
-    expect(result.data).toEqual({
-      value: {
-        type: "Semi",
-        data: undefined,
-        space: "  ",
-        children: [
-          { type: "Name", space: "", data: "foo" },
-          {
-            type: "Semi",
-            data: undefined,
-            space: "  ",
-            children: [
-              { type: "Name", space: "  ", data: "bar" },
-              { type: "Name", space: " ", data: "baz" }
-            ]
-          }
+          { type: "Name", data: "foo" },
+          { type: "NumLit", data: 1 },
+          { type: "NumLit", data: 2 },
+          { type: "NumLit", data: 1 }
         ]
       },
       rest: ""
@@ -117,9 +65,23 @@ describe("round trip identity laws", () => {
       expect(output.print()).toBe(input);
     });
   }
-  testRoundTrip("foo");
-  testRoundTrip("foo;bar");
-  testRoundTrip("foo ; bar");
-  testRoundTrip(" foo ; bar");
-  testRoundTrip("baz; foo; bar; asdf");
+  testRoundTrip("(foo)");
+  testRoundTrip("(foo bar)");
+  testRoundTrip("( foo bar )");
+  testRoundTrip("( foo bar  baz )");
+  testRoundTrip("( foo (foo 1 2 3 ) baz )");
+});
+
+describe("pretty printing", () => {
+  function testPretty(input: string, expected: string) {
+    test(JSON.stringify(input), () => {
+      const output = parse(input);
+      expect(output.pretty().print()).toBe(expected);
+    });
+  }
+  testPretty("(foo)", "(foo)");
+  testPretty("( foo )", "(foo)");
+  testPretty("(foo bar)", "(foo bar)");
+  testPretty("( foo  bar )", "(foo bar)");
+  testPretty("( foo (foo 1 2 3 ) baz )", "(foo (foo 1 2 3) baz)");
 });

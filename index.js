@@ -1,54 +1,63 @@
 // @flow
 
-type AST = AST_<any>;
-
-interface AST_<P> {
+interface AST {
   type: string;
-  space: string;
-  data: P;
   children?: Array<AST>;
   print(): string;
+  pretty(): AST;
 }
 
-class Name implements AST_<string> {
+class Name implements AST {
   type = "Name";
   data: string;
-  space: string;
-  constructor(data: string, space: string) {
+  constructor(data: string) {
     this.data = data;
-    this.space = space;
   }
   print() {
-    return `${this.space}${this.data}`;
+    return this.data;
+  }
+  pretty() {
+    return new Name(this.data);
   }
 }
 
-class Semi implements AST_<void> {
-  type = "Semi";
-  data = undefined;
+class List implements AST {
+  type = "List";
   children: Array<AST>;
-  space: string;
-  constructor(children: [AST, AST], space: string) {
+  spaces: Array<string>;
+  constructor(children: Array<AST>, spaces: Array<string>) {
     this.children = [...children];
-    this.space = space;
+    this.spaces = spaces;
   }
   print() {
-    return `${this.children[0].print()}${
-      this.space
-    };${this.children[1].print()}`;
+    let str = "(";
+    for (let i = 0; i < this.children.length; i += 1) {
+      str += this.spaces[i];
+      str += this.children[i].print();
+    }
+    str += this.spaces[this.children.length];
+    str += ")";
+    return str;
+  }
+  pretty() {
+    const spaces = Array(this.children.length + 1).fill(" ");
+    spaces[0] = "";
+    spaces[this.children.length] = "";
+    return new List(this.children.map(x => x.pretty()), spaces);
   }
 }
 
-class NumLit implements AST_<number> {
+class NumLit implements AST {
   type = "NumLit";
   data: number;
-  space: string;
-  constructor(data: number, space: string) {
+  constructor(data: number) {
     this.data = data;
-    this.space = space;
   }
   print() {
-    return `${this.space}${this.data}`;
+    return `${this.data}`;
+  }
+  pretty() {
+    return new NumLit(this.data);
   }
 }
 
@@ -108,43 +117,36 @@ function mapRest<A>(x: Parser<A>, f: string => string): Parser<A> {
   };
 }
 
-export const parseName: Parser<AST> = input =>
-  bind(getWhitespace, whitespace => {
-    return input => {
-      const match = input.match(/^[a-zA-Z]+/);
-      if (!match) {
-        return new Fail("not a name");
-      }
-      const name = match[0];
-      const rest = input.substring(name.length);
-      return new Success({
-        value: new Name(name, whitespace),
-        rest
-      });
-    };
-  })(input);
+export const parseName: Parser<AST> = input => {
+  const match = input.match(/^[a-zA-Z]+/);
+  if (!match) {
+    return new Fail("not a name");
+  }
+  const name = match[0];
+  const rest = input.substring(name.length);
+  return new Success({
+    value: new Name(name),
+    rest
+  });
+};
 
 export const parseNumLit: Parser<AST> = input => {
-  return bind(getWhitespace, whitespace => {
-    return input => {
-      const match = input.match(/^[0-9]+/);
-      if (!match) {
-        return new Fail("not a number");
-      }
-      const numString = match[0];
-      const rest = input.substring(numString.length);
-      return new Success({
-        value: new NumLit(parseInt(numString), whitespace),
-        rest
-      });
-    };
-  })(input);
+  const match = input.match(/^[0-9]+/);
+  if (!match) {
+    return new Fail("not a number");
+  }
+  const numString = match[0];
+  const rest = input.substring(numString.length);
+  return new Success({
+    value: new NumLit(parseInt(numString)),
+    rest
+  });
 };
 
 export const constant = (substring: string): Parser<void> => input => {
   const i = input.indexOf(substring);
-  if (i < 0) {
-    return new Fail("not a semi");
+  if (i != 0) {
+    return new Fail("could not find constant");
   }
   return new Success({
     value: undefined,
@@ -165,11 +167,11 @@ export function alternate<O>(options: Array<Parser<O>>): Parser<O> {
 }
 
 const parseTerm0: Parser<AST> = input => {
-  return alternate([parseSemi, parseTerm1])(input);
+  return alternate([parseTerm1])(input);
 };
 
 const parseTerm1: Parser<AST> = input => {
-  return alternate([parseName, parseNumLit])(input);
+  return alternate([parseList, parseName, parseNumLit])(input);
 };
 
 export function parse(input: string): AST {
@@ -207,10 +209,33 @@ export function collectWhitespaceBefore<A>(
   });
 }
 
-export const parseSemi: Parser<AST> = bind(parseTerm1, left => {
-  return bind(collectWhitespaceBefore(constant(";")), ({ whitespace }) => {
-    return map(parseTerm0, right => {
-      return new Semi([left, right], whitespace);
-    });
-  });
+export const parseList: Parser<AST> = bind(constant("("), () => {
+  return map(
+    parseListAux({ children: [], spaces: [] }),
+    ({ children, spaces }) => {
+      return new List(children, spaces);
+    }
+  );
 });
+
+function parseListAux({
+  children,
+  spaces
+}: {
+  children: Array<AST>,
+  spaces: Array<string>
+}): Parser<{ children: Array<AST>, spaces: Array<string> }> {
+  return bind(getWhitespace, space => {
+    return alternate([
+      map(constant(")"), () => {
+        return { children, spaces: [...spaces, space] };
+      }),
+      bind(parseTerm0, child => {
+        return parseListAux({
+          children: [...children, child],
+          spaces: [...spaces, space]
+        });
+      })
+    ]);
+  });
+}
