@@ -45,6 +45,21 @@ describe("parseList", () => {
       ]
     });
   });
+
+  it("parses unary lists", () => {
+    const ctx = new Ctx({ text: `(foo)`, indents: [0] });
+    const result = parseList(ctx);
+    expect(result).toEqual({
+      type: "List",
+      spaces: ["", ""],
+      children: [{ type: "Name", data: "foo" }]
+    });
+  });
+
+  it("fails to parse nullary lists", () => {
+    const ctx = new Ctx({ text: `()`, indents: [0] });
+    expect(() => parseList(ctx)).toThrow("alternation failed");
+  });
 });
 
 describe("parseIList", () => {
@@ -244,7 +259,6 @@ describe("pretty printing properties", () => {
       expect(output.pretty().print()).toBe(expected);
     });
   }
-  testPretty("()", "()");
   testPretty("(foo)", "(foo)");
   testPretty("( foo )", "(foo)");
   testPretty("(foo bar)", "(foo bar)");

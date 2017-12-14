@@ -300,8 +300,10 @@ function parseIListAux({
 
 export const parseList: Parser<AST> = ctx => {
   ctx.run(constant("("));
+  const space = ctx.run(optionalWhitespace);
+  const child = ctx.run(parseTerm0);
   const { children, spaces } = ctx.run(
-    parseListAux({ children: [], spaces: [] })
+    parseListAux({ children: [child], spaces: [space] })
   );
   return new List(children, spaces);
 };
