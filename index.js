@@ -62,123 +62,106 @@ class NumLit implements AST {
 }
 
 type State = {
-  indentation: number,
-  text: string
+  text: string,
+  indent: number
 };
 
-type Parser<A> = State => { value: A, state: State };
-
-function bind<A, B>(x: Parser<A>, f: A => Parser<B>): Parser<B> {
-  return state1 => {
-    const { value, state } = x(state1);
-    return f(value)(state);
-  };
+export class Ctx {
+  state: State;
+  constructor(state: State) {
+    this.state = state;
+  }
+  getText(): string{
+    return this.state.text;
+  }
+  setText(next: string): void{
+    this.state.text = next;
+  }
+  getIndent(): number{
+    return this.state.indent;
+  }
+  setIndent(next: number): void{
+    this.state.indent = next;
+  }
+  run<B>(parser: Parser<B>): B {
+    return parser(this);
+  }
 }
 
-function map<A, B>(x: Parser<A>, f: A => B): Parser<B> {
-  return state1 => {
-    const { value, state } = x(state1);
-    return {
-      value: f(value),
-      state
-    };
-  };
-}
+type Parser<A> = Ctx => A;
 
 class ParseError extends Error {}
 
-export const parseName: Parser<AST> = state => {
-  const match = state.text.match(/^[a-zA-Z]+/);
+export const parseName: Parser<AST> = ctx => {
+  const text = ctx.getText();
+  const match = text.match(/^[a-zA-Z]+/);
   if (!match) {
     throw new ParseError("not a name");
   }
   const name = match[0];
-  return {
-    value: new Name(name),
-    state: {
-      ...state,
-      text: state.text.substring(name.length)
-    }
-  };
+  ctx.setText(text.substring(name.length));
+  return new Name(name);
 };
 
-export const parseNumLit: Parser<AST> = state => {
-  const match = state.text.match(/^[0-9]+/);
+export const parseNumLit: Parser<AST> = ctx => {
+  const text = ctx.getText();
+  const match = text.match(/^[0-9]+/);
   if (!match) {
     throw new ParseError("not a number");
   }
   const numString = match[0];
-  return {
-    value: new NumLit(parseInt(numString)),
-    state: {
-      ...state,
-      text: state.text.substring(numString.length)
-    }
-  };
+  ctx.setText(text.substring(numString.length));
+  return new NumLit(parseInt(numString));
 };
 
-export const constant = (substring: string): Parser<void> => state => {
-  const i = state.text.indexOf(substring);
+export const constant = (substring: string): Parser<void> => ctx => {
+  const text = ctx.getText();
+  const i = text.indexOf(substring);
   if (i != 0) {
     throw new ParseError("could not find constant");
   }
-  return {
-    value: undefined,
-    state: {
-      ...state,
-      text: state.text.substring(i + substring.length)
-    }
-  };
+  ctx.setText(text.substring(i + substring.length));
+  return;
 };
 
 export function alternate<O>(options: Array<Parser<O>>): Parser<O> {
-  return state => {
+  return ctx => {
     for (const f of options) {
+      const text = ctx.getText();
+      const indent = ctx.getIndent();
       try {
-        return f(state);
-      } catch (e) {}
+        return f(ctx);
+      } catch (e) {
+        ctx.setText(text);
+        ctx.setIndent(indent);
+      }
     }
     throw new ParseError("alternation failed");
   };
 }
 
-const parseTerm0: Parser<AST> = input => {
-  return alternate([parseTerm1])(input);
-};
 
-const parseTerm1: Parser<AST> = input => {
-  return alternate([parseList, parseName, parseNumLit])(input);
-};
 
-export function parse(state: State): AST {
-  return parseTerm0(state).value;
+export function parse(input: string): AST {
+  const ctx = new Ctx({ text: input, indent: 0 });
+  return parseTerm0(ctx);
 }
 
-const optionalWhitespace: Parser<string> = state => {
-  const match = state.text.match(/^\s*/);
+const optionalWhitespace: Parser<string> = ctx => {
+  const text = ctx.getText();
+  const match = text.match(/^\s*/);
   if (!match) {
-    return {
-      state,
-      value: ""
-    };
+    return "";
   }
-  return {
-    state: {
-      ...state,
-      text: state.text.substring(match[0].length)
-    },
-    value: match[0]
-  };
+  ctx.setText(text.substring(match[0].length));
+  return match[0];
 };
 
-export const parseList: Parser<AST> = bind(constant("("), () => {
-  return map(
-    parseListAux({ children: [], spaces: [] }),
-    ({ children, spaces }) => {
-      return new List(children, spaces);
-    }
-  );
-});
+export const parseList: Parser<AST> = ctx => {
+  ctx.run(constant("("));
+  const { children, spaces } = ctx.run(parseListAux({ children: [], spaces: [] }));
+  return new List(children, spaces);
+};
 
 function parseListAux({
   children,
@@ -187,17 +170,23 @@ function parseListAux({
   children: Array<AST>,
   spaces: Array<string>
 }): Parser<{ children: Array<AST>, spaces: Array<string> }> {
-  return bind(optionalWhitespace, space => {
-    return alternate([
-      map(constant(")"), () => {
+  return ctx => {
+    const space = ctx.run(optionalWhitespace);
+    return ctx.run(alternate([
+      ctx => {
+        ctx.run(constant(")"));
         return { children, spaces: [...spaces, space] };
-      }),
-      bind(parseTerm0, child => {
-        return parseListAux({
+      },
+      ctx => {
+        const child = ctx.run(parseTerm0);
+        return ctx.run(parseListAux({
           children: [...children, child],
           spaces: [...spaces, space]
-        });
-      })
-    ]);
-  });
+        }));
+      }
+    ]))
+  }
 }
+
+const parseTerm1: Parser<AST> = alternate([parseList, parseName, parseNumLit]);
+const parseTerm0: Parser<AST> = alternate([parseTerm1]);
