@@ -2,7 +2,6 @@
   "name": "gallium",
   "version": "0.1.0",
   "description": "liquid metal",
-  "main": "index.js",
   "license": "MIT",
   "devDependencies": {
     "babel-plugin-transform-class-properties": "^6.24.1",

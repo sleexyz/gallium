@@ -1,9 +1,16 @@
 // @flow
-import { Ctx, parse, parseName, parseNumLit, parseList, parseIList } from "./";
+import {
+  ParseContext,
+  parse,
+  parseName,
+  parseNumLit,
+  parseList,
+  parseIList
+} from "./parser";
 
 describe("parseName", () => {
   it("parses names", () => {
-    const ctx = new Ctx({ text: "foo 1", indents: [0] });
+    const ctx = new ParseContext({ text: "foo 1", indents: [0] });
     const result = parseName(ctx);
     expect(result).toEqual({
       type: "Name",
@@ -12,27 +19,30 @@ describe("parseName", () => {
   });
 
   it("fails on whitespace", () => {
-    const ctx = new Ctx({ text: "   foo 1", indents: [0] });
+    const ctx = new ParseContext({ text: "   foo 1", indents: [0] });
     expect(() => parseName(ctx)).toThrow("not a name");
   });
 });
 
 describe("parseNumLit", () => {
   it("parses numeric literals", () => {
-    const ctx = new Ctx({ text: "100 asdf", indents: [0] });
+    const ctx = new ParseContext({ text: "100 asdf", indents: [0] });
     const result = parseNumLit(ctx);
     expect(result).toEqual({ type: "NumLit", data: 100 });
   });
 
   it("fails on whitespace", () => {
-    const input = new Ctx({ text: "  100 asdf", indents: [0] });
+    const input = new ParseContext({ text: "  100 asdf", indents: [0] });
     expect(() => parseNumLit(input)).toThrow("not a number");
   });
 });
 
 describe("parseList", () => {
   it("parses lists", () => {
-    const ctx = new Ctx({ text: `(foo 1 2 1)`, indents: [0] });
+    const ctx = new ParseContext({
+      text: `(foo 1 2 1)`,
+      indents: [0]
+    });
     const result = parseList(ctx);
     expect(result).toEqual({
       type: "List",
@@ -47,7 +57,7 @@ describe("parseList", () => {
   });
 
   it("parses unary lists", () => {
-    const ctx = new Ctx({ text: `(foo)`, indents: [0] });
+    const ctx = new ParseContext({ text: `(foo)`, indents: [0] });
     const result = parseList(ctx);
     expect(result).toEqual({
       type: "List",
@@ -57,7 +67,7 @@ describe("parseList", () => {
   });
 
   it("fails to parse nullary lists", () => {
-    const ctx = new Ctx({ text: `()`, indents: [0] });
+    const ctx = new ParseContext({ text: `()`, indents: [0] });
     expect(() => parseList(ctx)).toThrow("alternation failed");
   });
 });
@@ -67,7 +77,7 @@ describe("parseIList", () => {
     const text = `foo
   1
   2`;
-    const ctx = new Ctx({ text, indents: [0] });
+    const ctx = new ParseContext({ text, indents: [0] });
     const result = parseIList(ctx);
     expect(result).toEqual({
       type: "IList",
@@ -83,7 +93,7 @@ describe("parseIList", () => {
   it("parses indentation-based lists with one child", () => {
     const text = `foo
   bar`;
-    const ctx = new Ctx({ text, indents: [0] });
+    const ctx = new ParseContext({ text, indents: [0] });
     const result = parseIList(ctx);
     expect(result).toEqual({
       type: "IList",
@@ -97,7 +107,7 @@ describe("parseIList", () => {
     const text = `foo
 
   bar`;
-    const ctx = new Ctx({ text, indents: [0] });
+    const ctx = new ParseContext({ text, indents: [0] });
     const result = parseIList(ctx);
     expect(result).toEqual({
       type: "IList",
@@ -112,7 +122,7 @@ describe("parseIList", () => {
 
 
   bar`;
-    const ctx = new Ctx({ text, indents: [0] });
+    const ctx = new ParseContext({ text, indents: [0] });
     const result = parseIList(ctx);
     expect(result).toEqual({
       type: "IList",
@@ -128,7 +138,7 @@ describe("parseIList", () => {
     baz
     1
   2`;
-    const ctx = new Ctx({ text, indents: [0] });
+    const ctx = new ParseContext({ text, indents: [0] });
     const result = parseIList(ctx);
     expect(result).toEqual({
       type: "IList",
@@ -157,7 +167,7 @@ describe("parseIList", () => {
     baz
       1
   2`;
-    const ctx = new Ctx({ text, indents: [0] });
+    const ctx = new ParseContext({ text, indents: [0] });
     const result = parseIList(ctx);
     expect(result).toEqual({
       type: "IList",
@@ -193,7 +203,7 @@ describe("parseIList", () => {
           1
           2
     2`;
-    const ctx = new Ctx({ text, indents: [0] });
+    const ctx = new ParseContext({ text, indents: [0] });
     const result = parseIList(ctx);
     expect(result).toEqual({
       type: "IList",

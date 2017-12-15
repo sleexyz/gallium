@@ -1,5 +1,25 @@
 // @flow
 
+import {
+  type Parser,
+  type ParseState,
+  ParseContext,
+  ParseError,
+  constant,
+  alternate,
+  regExp,
+  withFallback,
+  getSpaces,
+  getNewline,
+  maybe,
+  whitespace,
+  headIndent,
+  pushIndent,
+  popIndent
+} from "./parser_combinators";
+
+export { ParseContext } from "./parser_combinators.js";
+
 interface AST {
   type: string;
   children?: Array<AST>;
@@ -8,28 +28,36 @@ interface AST {
   _pretty(indent: number): AST;
 }
 
-class Name implements AST {
+class AST_ {
+  pretty() {
+    return this._pretty(0);
+  }
+  _pretty(indent: number): AST {
+    throw new Error("abstract class");
+  }
+}
+
+class Name extends AST_ implements AST {
   type = "Name";
   data: string;
   constructor(data: string) {
+    super();
     this.data = data;
   }
   print() {
     return this.data;
-  }
-  pretty() {
-    return this._pretty(0);
   }
   _pretty(indent: number) {
     return new Name(this.data);
   }
 }
 
-class List implements AST {
+class List extends AST_ implements AST {
   type = "List";
   children: Array<AST>;
   spaces: Array<string>;
   constructor(children: Array<AST>, spaces: Array<string>) {
+    super();
     this.children = [...children];
     this.spaces = spaces;
   }
@@ -43,9 +71,6 @@ class List implements AST {
     str += ")";
     return str;
   }
-  pretty() {
-    return this._pretty(0);
-  }
   _pretty(indent: number) {
     const spaces = Array(this.children.length + 1).fill(" ");
     spaces[0] = "";
@@ -54,16 +79,17 @@ class List implements AST {
   }
 }
 
-class IList implements AST {
+class IList extends AST_ implements AST {
   type = "IList";
   children: Array<AST>;
   indent: number;
   extraSpaces: Array<string>;
   constructor(
     children: Array<AST>,
-    indent: number,
-    extraSpaces: Array<string>
+    extraSpaces: Array<string>,
+    indent: number
   ) {
+    super();
     this.children = [...children];
     this.indent = indent;
     this.extraSpaces = extraSpaces;
@@ -78,64 +104,28 @@ class IList implements AST {
     }
     return str;
   }
-  pretty() {
-    return this._pretty(0);
-  }
   _pretty(indent: number) {
     const children = this.children.map(x => x._pretty(indent + 2));
     const newIndent = indent + 2;
     const extraSpaces = Array(this.extraSpaces.length).fill("");
-    return new IList(children, newIndent, extraSpaces);
+    return new IList(children, extraSpaces, newIndent);
   }
 }
 
-class NumLit implements AST {
+class NumLit extends AST_ implements AST {
   type = "NumLit";
   data: number;
   constructor(data: number) {
+    super();
     this.data = data;
   }
   print() {
     return `${this.data}`;
   }
-  pretty() {
-    return this._pretty(0);
-  }
   _pretty(indent: number) {
     return new NumLit(this.data);
   }
 }
-
-type State = {
-  text: string,
-  indents: Array<number>
-};
-
-export class Ctx {
-  state: State;
-  constructor(state: State) {
-    this.state = state;
-  }
-  getText(): string {
-    return this.state.text;
-  }
-  setText(next: string): void {
-    this.state.text = next;
-  }
-  getIndents(): Array<number> {
-    return this.state.indents;
-  }
-  setIndents(next: Array<number>): void {
-    this.state.indents = next;
-  }
-  run<A>(parser: Parser<A>): A {
-    return parser(this);
-  }
-}
-
-type Parser<A> = Ctx => A;
-
-class ParseError extends Error {}
 
 export const parseName: Parser<AST> = ctx => {
   const text = ctx.getText();
@@ -159,79 +149,6 @@ export const parseNumLit: Parser<AST> = ctx => {
   return new NumLit(parseInt(numString));
 };
 
-export const constant = (substring: string): Parser<string> => ctx => {
-  const text = ctx.getText();
-  const i = text.indexOf(substring);
-  if (i != 0) {
-    throw new ParseError(
-      `could not find constant ${JSON.stringify(substring)}`
-    );
-  }
-  ctx.setText(text.substring(i + substring.length));
-  return substring;
-};
-
-export function alternate<O>(options: Array<Parser<O>>): Parser<O> {
-  return ctx => {
-    for (const f of options) {
-      const text = ctx.getText();
-      const indents = ctx.getIndents();
-      try {
-        return f(ctx);
-      } catch (e) {
-        ctx.setText(text);
-        ctx.setIndents(indents);
-      }
-    }
-    throw new ParseError("alternation failed");
-  };
-}
-
-export function parse(input: string): AST {
-  const ctx = new Ctx({ text: input, indents: [0] });
-  return parseTerm0(ctx);
-}
-
-const regExp = (r: RegExp): Parser<string> => ctx => {
-  const text = ctx.getText();
-  const match = text.match(r);
-  if (!match) {
-    throw new Error("no match");
-  }
-  ctx.setText(text.substring(match[0].length));
-  return match[0];
-};
-
-const withDefault = function<A>(parser: Parser<A>, def: A): Parser<A> {
-  return alternate([parser, () => def]);
-};
-
-const getSpaces: Parser<string> = regExp(/^\ +/);
-const getNewline: Parser<string> = constant("\n");
-
-const maybe = function<A>(parser: Parser<A>): Parser<?A> {
-  return alternate([ctx => parser(ctx), () => undefined]);
-};
-const whitespace: Parser<string> = regExp(/^\s+/);
-const optionalWhitespace: Parser<string> = withDefault(whitespace, "");
-
-const headIndent: Parser<number> = ctx => {
-  const indents = ctx.getIndents();
-  return indents[indents.length - 1];
-};
-
-const pushIndent = (numSpaces: number): Parser<void> => ctx => {
-  const indents = ctx.getIndents();
-  ctx.setIndents([...indents, numSpaces]);
-};
-
-const popIndent: Parser<void> = ctx => {
-  const indents = ctx.getIndents();
-  const newIndents = [...indents];
-  newIndents.pop();
-  ctx.setIndents(newIndents);
-};
-
 const increasedIndentationNewline: Parser<{
   extraSpace: string,
   indent: number
@@ -239,7 +156,7 @@ const increasedIndentationNewline: Parser<{
   const currentIndent = ctx.run(headIndent);
   ctx.run(maybe(getSpaces));
   ctx.run(getNewline);
-  const extraSpace = ctx.run(withDefault(regExp(/^\s*\n+/), ""));
+  const extraSpace = ctx.run(withFallback(regExp(/^\s*\n+/), ""));
   const numSpaces = ctx.run(getSpaces).length;
   if (numSpaces > currentIndent) {
     ctx.run(pushIndent(numSpaces));
@@ -255,7 +172,7 @@ const sameIndentationNewline: Parser<{
   const currentIndent = ctx.run(headIndent);
   ctx.run(maybe(getSpaces));
   ctx.run(getNewline);
-  const extraSpace = ctx.run(withDefault(regExp(/^\s*\n+/), ""));
+  const extraSpace = ctx.run(withFallback(regExp(/^\s*\n+/), ""));
   const numSpaces = ctx.run(getSpaces).length;
   if (numSpaces === currentIndent) {
     return { extraSpace, indent: numSpaces };
@@ -270,7 +187,7 @@ export const parseIList: Parser<AST> = ctx => {
   const { children, extraSpaces } = ctx.run(
     parseIListAux({ children: [child], extraSpaces: [extraSpace] })
   );
-  return new IList([term, ...children], indent, extraSpaces);
+  return new IList([term, ...children], extraSpaces, indent);
 };
 
 function parseIListAux({
@@ -300,7 +217,7 @@ function parseIListAux({
 
 export const parseList: Parser<AST> = ctx => {
   ctx.run(constant("("));
-  const space = ctx.run(optionalWhitespace);
+  const space = ctx.run(withFallback(whitespace, ""));
   const child = ctx.run(parseTerm0);
   const { children, spaces } = ctx.run(
     parseListAux({ children: [child], spaces: [space] })
@@ -308,34 +225,38 @@ export const parseList: Parser<AST> = ctx => {
   return new List(children, spaces);
 };
 
-function parseListAux({
+const parseListAux = ({
   children,
   spaces
 }: {
   children: Array<AST>,
   spaces: Array<string>
-}): Parser<{ children: Array<AST>, spaces: Array<string> }> {
-  return ctx => {
-    const space = ctx.run(optionalWhitespace);
-    return ctx.run(
-      alternate([
-        ctx => {
-          ctx.run(constant(")"));
-          return { children, spaces: [...spaces, space] };
-        },
-        ctx => {
-          const child = ctx.run(parseTerm0);
-          return ctx.run(
-            parseListAux({
-              children: [...children, child],
-              spaces: [...spaces, space]
-            })
-          );
-        }
-      ])
-    );
-  };
-}
+}): Parser<{ children: Array<AST>, spaces: Array<string> }> => ctx => {
+  const space = ctx.run(withFallback(whitespace, ""));
+  return ctx.run(
+    alternate([
+      ctx => {
+        ctx.run(constant(")"));
+        return { children, spaces: [...spaces, space] };
+      },
+      ctx => {
+        const child = ctx.run(parseTerm0);
+        return ctx.run(
+          parseListAux({
+            children: [...children, child],
+            spaces: [...spaces, space]
+          })
+        );
+      }
+    ])
+  );
+};
 
 const parseTerm1: Parser<AST> = alternate([parseList, parseName, parseNumLit]);
+
 const parseTerm0: Parser<AST> = alternate([parseIList, parseTerm1]);
+
+export function parse(input: string): AST {
+  const ctx = new ParseContext({ text: input, indents: [0] });
+  return parseTerm0(ctx);
+}
