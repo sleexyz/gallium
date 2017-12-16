@@ -13,7 +13,5 @@ process.stdin.on("data", chunk => {
 process.stdin.on("end", chunk => {
   const joined = inputChunks.join();
   // process.stdout.write(JSON.stringify(parse(joined), null, 2));
-  process.stdout.write(
-    print(pretty(parse(joined)))
-  );
+  process.stdout.write(print(pretty(parse(joined))));
 });
