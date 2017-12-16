@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 require("babel-register");
+const { print } = require("./printer");
+const { pretty } = require("./pretty");
 const { parse } = require("./parser");
 
 const inputChunks = [];
@@ -12,8 +14,6 @@ process.stdin.on("end", chunk => {
   const joined = inputChunks.join();
   // process.stdout.write(JSON.stringify(parse(joined), null, 2));
   process.stdout.write(
-    parse(joined)
-      .pretty()
-      .print()
+    print(pretty(parse(joined)))
   );
 });
