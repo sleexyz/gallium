@@ -18,114 +18,9 @@ import {
   popIndent
 } from "./parser_combinators";
 
+import { type AST, Name, NumLit, IList, List } from "./AST";
+
 export { ParseContext } from "./parser_combinators.js";
-
-interface AST {
-  type: string;
-  children?: Array<AST>;
-  print(): string;
-  pretty(): AST;
-  _pretty(indent: number): AST;
-}
-
-class AST_ {
-  pretty() {
-    return this._pretty(0);
-  }
-  _pretty(indent: number): AST {
-    throw new Error("abstract class");
-  }
-}
-
-class Name extends AST_ implements AST {
-  type = "Name";
-  data: string;
-  constructor(data: string) {
-    super();
-    this.data = data;
-  }
-  print() {
-    return this.data;
-  }
-  _pretty(indent: number) {
-    return new Name(this.data);
-  }
-}
-
-class List extends AST_ implements AST {
-  type = "List";
-  children: Array<AST>;
-  spaces: Array<string>;
-  constructor(children: Array<AST>, spaces: Array<string>) {
-    super();
-    this.children = [...children];
-    this.spaces = spaces;
-  }
-  print() {
-    let str = "(";
-    for (let i = 0; i < this.children.length; i += 1) {
-      str += this.spaces[i];
-      str += this.children[i].print();
-    }
-    str += this.spaces[this.children.length];
-    str += ")";
-    return str;
-  }
-  _pretty(indent: number) {
-    const spaces = Array(this.children.length + 1).fill(" ");
-    spaces[0] = "";
-    spaces[this.children.length] = "";
-    return new List(this.children.map(x => x._pretty(indent)), spaces);
-  }
-}
-
-class IList extends AST_ implements AST {
-  type = "IList";
-  children: Array<AST>;
-  indent: number;
-  extraSpaces: Array<string>;
-  constructor(
-    children: Array<AST>,
-    extraSpaces: Array<string>,
-    indent: number
-  ) {
-    super();
-    this.children = [...children];
-    this.indent = indent;
-    this.extraSpaces = extraSpaces;
-  }
-  print() {
-    let str = this.children[0].print();
-    for (let i = 1; i < this.children.length; i += 1) {
-      str += "\n";
-      str += this.extraSpaces[i - 1];
-      str += " ".repeat(this.indent);
-      str += this.children[i].print();
-    }
-    return str;
-  }
-  _pretty(indent: number) {
-    const children = this.children.map(x => x._pretty(indent + 2));
-    const newIndent = indent + 2;
-    const extraSpaces = Array(this.extraSpaces.length).fill("");
-    return new IList(children, extraSpaces, newIndent);
-  }
-}
-
-class NumLit extends AST_ implements AST {
-  type = "NumLit";
-  data: number;
-  constructor(data: number) {
-    super();
-    this.data = data;
-  }
-  print() {
-    return `${this.data}`;
-  }
-  _pretty(indent: number) {
-    return new NumLit(this.data);
-  }
-}
 
 export const parseName: Parser<AST> = ctx => {
   const text = ctx.getText();
@@ -135,7 +30,7 @@ export const parseName: Parser<AST> = ctx => {
   }
   const name = match[0];
   ctx.setText(text.substring(name.length));
-  return new Name(name);
+  return new Name(name, undefined);
 };
 
 export const parseNumLit: Parser<AST> = ctx => {
@@ -146,7 +41,7 @@ export const parseNumLit: Parser<AST> = ctx => {
   }
   const numString = match[0];
   ctx.setText(text.substring(numString.length));
-  return new NumLit(parseInt(numString));
+  return new NumLit(parseInt(numString), undefined);
 };
 
 const increasedIndentationNewline: Parser<{
@@ -187,7 +82,7 @@ export const parseIList: Parser<AST> = ctx => {
   const { children, extraSpaces } = ctx.run(
     parseIListAux({ children: [child], extraSpaces: [extraSpace] })
   );
-  return new IList([term, ...children], extraSpaces, indent);
+  return new IList([term, ...children], extraSpaces, indent, undefined);
 };
 
 function parseIListAux({
@@ -222,7 +117,7 @@ export const parseList: Parser<AST> = ctx => {
   const { children, spaces } = ctx.run(
     parseListAux({ children: [child], spaces: [space] })
   );
-  return new List(children, spaces);
+  return new List(children, spaces, undefined);
 };
 
 const parseListAux = ({

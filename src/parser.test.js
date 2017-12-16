@@ -14,7 +14,7 @@ describe("parseName", () => {
     const result = parseName(ctx);
     expect(result).toEqual({
       type: "Name",
-      data: "foo"
+      value: "foo"
     });
   });
 
@@ -28,7 +28,7 @@ describe("parseNumLit", () => {
   it("parses numeric literals", () => {
     const ctx = new ParseContext({ text: "100 asdf", indents: [0] });
     const result = parseNumLit(ctx);
-    expect(result).toEqual({ type: "NumLit", data: 100 });
+    expect(result).toEqual({ type: "NumLit", value: 100 });
   });
 
   it("fails on whitespace", () => {
@@ -48,10 +48,10 @@ describe("parseList", () => {
       type: "List",
       spaces: ["", " ", " ", " ", ""],
       children: [
-        { type: "Name", data: "foo" },
-        { type: "NumLit", data: 1 },
-        { type: "NumLit", data: 2 },
-        { type: "NumLit", data: 1 }
+        { type: "Name", value: "foo" },
+        { type: "NumLit", value: 1 },
+        { type: "NumLit", value: 2 },
+        { type: "NumLit", value: 1 }
       ]
     });
   });
@@ -62,7 +62,7 @@ describe("parseList", () => {
     expect(result).toEqual({
       type: "List",
       spaces: ["", ""],
-      children: [{ type: "Name", data: "foo" }]
+      children: [{ type: "Name", value: "foo" }]
     });
   });
 
@@ -84,9 +84,9 @@ describe("parseIList", () => {
       indent: 2,
       extraSpaces: ["", ""],
       children: [
-        { type: "Name", data: "foo" },
-        { type: "NumLit", data: 1 },
-        { type: "NumLit", data: 2 }
+        { type: "Name", value: "foo" },
+        { type: "NumLit", value: 1 },
+        { type: "NumLit", value: 2 }
       ]
     });
   });
@@ -99,7 +99,7 @@ describe("parseIList", () => {
       type: "IList",
       indent: 2,
       extraSpaces: [""],
-      children: [{ type: "Name", data: "foo" }, { type: "Name", data: "bar" }]
+      children: [{ type: "Name", value: "foo" }, { type: "Name", value: "bar" }]
     });
   });
 
@@ -113,7 +113,7 @@ describe("parseIList", () => {
       type: "IList",
       indent: 2,
       extraSpaces: ["\n"],
-      children: [{ type: "Name", data: "foo" }, { type: "Name", data: "bar" }]
+      children: [{ type: "Name", value: "foo" }, { type: "Name", value: "bar" }]
     });
   });
 
@@ -128,7 +128,7 @@ describe("parseIList", () => {
       type: "IList",
       indent: 2,
       extraSpaces: ["\n\n"],
-      children: [{ type: "Name", data: "foo" }, { type: "Name", data: "bar" }]
+      children: [{ type: "Name", value: "foo" }, { type: "Name", value: "bar" }]
     });
   });
 
@@ -145,18 +145,18 @@ describe("parseIList", () => {
       indent: 2,
       extraSpaces: ["", ""],
       children: [
-        { type: "Name", data: "foo" },
+        { type: "Name", value: "foo" },
         {
           type: "IList",
           indent: 4,
           extraSpaces: ["", ""],
           children: [
-            { type: "Name", data: "bar" },
-            { type: "Name", data: "baz" },
-            { type: "NumLit", data: 1 }
+            { type: "Name", value: "bar" },
+            { type: "Name", value: "baz" },
+            { type: "NumLit", value: 1 }
           ]
         },
-        { type: "NumLit", data: 2 }
+        { type: "NumLit", value: 2 }
       ]
     });
   });
@@ -174,25 +174,25 @@ describe("parseIList", () => {
       indent: 2,
       extraSpaces: ["", ""],
       children: [
-        { type: "Name", data: "foo" },
+        { type: "Name", value: "foo" },
         {
           type: "IList",
           indent: 4,
           extraSpaces: [""],
           children: [
-            { type: "Name", data: "bar" },
+            { type: "Name", value: "bar" },
             {
               type: "IList",
               indent: 6,
               extraSpaces: [""],
               children: [
-                { type: "Name", data: "baz" },
-                { type: "NumLit", data: 1 }
+                { type: "Name", value: "baz" },
+                { type: "NumLit", value: 1 }
               ]
             }
           ]
         },
-        { type: "NumLit", data: 2 }
+        { type: "NumLit", value: 2 }
       ]
     });
   });
@@ -210,88 +210,27 @@ describe("parseIList", () => {
       indent: 4,
       extraSpaces: ["", ""],
       children: [
-        { type: "Name", data: "foo" },
+        { type: "Name", value: "foo" },
         {
           type: "IList",
           indent: 5,
           extraSpaces: [""],
           children: [
-            { type: "Name", data: "bar" },
+            { type: "Name", value: "bar" },
             {
               type: "IList",
               indent: 10,
               extraSpaces: ["", ""],
               children: [
-                { type: "Name", data: "baz" },
-                { type: "NumLit", data: 1 },
-                { type: "NumLit", data: 2 }
+                { type: "Name", value: "baz" },
+                { type: "NumLit", value: 1 },
+                { type: "NumLit", value: 2 }
               ]
             }
           ]
         },
-        { type: "NumLit", data: 2 }
+        { type: "NumLit", value: 2 }
       ]
     });
   });
-});
-
-describe("parse/print round trip identity laws", () => {
-  function testRoundTrip(input: string) {
-    test(JSON.stringify(input), () => {
-      const output = parse(input);
-      expect(output.print()).toBe(input);
-    });
-  }
-  testRoundTrip("(foo)");
-  testRoundTrip("(foo bar)");
-  testRoundTrip("( foo bar )");
-  testRoundTrip("( foo bar  baz )");
-  testRoundTrip("( foo (foo 1 2 3 ) baz )");
-
-  testRoundTrip(`foo
-  1`);
-  testRoundTrip(`foo
-  1
-
-  foo
-
-
-    bar
-      sdf
-
-  baz`);
-});
-
-describe("pretty printing properties", () => {
-  function testPretty(input: string, expected: string) {
-    test(JSON.stringify(input), () => {
-      const output = parse(input);
-      expect(output.pretty().print()).toBe(expected);
-    });
-  }
-  testPretty("(foo)", "(foo)");
-  testPretty("( foo )", "(foo)");
-  testPretty("(foo bar)", "(foo bar)");
-  testPretty("( foo  bar )", "(foo bar)");
-  testPretty("( foo (foo 1 2 3 ) baz )", "(foo (foo 1 2 3) baz)");
-
-  testPretty(
-    `foo
-  1
-
-  foo
-
-
-    bar
-      sdf
-
-
-  baz`,
-    `foo
-  1
-  foo
-    bar
-      sdf
-  baz`
-  );
 });
