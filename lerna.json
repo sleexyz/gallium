@@ -2,7 +2,8 @@
   "lerna": "2.5.1",
   "npmClient": "yarn",
   "packages": [
-    "gallium"
+    "gallium-lang",
+    "gallium-env"
   ],
   "useWorkspaces": true,
   "version": "0.1.0"
