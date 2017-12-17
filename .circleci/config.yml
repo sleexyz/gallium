@@ -14,3 +14,37 @@ jobs:
       - run: 
           name: Run checks
           command: yarn check-all
+      - run:
+          name: Initialize workspace
+          command: cp -R . /tmp/project
+      - persist_to_workspace:
+          root: /tmp/project
+          paths: .
+
+  publish-site:
+    docker:
+      - image: node:8.7.0
+    steps:
+      - run:
+          name: Install awscli
+          command: |
+            apt-get -y -qq update
+            apt-get -y -qq install awscli
+      - attach_workspace:
+          at: /tmp/project
+      - run:
+          name: Build and Publish gallium.club
+          command: cd /tmp/project/gallium-env && ./scripts/publish.sh
+
+workflows:
+  version: 2
+  build-publish:
+    jobs:
+      - build
+      - publish-site:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master

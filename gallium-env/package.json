@@ -18,6 +18,8 @@
     "webpack-dev-server": "^2.9.7"
   },
   "scripts": {
+    "build-publish": "yarn clean && webpack -p",
+    "clean": "rm -rf ./dist",
     "check-all": "flow && jest && yarn format-check",
     "format": "prettier --write 'src/**/*.js'",
     "format-check": "prettier -l 'src/**/*.js'",
