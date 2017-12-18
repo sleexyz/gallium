@@ -1,8 +1,8 @@
-<h1 align="center"><i>G A L L I U M</i></h1>
+<h1 align="center"><i>g a l l i u m</i></h1>
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
-<p align="center">An environment for live pattern manipulation. <i><a href="http://gallium.live">GALLIUM.LIVE</a></i></p>
+<p align="center">An environment for live pattern manipulation. <i><a href="http://gallium.live">gallium.live</a></i></p>
 
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
