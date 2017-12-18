@@ -34,7 +34,7 @@ jobs:
           at: /tmp/project
       - run:
           name: Build and Publish gallium.club
-          command: cd /tmp/project/gallium-env && ./scripts/publish.sh
+          command: cd /tmp/project/gallium-live && ./scripts/publish.sh
 
 workflows:
   version: 2

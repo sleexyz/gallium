@@ -1,7 +1,7 @@
 {
-  "name": "gallium-env",
+  "name": "gallium-live",
   "version": "0.1.0",
-  "description": "gallium environment",
+  "description": "gallium live",
   "main": "src/index.js",
   "repository": "https://github.com/sleexyz/gallium",
   "license": "MIT",

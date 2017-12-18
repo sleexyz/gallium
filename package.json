@@ -1,8 +1,8 @@
 {
     "private": true,
     "workspaces": [
-        "gallium-lang",
-        "gallium-env"
+        "gallium",
+        "gallium-live"
     ],
     "devDependencies": {
         "flow-bin": "^0.55.0",
