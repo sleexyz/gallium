@@ -3,7 +3,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-  entry: ["./src/index.js"],
+  entry: ["babel-polyfill", "./src/index.js"],
   devServer: {
     port: 8081,
     contentBase: "./dist"

@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "liquid metal",
   "license": "MIT",
-  "main": "lib/index.js",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-class-properties": "^6.24.1",

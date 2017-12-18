@@ -65,7 +65,7 @@ export function stack<A>(children: Array<Pattern<A>>): Pattern<A> {
   };
 }
 
-type Transformer<A> = (Pattern<A>) => Pattern<A>;
+export type Transformer<A> = (Pattern<A>) => Pattern<A>;
 
 export function shift<A>(n: number): Transformer<A> {
   return pattern => (start, end) => {
