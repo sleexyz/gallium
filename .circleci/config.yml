@@ -33,7 +33,7 @@ jobs:
       - attach_workspace:
           at: /tmp/project
       - run:
-          name: Build and Publish gallium.club
+          name: Build and Publish gallium.live
           command: cd /tmp/project/gallium-live && ./scripts/publish.sh
 
 workflows:
