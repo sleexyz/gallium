@@ -5,8 +5,8 @@ import {
   type ASTx,
   Name,
   NumLit,
-  List,
-  IList,
+  SExpr,
+  IExpr,
   traverse
 } from "./AST";
 
@@ -119,11 +119,11 @@ const resolveNumLitMiddleware: StepMiddleware<Term> = (
   return fallback(node);
 };
 
-const resolveListMiddleware: StepMiddleware<Term> = (
+const resolveSExprMiddleware: StepMiddleware<Term> = (
   context,
   fallback
 ) => node => {
-  if (node instanceof List) {
+  if (node instanceof SExpr) {
     const boundNode = node.setPayload(
       new Term({
         type: { type: "list", param: "number" },
@@ -140,11 +140,11 @@ const resolveListMiddleware: StepMiddleware<Term> = (
   return fallback(node);
 };
 
-const resolveIListMiddleware: StepMiddleware<Term> = (
+const resolveIExprMiddleware: StepMiddleware<Term> = (
   context,
   fallback
 ) => node => {
-  if (node instanceof IList) {
+  if (node instanceof IExpr) {
     const boundNode = node.setPayload(
       new Term({
         type: { type: "list", param: "number" },
@@ -171,8 +171,8 @@ export const resolve = (context: BindingContext<Term>, node: AST): ABT => {
     composeMiddleware([
       resolveNameMiddleware,
       resolveNumLitMiddleware,
-      resolveListMiddleware,
-      resolveIListMiddleware
+      resolveSExprMiddleware,
+      resolveIExprMiddleware
     ])
   );
   return traverse(step)(node);

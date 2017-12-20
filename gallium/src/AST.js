@@ -52,8 +52,8 @@ export class NumLit<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
   }
 }
 
-export class SExp<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
-  type = "SExp";
+export class SExpr<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
+  type = "SExpr";
   children: Array<X>;
   spaces: Array<string>;
 
@@ -63,13 +63,13 @@ export class SExp<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
     this.spaces = spaces;
     this.payload = payload;
   }
-  copy(): SExp<P, X> {
-    return new SExp(this.children, this.spaces, this.payload);
+  copy(): SExpr<P, X> {
+    return new SExpr(this.children, this.spaces, this.payload);
   }
 }
 
-export class IExp<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
-  type = "IExp";
+export class IExpr<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
+  type = "IExpr";
   children: Array<X>;
   indent: number;
   extraSpaces: Array<string>;
@@ -85,8 +85,13 @@ export class IExp<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
     this.extraSpaces = extraSpaces;
     this.payload = payload;
   }
-  copy(): IExp<P, X> {
-    return new IExp(this.children, this.extraSpaces, this.indent, this.payload);
+  copy(): IExpr<P, X> {
+    return new IExpr(
+      this.children,
+      this.extraSpaces,
+      this.indent,
+      this.payload
+    );
   }
 }
 

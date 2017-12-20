@@ -18,7 +18,7 @@ import {
   popIndent
 } from "./parser_combinators";
 
-import { type AST, Name, NumLit, IExp, SExp } from "./AST";
+import { type AST, Name, NumLit, IExpr, SExpr } from "./AST";
 
 export { ParseContext } from "./parser_combinators.js";
 
@@ -75,17 +75,17 @@ const sameIndentationNewline: Parser<{
   throw new Error("not same indentation");
 };
 
-export const parseIExp: Parser<AST> = ctx => {
+export const parseIExpr: Parser<AST> = ctx => {
   const term = ctx.run(parseTerm1);
   const { extraSpace, indent } = ctx.run(increasedIndentationNewline);
   const child = ctx.run(parseTerm0);
   const { children, extraSpaces } = ctx.run(
-    parseIExpAux({ children: [child], extraSpaces: [extraSpace] })
+    parseIExprAux({ children: [child], extraSpaces: [extraSpace] })
   );
-  return new IExp([term, ...children], extraSpaces, indent, undefined);
+  return new IExpr([term, ...children], extraSpaces, indent, undefined);
 };
 
-function parseIExpAux({
+function parseIExprAux({
   children,
   extraSpaces
 }: {
@@ -97,7 +97,7 @@ function parseIExpAux({
       const { extraSpace } = ctx.run(sameIndentationNewline);
       const child = ctx.run(parseTerm0);
       return ctx.run(
-        parseIExpAux({
+        parseIExprAux({
           children: [...children, child],
           extraSpaces: [...extraSpaces, extraSpace]
         })
@@ -110,17 +110,17 @@ function parseIExpAux({
   ]);
 }
 
-export const parseSExp: Parser<AST> = ctx => {
+export const parseSExpr: Parser<AST> = ctx => {
   ctx.run(constant("("));
   const space = ctx.run(withFallback(whitespace, ""));
   const child = ctx.run(parseTerm0);
   const { children, spaces } = ctx.run(
-    parseSExpAux({ children: [child], spaces: [space] })
+    parseSExprAux({ children: [child], spaces: [space] })
   );
-  return new SExp(children, spaces, undefined);
+  return new SExpr(children, spaces, undefined);
 };
 
-const parseSExpAux = ({
+const parseSExprAux = ({
   children,
   spaces
 }: {
@@ -137,7 +137,7 @@ const parseSExpAux = ({
       ctx => {
         const child = ctx.run(parseTerm0);
         return ctx.run(
-          parseSExpAux({
+          parseSExprAux({
             children: [...children, child],
             spaces: [...spaces, space]
           })
@@ -147,9 +147,9 @@ const parseSExpAux = ({
   );
 };
 
-const parseTerm1: Parser<AST> = alternate([parseSExp, parseName, parseNumLit]);
+const parseTerm1: Parser<AST> = alternate([parseSExpr, parseName, parseNumLit]);
 
-const parseTerm0: Parser<AST> = alternate([parseIExp, parseTerm1]);
+const parseTerm0: Parser<AST> = alternate([parseIExpr, parseTerm1]);
 
 export function parse(input: string): AST {
   const ctx = new ParseContext({ text: input, indents: [0] });

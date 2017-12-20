@@ -4,8 +4,8 @@ import {
   parse,
   parseName,
   parseNumLit,
-  parseSExp,
-  parseIExp
+  parseSExpr,
+  parseIExpr
 } from "./parser";
 
 describe("parseName", () => {
@@ -37,15 +37,15 @@ describe("parseNumLit", () => {
   });
 });
 
-describe("parseSExp", () => {
+describe("parseSExpr", () => {
   it("parses lists", () => {
     const ctx = new ParseContext({
       text: `(foo 1 2 1)`,
       indents: [0]
     });
-    const result = parseSExp(ctx);
+    const result = parseSExpr(ctx);
     expect(result).toEqual({
-      type: "SExp",
+      type: "SExpr",
       spaces: ["", " ", " ", " ", ""],
       children: [
         { type: "Name", value: "foo" },
@@ -58,9 +58,9 @@ describe("parseSExp", () => {
 
   it("parses unary lists", () => {
     const ctx = new ParseContext({ text: `(foo)`, indents: [0] });
-    const result = parseSExp(ctx);
+    const result = parseSExpr(ctx);
     expect(result).toEqual({
-      type: "SExp",
+      type: "SExpr",
       spaces: ["", ""],
       children: [{ type: "Name", value: "foo" }]
     });
@@ -68,19 +68,19 @@ describe("parseSExp", () => {
 
   it("fails to parse nullary lists", () => {
     const ctx = new ParseContext({ text: `()`, indents: [0] });
-    expect(() => parseSExp(ctx)).toThrow("alternation failed");
+    expect(() => parseSExpr(ctx)).toThrow("alternation failed");
   });
 });
 
-describe("parseIExp", () => {
+describe("parseIExpr", () => {
   it("parses indentation-based lists", () => {
     const text = `foo
   1
   2`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIExp(ctx);
+    const result = parseIExpr(ctx);
     expect(result).toEqual({
-      type: "IExp",
+      type: "IExpr",
       indent: 2,
       extraSpaces: ["", ""],
       children: [
@@ -94,9 +94,9 @@ describe("parseIExp", () => {
     const text = `foo
   bar`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIExp(ctx);
+    const result = parseIExpr(ctx);
     expect(result).toEqual({
-      type: "IExp",
+      type: "IExpr",
       indent: 2,
       extraSpaces: [""],
       children: [{ type: "Name", value: "foo" }, { type: "Name", value: "bar" }]
@@ -108,9 +108,9 @@ describe("parseIExp", () => {
 
   bar`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIExp(ctx);
+    const result = parseIExpr(ctx);
     expect(result).toEqual({
-      type: "IExp",
+      type: "IExpr",
       indent: 2,
       extraSpaces: ["\n"],
       children: [{ type: "Name", value: "foo" }, { type: "Name", value: "bar" }]
@@ -123,9 +123,9 @@ describe("parseIExp", () => {
 
   bar`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIExp(ctx);
+    const result = parseIExpr(ctx);
     expect(result).toEqual({
-      type: "IExp",
+      type: "IExpr",
       indent: 2,
       extraSpaces: ["\n\n"],
       children: [{ type: "Name", value: "foo" }, { type: "Name", value: "bar" }]
@@ -139,15 +139,15 @@ describe("parseIExp", () => {
     1
   2`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIExp(ctx);
+    const result = parseIExpr(ctx);
     expect(result).toEqual({
-      type: "IExp",
+      type: "IExpr",
       indent: 2,
       extraSpaces: ["", ""],
       children: [
         { type: "Name", value: "foo" },
         {
-          type: "IExp",
+          type: "IExpr",
           indent: 4,
           extraSpaces: ["", ""],
           children: [
@@ -168,21 +168,21 @@ describe("parseIExp", () => {
       1
   2`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIExp(ctx);
+    const result = parseIExpr(ctx);
     expect(result).toEqual({
-      type: "IExp",
+      type: "IExpr",
       indent: 2,
       extraSpaces: ["", ""],
       children: [
         { type: "Name", value: "foo" },
         {
-          type: "IExp",
+          type: "IExpr",
           indent: 4,
           extraSpaces: [""],
           children: [
             { type: "Name", value: "bar" },
             {
-              type: "IExp",
+              type: "IExpr",
               indent: 6,
               extraSpaces: [""],
               children: [
@@ -204,21 +204,21 @@ describe("parseIExp", () => {
           2
     2`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIExp(ctx);
+    const result = parseIExpr(ctx);
     expect(result).toEqual({
-      type: "IExp",
+      type: "IExpr",
       indent: 4,
       extraSpaces: ["", ""],
       children: [
         { type: "Name", value: "foo" },
         {
-          type: "IExp",
+          type: "IExpr",
           indent: 5,
           extraSpaces: [""],
           children: [
             { type: "Name", value: "bar" },
             {
-              type: "IExp",
+              type: "IExpr",
               indent: 10,
               extraSpaces: ["", ""],
               children: [
