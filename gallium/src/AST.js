@@ -5,7 +5,7 @@ export interface ASTxF<P, X> {
   payload: P;
   children?: Array<X>;
   copy(): ASTxF<P, X>;
-  mapPayload<Q>(f: (P) => Q): ASTxF<Q, X>;
+  setPayload<Q>(payload: Q): ASTxF<Q, X>;
 }
 
 export type ASTx<P> = ASTxF<P, ASTx<P>>;
@@ -19,9 +19,9 @@ class ASTxF_Abstract<P, X> {
   copy(): ASTxF<P, X> {
     throw new Error("abstract class");
   }
-  mapPayload<Q>(f: P => Q): ASTxF<Q, X> {
+  setPayload<Q>(payload: Q): ASTxF<Q, X> {
     const node: any = this.copy();
-    node.payload = f(node.payload);
+    node.payload = payload;
     return node;
   }
 }
