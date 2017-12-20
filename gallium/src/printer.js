@@ -1,6 +1,6 @@
 // @flow
 
-import { type ASTx, Name, NumLit, IList, List } from "./AST";
+import { type ASTx, Name, NumLit, IExp, SExp } from "./AST";
 
 export function print(node: ASTx<*>): string {
   if (node instanceof Name) {
@@ -9,7 +9,7 @@ export function print(node: ASTx<*>): string {
   if (node instanceof NumLit) {
     return `${node.value}`;
   }
-  if (node instanceof List) {
+  if (node instanceof SExp) {
     let str = "(";
     for (let i = 0; i < node.children.length; i += 1) {
       str += node.spaces[i];
@@ -19,7 +19,7 @@ export function print(node: ASTx<*>): string {
     str += ")";
     return str;
   }
-  if (node instanceof IList) {
+  if (node instanceof IExp) {
     let str = print(node.children[0]);
     for (let i = 1; i < node.children.length; i += 1) {
       str += "\n";

@@ -4,8 +4,8 @@ import {
   parse,
   parseName,
   parseNumLit,
-  parseList,
-  parseIList
+  parseSExp,
+  parseIExp
 } from "./parser";
 
 describe("parseName", () => {
@@ -37,15 +37,15 @@ describe("parseNumLit", () => {
   });
 });
 
-describe("parseList", () => {
+describe("parseSExp", () => {
   it("parses lists", () => {
     const ctx = new ParseContext({
       text: `(foo 1 2 1)`,
       indents: [0]
     });
-    const result = parseList(ctx);
+    const result = parseSExp(ctx);
     expect(result).toEqual({
-      type: "List",
+      type: "SExp",
       spaces: ["", " ", " ", " ", ""],
       children: [
         { type: "Name", value: "foo" },
@@ -58,9 +58,9 @@ describe("parseList", () => {
 
   it("parses unary lists", () => {
     const ctx = new ParseContext({ text: `(foo)`, indents: [0] });
-    const result = parseList(ctx);
+    const result = parseSExp(ctx);
     expect(result).toEqual({
-      type: "List",
+      type: "SExp",
       spaces: ["", ""],
       children: [{ type: "Name", value: "foo" }]
     });
@@ -68,19 +68,19 @@ describe("parseList", () => {
 
   it("fails to parse nullary lists", () => {
     const ctx = new ParseContext({ text: `()`, indents: [0] });
-    expect(() => parseList(ctx)).toThrow("alternation failed");
+    expect(() => parseSExp(ctx)).toThrow("alternation failed");
   });
 });
 
-describe("parseIList", () => {
+describe("parseIExp", () => {
   it("parses indentation-based lists", () => {
     const text = `foo
   1
   2`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIList(ctx);
+    const result = parseIExp(ctx);
     expect(result).toEqual({
-      type: "IList",
+      type: "IExp",
       indent: 2,
       extraSpaces: ["", ""],
       children: [
@@ -94,9 +94,9 @@ describe("parseIList", () => {
     const text = `foo
   bar`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIList(ctx);
+    const result = parseIExp(ctx);
     expect(result).toEqual({
-      type: "IList",
+      type: "IExp",
       indent: 2,
       extraSpaces: [""],
       children: [{ type: "Name", value: "foo" }, { type: "Name", value: "bar" }]
@@ -108,9 +108,9 @@ describe("parseIList", () => {
 
   bar`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIList(ctx);
+    const result = parseIExp(ctx);
     expect(result).toEqual({
-      type: "IList",
+      type: "IExp",
       indent: 2,
       extraSpaces: ["\n"],
       children: [{ type: "Name", value: "foo" }, { type: "Name", value: "bar" }]
@@ -123,9 +123,9 @@ describe("parseIList", () => {
 
   bar`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIList(ctx);
+    const result = parseIExp(ctx);
     expect(result).toEqual({
-      type: "IList",
+      type: "IExp",
       indent: 2,
       extraSpaces: ["\n\n"],
       children: [{ type: "Name", value: "foo" }, { type: "Name", value: "bar" }]
@@ -139,15 +139,15 @@ describe("parseIList", () => {
     1
   2`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIList(ctx);
+    const result = parseIExp(ctx);
     expect(result).toEqual({
-      type: "IList",
+      type: "IExp",
       indent: 2,
       extraSpaces: ["", ""],
       children: [
         { type: "Name", value: "foo" },
         {
-          type: "IList",
+          type: "IExp",
           indent: 4,
           extraSpaces: ["", ""],
           children: [
@@ -168,21 +168,21 @@ describe("parseIList", () => {
       1
   2`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIList(ctx);
+    const result = parseIExp(ctx);
     expect(result).toEqual({
-      type: "IList",
+      type: "IExp",
       indent: 2,
       extraSpaces: ["", ""],
       children: [
         { type: "Name", value: "foo" },
         {
-          type: "IList",
+          type: "IExp",
           indent: 4,
           extraSpaces: [""],
           children: [
             { type: "Name", value: "bar" },
             {
-              type: "IList",
+              type: "IExp",
               indent: 6,
               extraSpaces: [""],
               children: [
@@ -204,21 +204,21 @@ describe("parseIList", () => {
           2
     2`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIList(ctx);
+    const result = parseIExp(ctx);
     expect(result).toEqual({
-      type: "IList",
+      type: "IExp",
       indent: 4,
       extraSpaces: ["", ""],
       children: [
         { type: "Name", value: "foo" },
         {
-          type: "IList",
+          type: "IExp",
           indent: 5,
           extraSpaces: [""],
           children: [
             { type: "Name", value: "bar" },
             {
-              type: "IList",
+              type: "IExp",
               indent: 10,
               extraSpaces: ["", ""],
               children: [
