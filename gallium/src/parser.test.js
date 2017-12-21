@@ -13,6 +13,11 @@ describe("parse", () => {
     const result = parse("0");
     expect(result).toEqual({ type: "NumLit", value: 0 });
   });
+
+  it("parses decimals", () => {
+    const result = parse("0.5");
+    expect(result).toEqual({ type: "NumLit", value: 0.5 });
+  });
 });
 
 describe("parseName", () => {
@@ -36,6 +41,12 @@ describe("parseNumLit", () => {
     const ctx = new ParseContext({ text: "100 asdf", indents: [0] });
     const result = parseNumLit(ctx);
     expect(result).toEqual({ type: "NumLit", value: 100 });
+  });
+
+  it("parses decimal literals", () => {
+    const ctx = new ParseContext({ text: "0.5", indents: [0] });
+    const result = parseNumLit(ctx);
+    expect(result).toEqual({ type: "NumLit", value: 0.5 });
   });
 
   it("fails on whitespace", () => {

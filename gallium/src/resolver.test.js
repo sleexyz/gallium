@@ -83,6 +83,12 @@ describe("interpretation", () => {
     expect(abt.payload.getValue()).toBe(0);
   });
 
+  it("should be able to interpret decimals", () => {
+    const ast = parse("0.5");
+    const abt = resolve(context, ast);
+    expect(abt.payload.getValue()).toBe(0.5);
+  });
+
   it("should be able to interpret s-expressions", () => {
     const ast = parse("(foo bar 2 3)");
     const abt = resolve(context, ast);

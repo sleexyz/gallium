@@ -35,13 +35,13 @@ export const parseName: Parser<AST> = ctx => {
 
 export const parseNumLit: Parser<AST> = ctx => {
   const text = ctx.getText();
-  const match = text.match(/^[0-9]+/);
+  const match = text.match(/^(\d+\.?\d*|\.\d+)/);
   if (!match) {
     throw new ParseError("not a number");
   }
   const numString = match[0];
   ctx.setText(text.substring(numString.length));
-  return new NumLit(parseInt(numString), undefined);
+  return new NumLit(parseFloat(numString), undefined);
 };
 
 const increasedIndentationNewline: Parser<{
