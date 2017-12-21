@@ -4,6 +4,11 @@
       "browsers": ["last 2 versions", "safari >= 7"]
     }
   }]],
-  plugins: ["transform-flow-strip-types", "transform-object-rest-spread", "transform-class-properties"]
+  plugins: [
+    "transform-react-jsx",
+    "transform-flow-strip-types",
+    "transform-object-rest-spread",
+    "transform-class-properties"
+  ]
 }
 

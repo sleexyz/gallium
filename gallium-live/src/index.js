@@ -1,4 +1,6 @@
 // @flow
+import * as React from "react";
+import * as ReactDOM from "react-dom";
 import { parse } from "gallium/lib/parser";
 import {
   type Pattern,
@@ -8,13 +10,16 @@ import {
   alt,
   fast,
   slow,
-  shift
+  shift,
+  stack,
+  compose
 } from "gallium/lib/semantics";
+import { type ABT, Term, resolve } from "gallium/lib/resolver";
 
-async function setupMIDI(name: string) {
+async function setupMIDI(name?: string) {
   const access = await (navigator: any).requestMIDIAccess();
   for (const output of access.outputs.values()) {
-    if (name === output.name) {
+    if (!name || name === output.name) {
       const port = await output.open();
       return port;
     }
@@ -23,6 +28,7 @@ async function setupMIDI(name: string) {
 }
 
 type PlaybackState = {
+  output: { send: (any, number) => void },
   beat: number,
   pattern: Pattern<*>
 };
@@ -49,39 +55,232 @@ export function pitchMap(f: number => number): Transformer<Array<number>> {
   };
 }
 
-async function main() {
-  const output = await setupMIDI("VirMIDI 2-0");
+async function setup(): Promise<PlaybackState> {
+  const bpm = 160;
+  const beatLength = getBeatLength(bpm);
   const state = {
+    output: await setupMIDI(),
     beat: 0,
-    bpm: 160,
-    pattern: alt([
-      pitchMap(x => x + 12),
-      x => x,
-      pitchMap(x => x + 12 + 12),
-      x => x
-    ])(
-      fast(4)(
-        alt([
-          () => note(76),
-          () => note(72),
-          alt([() => note(62), () => silence]),
-          () => fast(1.5)(note(48))
-        ])(() => [])
-      )
-    )
+    pattern: silence
   };
+  function sendEvent(event) {
+    const timestamp =
+      performance.now() + (event.start - state.beat) * beatLength;
+    state.output.send(event.value, timestamp);
+  }
   function queryAndSend() {
     const events = state.pattern(state.beat, state.beat + 1);
-    events.map(({ value, start, end }) => {
-      const timestamp =
-        performance.now() + (start - state.beat) * getBeatLength(state.bpm);
-      output.send(value, timestamp);
-    });
+    for (let i = 0; i < events.length; i++) {
+      sendEvent(events[i]);
+    }
     state.beat += 1;
   }
-  setInterval(() => {
-    queryAndSend();
-  }, getBeatLength(state.bpm));
+  setInterval(queryAndSend, beatLength);
+  return state;
 }
 
-main();
+let globalPlaybackState;
+
+const globalContext = {
+  note: new Term({
+    type: {
+      type: "function",
+      input: { type: "list", param: "number" },
+      output: "transformer"
+    },
+    value: children =>
+      alt(
+        children.map(x => () =>
+          periodic({
+            period: 1,
+            duration: 1,
+            phase: 0,
+            value: new Uint8Array([0x90, x, 0x7f]) //note-on
+          })
+        )
+      )
+  }),
+  compose: new Term({
+    type: {
+      type: "function",
+      input: { type: "list", param: "transformer" },
+      output: "transformer"
+    },
+    value: compose
+  }),
+  alt: new Term({
+    type: {
+      type: "function",
+      input: { type: "list", param: "transformer" },
+      output: "transformer"
+    },
+    value: alt
+  }),
+  slow: new Term({
+    type: {
+      type: "function",
+      input: { type: "list", param: "number" },
+      output: "transformer"
+    },
+    value: xs => alt(xs.map(slow))
+  }),
+  fast: new Term({
+    type: {
+      type: "function",
+      input: { type: "list", param: "number" },
+      output: "transformer"
+    },
+    value: xs => alt(xs.map(fast))
+  }),
+  add: new Term({
+    type: {
+      type: "function",
+      input: { type: "list", param: "number" },
+      output: "transformer"
+    },
+    value: xs => alt(xs.map(n => pitchMap(x => x + n)))
+  }),
+  i: new Term({
+    type: "transformer",
+    value: x => x
+  }),
+  m: new Term({
+    type: "transformer",
+    value: () => silence
+  }),
+  stack: new Term({
+    type: {
+      type: "function",
+      input: { type: "list", param: "transformer" },
+      output: "transformer"
+    },
+    value: stack
+  }),
+  shift: new Term({
+    type: {
+      type: "function",
+      input: { type: "list", param: "number" },
+      output: "transformer"
+    },
+    value: xs => alt(xs.map(shift))
+  })
+};
+
+type EditorState = {
+  text: string,
+  abt: ?ABT,
+  error: ?string
+};
+
+const initialCode = `compose
+  (note 48)
+  (fast 1)
+  (add 2 4 8 9 11 12)
+  (stack (compose (add 12 36) (shift 1)) (slow 1))
+  (fast 1)
+`;
+
+class Editor extends React.Component<{}, EditorState> {
+  state = {
+    text: initialCode,
+    error: undefined,
+    abt: undefined
+  };
+  componentDidMount() {
+    this.updateABT(this.state.text);
+  }
+  onChange = e => {
+    this.setState({
+      text: e.target.value
+    });
+    this.updateABT(e.target.value);
+  };
+  updateABT(code: string) {
+    try {
+      const abt = resolve(globalContext, parse(code));
+      this.setState({
+        abt,
+        error: undefined
+      });
+      globalPlaybackState.pattern = (abt.payload.getValue(): any)(silence);
+    } catch (e) {
+      this.setState({
+        error: e.toString()
+      });
+    }
+  }
+  renderDebug() {
+    if (this.state.error) {
+      return <pre>{this.state.error}</pre>;
+    }
+    return <pre>{JSON.stringify(this.state.abt, null, 2)}</pre>;
+  }
+  onMIDIOutputChange = async (choice: string) => {
+    const newOutput = await setupMIDI(choice);
+    globalPlaybackState.output = newOutput;
+  };
+  render() {
+    return (
+      <div>
+        <h1>
+          <i style={{ letterSpacing: "0.5em" }}>gallium</i>
+        </h1>
+        <div>
+          <a href="https://github.com/sleexyz/gallium">github</a>
+        </div>
+        <div style={{ marginTop: "20px" }}>
+          <textarea
+            onChange={this.onChange}
+            value={this.state.text}
+            rows="24"
+            cols="60"
+          />
+        </div>
+        <ChooseOutput onChange={this.onMIDIOutputChange} />
+        {this.renderDebug()}
+      </div>
+    );
+  }
+}
+
+class ChooseOutput extends React.Component<
+  { onChange: string => Promise<void> },
+  { loaded: boolean, value: any }
+> {
+  options: Array<string> = [];
+  state = { loaded: false, value: undefined };
+
+  constructor() {
+    super();
+    this.setOptions();
+  }
+
+  async setOptions() {
+    const access = await (navigator: any).requestMIDIAccess();
+    for (const output of access.outputs.values()) {
+      this.options.push(output.name);
+      this.setState({ loaded: true });
+    }
+  }
+
+  onChange = e => {
+    this.props.onChange(e.target.value);
+  };
+
+  render() {
+    return (
+      <select value={this.state.value} onChange={this.onChange}>
+        {this.options.map(x => (
+          <option key={x} value={x}>
+            {x}
+          </option>
+        ))}
+      </select>
+    );
+  }
+}
+
+setup().then(state => {
+  globalPlaybackState = state;
+  ReactDOM.render(<Editor />, document.getElementById("react-root"));
+});

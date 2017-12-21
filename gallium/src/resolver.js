@@ -61,7 +61,7 @@ export class Term {
 
 type BindingContext<T> = { [string]: T };
 
-type ABT = ASTx<Term>;
+export type ABT = ASTx<Term>;
 
 function assert(x: boolean, reason: string) {
   if (!x) {

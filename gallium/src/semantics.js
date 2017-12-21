@@ -55,7 +55,7 @@ export function query<A>(
   return pattern(start, end);
 }
 
-export function stack<A>(children: Array<Pattern<A>>): Pattern<A> {
+export function stackPat<A>(children: Array<Pattern<A>>): Pattern<A> {
   return (start, end) => {
     let events = [];
     for (let i = 0; i < children.length; i += 1) {
@@ -104,7 +104,7 @@ export const silence: Pattern<any> = () => [];
 
 export function alt<A>(children: Array<Transformer<A>>): Transformer<A> {
   return pattern => {
-    return stack(
+    return stackPat(
       children.map((transform, i) => {
         return gate(i, children.length)(transform(pattern));
       })
@@ -112,8 +112,24 @@ export function alt<A>(children: Array<Transformer<A>>): Transformer<A> {
   };
 }
 
+export function compose<A>(children: Array<Transformer<A>>): Transformer<A> {
+  return pattern => {
+    let ret = pattern;
+    for (const transform of children) {
+      ret = transform(ret);
+    }
+    return ret;
+  };
+}
+
+export function stack<A>(children: Array<Transformer<A>>): Transformer<A> {
+  return pattern => {
+    return stackPat(children.map(transform => transform(pattern)));
+  };
+}
+
 export function and<A>(transform: Transformer<A>): Transformer<A> {
   return pattern => {
-    return stack([pattern, transform(pattern)]);
+    return stackPat([pattern, transform(pattern)]);
   };
 }

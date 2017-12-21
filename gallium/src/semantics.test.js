@@ -6,7 +6,7 @@ import {
   fast,
   slow,
   beat,
-  stack,
+  stackPat,
   periodic,
   gate,
   alt,
@@ -67,21 +67,21 @@ const bd = periodic({ period: 1, duration: 1, phase: 0, value: "bd" });
 
 const sn = periodic({ period: 1, duration: 1, phase: 0, value: "sn" });
 
-describe("stack", () => {
-  describe("stack", () => {
-    const pattern = stack([bd, sn]);
+describe("stackPat", () => {
+  describe("stackPat", () => {
+    const pattern = stackPat([bd, sn]);
     testQuery(pattern, 0, 1, [0, 0], ["bd", "sn"]);
     testQuery(pattern, 0, 2, [0, 0, 1, 1], ["bd", "sn", "bd", "sn"]);
   });
 
-  describe("slow stack", () => {
-    const pattern = slow(2)(stack([bd, sn]));
+  describe("slow stackPat", () => {
+    const pattern = slow(2)(stackPat([bd, sn]));
     testQuery(pattern, 0, 1, [0, 0], ["bd", "sn"]);
     testQuery(pattern, 0, 2, [0, 0], ["bd", "sn"]);
   });
 
-  describe("shift stack", () => {
-    const pattern = shift(0.5)(stack([bd, sn]));
+  describe("shift stackPat", () => {
+    const pattern = shift(0.5)(stackPat([bd, sn]));
     testQuery(pattern, 0, 1, [0.5, 0.5], ["bd", "sn"]);
     testQuery(pattern, 0, 2, [0.5, 0.5, 1.5, 1.5], ["bd", "sn", "bd", "sn"]);
   });
