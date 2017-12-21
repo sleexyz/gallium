@@ -37,11 +37,11 @@ export class Term {
   evaluated: boolean;
   constructor(data: TermConstructor<*>) {
     this.type = data.type;
-    if (data.value) {
+    if (data.value != null) {
       this.value = data.value;
       Object.defineProperty(this, "evaluated", { value: true });
     } else {
-      this.thunkValue = data.thunkValue;
+      this.thunkValue = (data: any).thunkValue;
       Object.defineProperty(this, "evaluated", {
         value: false,
         writable: true

@@ -8,6 +8,13 @@ import {
   parseIExpr
 } from "./parser";
 
+describe("parse", () => {
+  it("parses 0", () => {
+    const result = parse("0");
+    expect(result).toEqual({ type: "NumLit", value: 0 });
+  });
+});
+
 describe("parseName", () => {
   it("parses names", () => {
     const ctx = new ParseContext({ text: "foo 1", indents: [0] });
