@@ -1,6 +1,6 @@
 // @flow
 
-import { type ASTx, Name, NumLit, IExpr, SExpr } from "./AST";
+import { type ASTx, Name, NumLit, IExpr, SExpr, OpenSExpr } from "./AST";
 
 function _pretty<X>(indent: number, node: ASTx<X>): ASTx<X> {
   if (node instanceof Name) {
@@ -14,6 +14,15 @@ function _pretty<X>(indent: number, node: ASTx<X>): ASTx<X> {
     spaces[0] = "";
     spaces[node.children.length] = "";
     return new SExpr(
+      node.children.map(x => _pretty(indent, x)),
+      spaces,
+      node.payload
+    );
+  }
+  if (node instanceof OpenSExpr) {
+    const spaces = Array(node.children.length).fill(" ");
+    spaces[node.children.length - 1] = "";
+    return new OpenSExpr(
       node.children.map(x => _pretty(indent, x)),
       spaces,
       node.payload

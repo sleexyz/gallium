@@ -18,7 +18,7 @@ import {
   popIndent
 } from "./parser_combinators";
 
-import { type AST, Name, NumLit, IExpr, SExpr } from "./AST";
+import { type AST, Name, NumLit, OpenSExpr, IExpr, SExpr } from "./AST";
 
 export { ParseContext } from "./parser_combinators.js";
 
@@ -110,10 +110,45 @@ function parseIExprAux({
   ]);
 }
 
+export const parseOpenSExpr: Parser<AST> = ctx => {
+  const child1 = ctx.run(parseTerm2);
+  const space = ctx.run(withFallback(getSpaces, ""));
+  const child2 = ctx.run(parseTerm2);
+  const { children, spaces } = ctx.run(
+    parseOpenSExprAux({ children: [child1, child2], spaces: [space] })
+  );
+  return new OpenSExpr(children, spaces, undefined);
+};
+
+const parseOpenSExprAux = ({
+  children,
+  spaces
+}: {
+  children: Array<AST>,
+  spaces: Array<string>
+}): Parser<{ children: Array<AST>, spaces: Array<string> }> => ctx => {
+  const space = ctx.run(withFallback(getSpaces, ""));
+  return ctx.run(
+    alternate([
+      ctx => {
+        const child = ctx.run(parseTerm2);
+        return ctx.run(
+          parseOpenSExprAux({
+            children: [...children, child],
+            spaces: [...spaces, space]
+          })
+        );
+      },
+      ctx => {
+        return { children, spaces: [...spaces, space] };
+      }
+    ])
+  );
+};
 export const parseSExpr: Parser<AST> = ctx => {
   ctx.run(constant("("));
   const space = ctx.run(withFallback(whitespace, ""));
-  const child = ctx.run(parseTerm0);
+  const child = ctx.run(parseTerm2);
   const { children, spaces } = ctx.run(
     parseSExprAux({ children: [child], spaces: [space] })
   );
@@ -135,7 +170,7 @@ const parseSExprAux = ({
         return { children, spaces: [...spaces, space] };
       },
       ctx => {
-        const child = ctx.run(parseTerm0);
+        const child = ctx.run(parseTerm2);
         return ctx.run(
           parseSExprAux({
             children: [...children, child],
@@ -147,7 +182,9 @@ const parseSExprAux = ({
   );
 };
 
-const parseTerm1: Parser<AST> = alternate([parseSExpr, parseName, parseNumLit]);
+const parseTerm2: Parser<AST> = alternate([parseSExpr, parseName, parseNumLit]);
+
+const parseTerm1: Parser<AST> = alternate([parseOpenSExpr, parseTerm2]);
 
 const parseTerm0: Parser<AST> = alternate([parseIExpr, parseTerm1]);
 

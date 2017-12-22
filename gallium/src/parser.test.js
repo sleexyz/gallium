@@ -5,6 +5,7 @@ import {
   parseName,
   parseNumLit,
   parseSExpr,
+  parseOpenSExpr,
   parseIExpr
 } from "./parser";
 
@@ -17,6 +18,17 @@ describe("parse", () => {
   it("parses decimals", () => {
     const result = parse("0.5");
     expect(result).toEqual({ type: "NumLit", value: 0.5 });
+  });
+
+  it("parses openSExprs", () => {
+    const result = parse(`compose
+  note 1
+`);
+    expect((result: any).children[1]).toEqual({
+      type: "OpenSExpr",
+      children: [{ type: "Name", value: "note" }, { type: "NumLit", value: 1 }],
+      spaces: [" ", ""]
+    });
   });
 });
 
@@ -83,10 +95,25 @@ describe("parseSExpr", () => {
       children: [{ type: "Name", value: "foo" }]
     });
   });
+});
 
-  it("fails to parse nullary lists", () => {
-    const ctx = new ParseContext({ text: `()`, indents: [0] });
-    expect(() => parseSExpr(ctx)).toThrow("alternation failed");
+describe("parseOpenSExpr", () => {
+  it("parses lists", () => {
+    const ctx = new ParseContext({
+      text: `foo 1 2 1`,
+      indents: [0]
+    });
+    const result = parseOpenSExpr(ctx);
+    expect(result).toEqual({
+      type: "OpenSExpr",
+      spaces: [" ", " ", " ", ""],
+      children: [
+        { type: "Name", value: "foo" },
+        { type: "NumLit", value: 1 },
+        { type: "NumLit", value: 2 },
+        { type: "NumLit", value: 1 }
+      ]
+    });
   });
 });
 

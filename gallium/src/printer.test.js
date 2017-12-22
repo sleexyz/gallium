@@ -21,7 +21,7 @@ describe("parse/print round trip identity laws", () => {
   testRoundTrip(`foo
   1
 
-  foo
+  foo 1 2
 
 
     bar

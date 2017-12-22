@@ -52,6 +52,23 @@ export class NumLit<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
   }
 }
 
+export class OpenSExpr<P, X> extends ASTxF_Abstract<P, X>
+  implements ASTxF<P, X> {
+  type = "OpenSExpr";
+  children: Array<X>;
+  spaces: Array<string>;
+
+  constructor(children: Array<X>, spaces: Array<string>, payload: P) {
+    super();
+    this.children = [...children];
+    this.spaces = spaces;
+    this.payload = payload;
+  }
+  copy(): OpenSExpr<P, X> {
+    return new OpenSExpr(this.children, this.spaces, this.payload);
+  }
+}
+
 export class SExpr<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
   type = "SExpr";
   children: Array<X>;

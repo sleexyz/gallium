@@ -1,6 +1,6 @@
 // @flow
 
-import { type ASTx, Name, NumLit, IExpr, SExpr } from "./AST";
+import { type ASTx, Name, OpenSExpr, NumLit, IExpr, SExpr } from "./AST";
 
 export function print(node: ASTx<*>): string {
   if (node instanceof Name) {
@@ -17,6 +17,14 @@ export function print(node: ASTx<*>): string {
     }
     str += node.spaces[node.children.length];
     str += ")";
+    return str;
+  }
+  if (node instanceof OpenSExpr) {
+    let str = "";
+    for (let i = 0; i < node.children.length; i += 1) {
+      str += print(node.children[i]);
+      str += node.spaces[i];
+    }
     return str;
   }
   if (node instanceof IExpr) {

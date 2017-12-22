@@ -21,7 +21,7 @@ describe("pretty printing properties", () => {
     `foo
   1
 
-  foo
+  foo     1  2  3
 
 
     bar
@@ -31,7 +31,7 @@ describe("pretty printing properties", () => {
   baz`,
     `foo
   1
-  foo
+  foo 1 2 3
     bar
       sdf
   baz`

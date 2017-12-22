@@ -6,6 +6,7 @@ import {
   Name,
   NumLit,
   SExpr,
+  OpenSExpr,
   IExpr,
   traverse
 } from "./AST";
@@ -20,22 +21,22 @@ const number: TypeRep = "number";
 const transformer: TypeRep = "transformer";
 const list = (param: TypeRep): TypeRep => ({ type: "list", param });
 
-type TermConstructor<T> =
+type TermConstructor =
   | {
       type: TypeRep,
-      value: T
+      value: any
     }
   | {
       type: TypeRep,
-      thunkValue: () => T
+      thunkValue: () => any
     };
 
 export class Term {
   type: TypeRep;
-  value: *;
-  thunkValue: () => *;
+  value: any;
+  thunkValue: () => any;
   evaluated: boolean;
-  constructor(data: TermConstructor<*>) {
+  constructor(data: TermConstructor) {
     this.type = data.type;
     if (data.value != null) {
       this.value = data.value;
@@ -119,32 +120,14 @@ const resolveNumLitMiddleware: StepMiddleware<Term> = (
   return fallback(node);
 };
 
-const resolveSExprMiddleware: StepMiddleware<Term> = (
-  context,
-  fallback
-) => node => {
-  if (node instanceof SExpr) {
-    const boundNode = node.setPayload(
-      new Term({
-        type: { type: "list", param: "number" },
-        thunkValue: () => {
-          const [fn, ...args] = (boundNode: any).children.map(x => {
-            return x.payload.getValue();
-          });
-          return fn(args);
-        }
-      })
-    );
-    return boundNode;
-  }
-  return fallback(node);
-};
-
-const resolveIExprMiddleware: StepMiddleware<Term> = (
-  context,
-  fallback
-) => node => {
-  if (node instanceof IExpr) {
+const resolveSExprMiddleware: StepMiddleware<Term> = (context, fallback) => (
+  node: any
+) => {
+  if (
+    node instanceof SExpr ||
+    node instanceof IExpr ||
+    node instanceof OpenSExpr
+  ) {
     const boundNode = node.setPayload(
       new Term({
         type: { type: "list", param: "number" },
@@ -171,8 +154,7 @@ export const resolve = (context: BindingContext<Term>, node: AST): ABT => {
     composeMiddleware([
       resolveNameMiddleware,
       resolveNumLitMiddleware,
-      resolveSExprMiddleware,
-      resolveIExprMiddleware
+      resolveSExprMiddleware
     ])
   );
   return traverse(step)(node);
