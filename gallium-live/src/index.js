@@ -173,13 +173,14 @@ type EditorState = {
 };
 
 const initialCode = `compose
-  note 36
-  fast 2 4
+  note 24 48
+  fast 2 1
+  fast 1 1 .5
   add 0 2 7 15 31
   stack
-    compose (add 12) (shift 1 2 3)
+    compose (add 12 14) (shift 1 2 3)
     i
-  slow 1
+  fast 2 0.5 2 1
 `;
 
 class Editor extends React.Component<{}, EditorState> {
