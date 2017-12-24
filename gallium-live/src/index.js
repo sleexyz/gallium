@@ -2,19 +2,9 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { parse } from "gallium/lib/parser";
-import {
-  type Pattern,
-  type Transformer,
-  periodic,
-  silence,
-  alt,
-  fast,
-  slow,
-  shift,
-  stack,
-  compose
-} from "gallium/lib/semantics";
-import { type ABT, Term, resolve } from "gallium/lib/resolver";
+import { type ABT, T, Term, resolve } from "gallium/lib/resolver";
+import { globalContext } from "./context";
+import { type Pattern, silence } from "gallium/lib/semantics";
 
 async function setupMIDI(name?: string) {
   const access = await (navigator: any).requestMIDIAccess();
@@ -33,26 +23,8 @@ type PlaybackState = {
   pattern: Pattern<*>
 };
 
-const note = x =>
-  periodic({
-    period: 1,
-    duration: 1,
-    phase: 0,
-    value: [0x90, x, 0x7f] //note-on
-  });
-
 function getBeatLength(bpm: number): number {
   return 1000 * 60 / bpm;
-}
-
-export function pitchMap(f: number => number): Transformer<Array<number>> {
-  return pattern => (start, end) => {
-    const events = pattern(start, end);
-    return events.map(event => ({
-      ...event,
-      value: [event.value[0], f(event.value[1]), event.value[2]]
-    }));
-  };
 }
 
 async function setup(): Promise<PlaybackState> {
@@ -81,104 +53,19 @@ async function setup(): Promise<PlaybackState> {
 
 let globalPlaybackState;
 
-const globalContext = {
-  note: new Term({
-    type: {
-      type: "function",
-      input: { type: "list", param: "number" },
-      output: "transformer"
-    },
-    value: children =>
-      alt(
-        children.map(x => () =>
-          periodic({
-            period: 1,
-            duration: 1,
-            phase: 0,
-            value: new Uint8Array([0x90, x, 0x7f]) //note-on
-          })
-        )
-      )
-  }),
-  compose: new Term({
-    type: {
-      type: "function",
-      input: { type: "list", param: "transformer" },
-      output: "transformer"
-    },
-    value: compose
-  }),
-  alt: new Term({
-    type: {
-      type: "function",
-      input: { type: "list", param: "transformer" },
-      output: "transformer"
-    },
-    value: alt
-  }),
-  slow: new Term({
-    type: {
-      type: "function",
-      input: { type: "list", param: "number" },
-      output: "transformer"
-    },
-    value: xs => alt(xs.map(slow))
-  }),
-  fast: new Term({
-    type: {
-      type: "function",
-      input: { type: "list", param: "number" },
-      output: "transformer"
-    },
-    value: xs => alt(xs.map(fast))
-  }),
-  add: new Term({
-    type: {
-      type: "function",
-      input: { type: "list", param: "number" },
-      output: "transformer"
-    },
-    value: xs => alt(xs.map(n => pitchMap(x => x + n)))
-  }),
-  i: new Term({
-    type: "transformer",
-    value: x => x
-  }),
-  m: new Term({
-    type: "transformer",
-    value: () => silence
-  }),
-  stack: new Term({
-    type: {
-      type: "function",
-      input: { type: "list", param: "transformer" },
-      output: "transformer"
-    },
-    value: stack
-  }),
-  shift: new Term({
-    type: {
-      type: "function",
-      input: { type: "list", param: "number" },
-      output: "transformer"
-    },
-    value: xs => alt(xs.map(shift))
-  })
-};
-
 type EditorState = {
   text: string,
   abt: ?ABT,
   error: ?string
 };
 
-const initialCode = `compose
+const initialCode = `do
   note 24 48
   fast 2 1
   fast 1 1 .5
   add 0 2 7 15 31
   stack
-    compose (add 12 14) (shift 1 2 3)
+    do (add 12 14) (shift 1 2 3)
     i
   fast 2 0.5 2 1
 `;

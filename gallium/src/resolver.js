@@ -10,6 +10,7 @@ import {
   IExpr,
   traverse
 } from "./AST";
+import { type Transformer } from "./semantics";
 
 export type TypeRep =
   | { type: "function", input: TypeRep, output: TypeRep }
@@ -17,9 +18,16 @@ export type TypeRep =
   | "transformer"
   | "number";
 
-const number: TypeRep = "number";
-const transformer: TypeRep = "transformer";
-const list = (param: TypeRep): TypeRep => ({ type: "list", param });
+export const T = {
+  number: "number",
+  transformer: "transformer",
+  list: (param: TypeRep): TypeRep => ({ type: "list", param }),
+  function: (input: TypeRep, output: TypeRep): TypeRep => ({
+    type: "function",
+    input,
+    output
+  })
+};
 
 type TermConstructor =
   | {
