@@ -1,7 +1,7 @@
 // @flow
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { parse } from "gallium/lib/parser";
+import { parseTopLevel } from "gallium/lib/parser";
 import { type ABT, T, Term, resolve } from "gallium/lib/resolver";
 import { globalContext } from "./context";
 import { type Pattern, silence } from "gallium/lib/semantics";
@@ -59,15 +59,16 @@ type EditorState = {
   error: ?string
 };
 
-const initialCode = `do
-  note 24 48
-  fast 2 1
-  fast 1 1 .5
-  add 0 2 7 15 31
-  stack
-    do (add 12 14) (shift 1 2 3)
-    i
-  fast 2 0.5 2 1
+const initialCode = `note 24 48
+fast 2 1
+fast 1 1 .5
+add 0 2 7 15 31
+stack
+  do
+    add 12 14
+    shift 1 2 3
+  i
+fast 2 0.5 2 1
 `;
 
 class Editor extends React.Component<{}, EditorState> {
@@ -87,7 +88,7 @@ class Editor extends React.Component<{}, EditorState> {
   };
   updateABT(code: string) {
     try {
-      const abt = resolve(globalContext, parse(code));
+      const abt = resolve(globalContext, parseTopLevel(code));
       this.setState({
         abt,
         error: undefined

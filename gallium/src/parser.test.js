@@ -1,6 +1,7 @@
 // @flow
 import {
   ParseContext,
+  parseTopLevel,
   parse,
   parseName,
   parseNumLit,
@@ -8,6 +9,54 @@ import {
   parseOpenSExpr,
   parseIExpr
 } from "./parser";
+
+describe("parseTopLevel", () => {
+  it("can parse expressions", () => {
+    const result = parseTopLevel("foo");
+    expect(result).toEqual({
+      type: "IExpr",
+      children: [{ type: "Name", value: "do" }, { type: "Name", value: "foo" }],
+      extraSpaces: [""],
+      indent: 0
+    });
+  });
+
+  it("is robust to surrounding whitespace", () => {
+    const result = parseTopLevel(`
+foo
+
+`);
+    expect(result).toEqual({
+      type: "IExpr",
+      children: [{ type: "Name", value: "do" }, { type: "Name", value: "foo" }],
+      extraSpaces: ["\n"],
+      indent: 0
+    });
+  });
+
+  it("accepts multiple lines", () => {
+    const result = parseTopLevel(`
+
+foo
+
+bar
+baz
+
+
+`);
+    expect(result).toEqual({
+      type: "IExpr",
+      children: [
+        { type: "Name", value: "do" },
+        { type: "Name", value: "foo" },
+        { type: "Name", value: "bar" },
+        { type: "Name", value: "baz" }
+      ],
+      extraSpaces: ["\n\n", "\n", ""],
+      indent: 0
+    });
+  });
+});
 
 describe("parse", () => {
   it("parses 0", () => {

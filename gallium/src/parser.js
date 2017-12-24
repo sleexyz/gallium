@@ -68,7 +68,7 @@ const sameIndentationNewline: Parser<{
   ctx.run(maybe(getSpaces));
   ctx.run(getNewline);
   const extraSpace = ctx.run(withFallback(regExp(/^\s*\n+/), ""));
-  const numSpaces = ctx.run(getSpaces).length;
+  const numSpaces = ctx.run(withFallback(getSpaces, "")).length;
   if (numSpaces === currentIndent) {
     return { extraSpace, indent: numSpaces };
   }
@@ -191,4 +191,19 @@ const parseTerm0: Parser<AST> = alternate([parseIExpr, parseTerm1]);
 export function parse(input: string): AST {
   const ctx = new ParseContext({ text: input, indents: [0] });
   return parseTerm0(ctx);
+}
+
+const parseTopLevelExpr: Parser<AST> = ctx => {
+  const term = new Name("do", undefined);
+  const extraSpace = ctx.run(withFallback(regExp(/^\s*\n+/), ""));
+  const child = ctx.run(parseTerm0);
+  const { children, extraSpaces } = ctx.run(
+    parseIExprAux({ children: [child], extraSpaces: [extraSpace] })
+  );
+  return new IExpr([term, ...children], extraSpaces, 0, undefined);
+};
+
+export function parseTopLevel(input: string): AST {
+  const ctx = new ParseContext({ text: input, indents: [0] });
+  return parseTopLevelExpr(ctx);
 }
