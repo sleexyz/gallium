@@ -83,32 +83,29 @@ export function fast<A>(k: number): Transformer<A> {
   return slow(1 / k);
 }
 
-function gateWith<A>(gatePat: Pattern<any>): Transformer<A> {
-  return pattern => (start, end) => {
-    const gates = query(start, end, gatePat);
-    let events = [];
-    for (const { start, end } of gates) {
-      events = events.concat(query(start, end, pattern));
-    }
-    return events;
-  };
-}
-
-export function gate<A>(phase: number, period: number): Transformer<A> {
-  return gateWith(
-    periodic({ period: period, duration: 1, phase, value: undefined })
-  );
-}
-
 export const silence: Pattern<any> = () => [];
+
+const splitQueries = <A>(pattern: Pattern<A>): Pattern<A> => (start, end) => {
+  let events = [];
+  let i = start;
+  /* if (i % 1 > 0) {
+   *   events = events.concat(pattern(i, Math.min(Math.floor(i) + 1, end)));
+   * }
+   * i = Math.ceil(i); */
+  for (; i < end; i += 1) {
+    events = events.concat(pattern(i, Math.min(i + 1, end)));
+  }
+  return events;
+};
 
 export function alt<A>(children: Array<Transformer<A>>): Transformer<A> {
   return pattern => {
-    return stackPat(
-      children.map((transform, i) => {
-        return gate(i, children.length)(transform(pattern));
-      })
-    );
+    return splitQueries((start, end) => {
+      const n = children.length;
+      const i = (Math.floor(start) % n + n) % n;
+      const transform = children[i];
+      return transform(pattern)(start, end);
+    });
   };
 }
 

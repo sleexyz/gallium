@@ -8,7 +8,7 @@ import {
   beat,
   stackPat,
   periodic,
-  gate,
+  compose,
   alt,
   silence,
   and
@@ -87,49 +87,6 @@ describe("stackPat", () => {
   });
 });
 
-describe("gate", () => {
-  describe("beat; gate(0, 4)", () => {
-    const pattern = gate(0, 4)(beat);
-    testQuery(pattern, 0, 4, [0]);
-    testQuery(pattern, 0, 8, [0, 4]);
-    testQuery(pattern, 1, 4, []);
-    testQuery(pattern, 1, 8, [4]);
-  });
-
-  describe("beat; gate(1, 4)", () => {
-    const pattern = gate(1, 4)(beat);
-    testQuery(pattern, 0, 4, [1]);
-    testQuery(pattern, 0, 8, [1, 5]);
-    testQuery(pattern, 1, 4, [1]);
-    testQuery(pattern, 1, 8, [1, 5]);
-  });
-
-  describe("beat; gate(1, 4) ; shift 1", () => {
-    const pattern = shift(1)(gate(1, 4)(beat));
-    testQuery(pattern, 0, 4, [2]);
-    testQuery(pattern, 0, 8, [2, 6]);
-    testQuery(pattern, 1, 4, [2]);
-    testQuery(pattern, 1, 8, [2, 6]);
-  });
-
-  describe("beat; gate(1, 4) ; shift 1", () => {
-    const pattern = shift(2)(gate(1, 4)(beat));
-    testQuery(pattern, 0, 4, [3]);
-    testQuery(pattern, 0, 8, [3, 7]);
-    testQuery(pattern, 1, 4, [3]);
-    testQuery(pattern, 1, 8, [3, 7]);
-  });
-
-  describe("beat; gate(1, 4) ; fast 2", () => {
-    const pattern = fast(2)(gate(1, 4)(beat));
-    testQuery(pattern, 0, 2, [0.5]);
-    testQuery(pattern, 0, 4, [0.5, 2.5]);
-    testQuery(pattern, 0, 8, [0.5, 2.5, 4.5, 6.5]);
-    testQuery(pattern, 1, 4, [2.5]);
-    testQuery(pattern, 1, 8, [2.5, 4.5, 6.5]);
-  });
-});
-
 describe("alt", () => {
   describe("alt bd sn", () => {
     const pattern = alt([() => bd, () => sn])(silence);
@@ -161,6 +118,29 @@ describe("alt", () => {
       ["bd", "sn", "sn", "bd", "sn", "sn"]
     );
     testQuery(pattern, 1, 3, [1, 2, 2.5], ["sn", "bd", "sn"]);
+  });
+
+  describe("event distribution", () => {
+    test("even distribution of events without alt", () => {
+      const transform = compose([fast(2), slow(2)]);
+      const pattern = transform(bd);
+      expect(query(0, 1, pattern).length).toBe(1);
+      expect(query(1, 2, pattern).length).toBe(1);
+    });
+
+    test("even distribution of events with alt", () => {
+      const transform = compose([alt([fast(2)]), slow(2)]);
+      const pattern = transform(bd);
+      expect(query(0, 1, pattern).length).toBe(1);
+      expect(query(1, 2, pattern).length).toBe(1);
+      expect(query(2, 3, pattern).length).toBe(1);
+      expect(query(3, 4, pattern).length).toBe(1);
+    });
+  });
+
+  test("can take negative queries", () => {
+    const pattern = alt([() => bd, () => sn])(silence);
+    expect(query(-1, 0, pattern)).toEqual([{ start: -1, end: 0, value: "sn" }]);
   });
 });
 
