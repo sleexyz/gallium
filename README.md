@@ -2,7 +2,7 @@
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
-<p align="center">An environment for live pattern manipulation. <i><a href="http://gallium.live">gallium.live</a></i></p>
+<p align="center">An environment for liquid pattern manipulation. <i><a href="http://gallium.live">gallium.live</a></i></p>
 
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
