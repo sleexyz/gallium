@@ -2,6 +2,8 @@ import { configure } from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
 import "jest-enzyme";
 
+import * as MIDI from "./midi";
+
 configure({ adapter: new Adapter() });
 
 beforeAll(() => {
@@ -68,10 +70,22 @@ export function spyOnAsync(object: any, path: string): void {
   });
 }
 
-export function stubMIDIOutputDevices(devices: Array<any>) {
+export function withAsyncSpy(object: any, path: string): void {
+  beforeEach(() => {
+    spyOnAsync(object, path);
+  });
+}
+
+export function stubMIDIOutputDevices(devices: Array<MIDI.Device>) {
   stubGlobalProperty(navigator, "requestMIDIAccess", async () => ({
     outputs: {
       values: () => devices
     }
   }));
+}
+
+export function withMIDIOutputDevices(devices: Array<MIDI.Device>) {
+  beforeEach(() => {
+    stubMIDIOutputDevices(devices);
+  });
 }

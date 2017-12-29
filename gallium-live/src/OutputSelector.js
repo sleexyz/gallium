@@ -1,5 +1,6 @@
 // @flow
 import * as React from "react";
+import * as LocalStorage from "./local_storage";
 
 type State = {
   loading: boolean,
@@ -30,13 +31,21 @@ export class OutputSelector extends React.Component<
         this.options.push(output.name);
         this.setState({ loading: false });
       }
+      const lastPort = LocalStorage.loadOutputPort();
+      if (this.options.includes(lastPort)) {
+        this.setState({ value: lastPort });
+        this.props.onChange(lastPort);
+      }
     } catch (e) {
       this.setState({ error: e.toString() });
     }
   }
 
   onChange = (e: *) => {
-    this.props.onChange(e.target.value);
+    const outputPort = e.target.value;
+    LocalStorage.saveOutputPort(outputPort);
+    this.props.onChange(outputPort);
+    this.setState({ value: outputPort });
   };
 
   render() {

@@ -1,7 +1,7 @@
 import * as TestUtils from "./test_utils";
 import * as MIDI from "./midi";
 
-const mockDevice = {
+const mockDevice: MIDI.Device = {
   name: "foo",
   open: async () => mockDevice
 };

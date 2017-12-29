@@ -10,16 +10,14 @@ import * as MIDI from "./midi";
 
 type PlaybackState = {
   isPlaying: boolean,
-  output: { send: (any, number) => void },
+  output: MIDI.Device,
   beat: number,
   pattern: Pattern<*>
 };
 
 export const globalPlaybackState: PlaybackState = {
   isPlaying: false,
-  output: {
-    send: () => {}
-  },
+  output: MIDI.makeDummyDevice("mockDevice"),
   beat: 0,
   pattern: silence
 };
