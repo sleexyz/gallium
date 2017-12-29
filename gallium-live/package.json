@@ -13,10 +13,19 @@
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.6.1",
+    "enzyme": "^3.2.0",
+    "enzyme-adapter-react-16": "^1.1.1",
     "html-webpack-plugin": "^2.30.1",
     "jest": "^21.2.1",
+    "jest-enzyme": "^4.0.2",
     "webpack": "^3.10.0",
     "webpack-dev-server": "^2.9.7"
+  },
+  "jest": {
+    "setupFiles": [
+      "./src/shim.js"
+    ],
+    "setupTestFrameworkScriptFile": "./src/test_utils.js"
   },
   "scripts": {
     "build-publish": "yarn clean && webpack -p",
