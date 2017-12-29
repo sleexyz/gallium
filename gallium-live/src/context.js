@@ -14,12 +14,12 @@ import {
 } from "gallium/lib/semantics";
 import { type ABT, T, Term, resolve } from "gallium/lib/resolver";
 
-export function pitchMap(f: number => number): Transformer<Array<number>> {
+export function pitchMap(f: number => number): Transformer<Uint8Array> {
   return pattern => (start, end) => {
     const events = pattern(start, end);
     return events.map(event => ({
       ...event,
-      value: [event.value[0], f(event.value[1]), event.value[2]]
+      value: new Uint8Array([event.value[0], f(event.value[1]), event.value[2]])
     }));
   };
 }
@@ -62,6 +62,10 @@ export const globalContext = {
   add: new Term({
     type: T.function(T.list(T.number), T.transformer),
     value: xs => alt(xs.map(n => pitchMap(x => x + n)))
+  }),
+  sub: new Term({
+    type: T.function(T.list(T.number), T.transformer),
+    value: xs => alt(xs.map(n => pitchMap(x => x - n)))
   }),
   i: new Term({
     type: T.transformer,
