@@ -13,6 +13,7 @@ import {
   compose
 } from "gallium/lib/semantics";
 import { type ABT, T, Term, resolve } from "gallium/lib/resolver";
+import { parseTopLevel } from "gallium/lib/parser";
 
 export function pitchMap(f: number => number): Transformer<Uint8Array> {
   return pattern => (start, end) => {
@@ -84,3 +85,9 @@ export const globalContext = {
     value: xs => alt(xs.map(shift))
   })
 };
+
+export function parseAndResolve(code: string): Pattern<any> {
+  return resolve(globalContext, parseTopLevel(code)).payload.getValue()(
+    silence
+  );
+}

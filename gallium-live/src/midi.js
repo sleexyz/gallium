@@ -2,7 +2,7 @@
 
 export type Device = {
   name: string,
-  send: (Uint8Array, ?number) => void,
+  send: (Uint8Array, number) => void,
   open: () => Promise<Device>
 };
 

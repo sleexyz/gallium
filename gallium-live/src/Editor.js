@@ -4,46 +4,10 @@ import * as ReactDOM from "react-dom";
 import { parseTopLevel } from "gallium/lib/parser";
 import { type ABT, T, Term, resolve } from "gallium/lib/resolver";
 import { globalContext } from "./context";
-import { type Pattern, silence } from "gallium/lib/semantics";
+import { silence } from "gallium/lib/semantics";
 import { OutputSelector } from "./OutputSelector";
+import * as Playback from "./playback";
 import * as MIDI from "./midi";
-
-type PlaybackState = {
-  isPlaying: boolean,
-  output: MIDI.Device,
-  beat: number,
-  pattern: Pattern<*>
-};
-
-export const globalPlaybackState: PlaybackState = {
-  isPlaying: false,
-  output: MIDI.makeDummyDevice("mockDevice"),
-  beat: 0,
-  pattern: silence
-};
-
-export function start(state: PlaybackState): void => void {
-  const beatLength = 1000 * 60 / 160;
-  function sendEvent(event) {
-    const timestamp =
-      performance.now() + (event.start - state.beat) * beatLength;
-    state.output.send(event.value, timestamp);
-  }
-  function queryAndSend() {
-    const events = state.pattern(state.beat, state.beat + 1);
-    for (let i = 0; i < events.length; i++) {
-      sendEvent(events[i]);
-    }
-    state.beat += 1;
-  }
-  const intervalId = setInterval(queryAndSend, beatLength);
-  state.isPlaying = true;
-
-  return function stop() {
-    clearInterval(intervalId);
-    state.isPlaying = false;
-  };
-}
 
 type EditorState = {
   text: string,
@@ -69,13 +33,12 @@ export class Editor extends React.Component<{}, EditorState> {
     error: undefined,
     abt: undefined
   };
-  stop: void => void;
   componentDidMount() {
-    this.stop = start(globalPlaybackState);
+    Playback.start();
     this.updateABT(this.state.text);
   }
   componentWillUnmount() {
-    this.stop();
+    Playback.stop();
   }
   onChange = (e: *) => {
     this.setState({
@@ -90,7 +53,7 @@ export class Editor extends React.Component<{}, EditorState> {
         abt,
         error: undefined
       });
-      globalPlaybackState.pattern = (abt.payload.getValue(): any)(silence);
+      Playback.state.pattern = (abt.payload.getValue(): any)(silence);
     } catch (e) {
       this.setState({
         error: e.toString()
@@ -99,7 +62,7 @@ export class Editor extends React.Component<{}, EditorState> {
   }
   onMIDIOutputChange = async (choice: string) => {
     const newOutput = await MIDI.connectToOutputPort(choice);
-    globalPlaybackState.output = newOutput;
+    Playback.state.output = newOutput;
   };
   render() {
     return (

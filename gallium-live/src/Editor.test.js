@@ -2,7 +2,8 @@
 import * as React from "react";
 import * as TestUtils from "./test_utils";
 import { mount } from "enzyme";
-import { Editor, globalPlaybackState } from "./Editor.js";
+import { Editor } from "./Editor.js";
+import * as Playback from "./playback";
 
 describe("Editor", () => {
   beforeEach(() => {
@@ -11,13 +12,13 @@ describe("Editor", () => {
 
   it("starts playback once mounted", () => {
     const wrapper = mount(<Editor />);
-    expect(globalPlaybackState.isPlaying).toBe(true);
+    expect(Playback.isPlaying()).toBe(true);
   });
 
   it("stops playback when unmounted", () => {
     const wrapper = mount(<Editor />);
     wrapper.unmount();
-    expect(globalPlaybackState.isPlaying).toBe(false);
+    expect(Playback.isPlaying()).toBe(false);
   });
 });
 

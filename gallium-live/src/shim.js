@@ -1,8 +1,10 @@
+// @flow
+import nowPolyfill from "performance-now";
 global.requestAnimationFrame = callback => {
   setTimeout(callback, 0);
 };
 
-const localStorageMock = (function() {
+window.localStorage = (function() {
   let store = {};
 
   return {
@@ -18,6 +20,6 @@ const localStorageMock = (function() {
   };
 })();
 
-Object.defineProperty(window, "localStorage", {
-  value: localStorageMock
-});
+window.performance = {
+  now: nowPolyfill
+};
