@@ -43,6 +43,10 @@ export function modifyGlobalProperty(
   });
 }
 
+export function mockPerformanceNow(n: number) {
+  modifyGlobalProperty(performance, "now", realNow => () => n);
+}
+
 export function spyOnAsync(object: any, path: string): void {
   modifyGlobalProperty(object, path, fn => {
     const wrappedFunction = async function() {

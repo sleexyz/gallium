@@ -27,14 +27,19 @@ function getBeatLength(bpm: number): number {
 export const state: PlaybackState = makeInitialState();
 
 function sendEvent(event): void {
-  const timestamp =
-    performance.now() + (event.start - state.beat) * getBeatLength(state.bpm);
-  const message = new Uint8Array([
+  const now = performance.now();
+  const timestampOn =
+    now + (event.start - state.beat) * getBeatLength(state.bpm);
+  const timestampOff =
+    now + (event.end - state.beat) * getBeatLength(state.bpm);
+  const messageOn = new Uint8Array([
     event.value[0],
     event.value[1] & 127,
     event.value[2]
   ]);
-  state.output.send(message, timestamp);
+  const messageOff = new Uint8Array([0x80, event.value[1] & 127, 0]);
+  state.output.send(messageOn, timestampOn);
+  state.output.send(messageOff, timestampOff);
 }
 
 export function queryAndSend(): void {

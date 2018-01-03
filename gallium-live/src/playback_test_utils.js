@@ -19,7 +19,7 @@ async function collectEventsNRT({
   numBeats: number
 }) {
   Playback.state.pattern = pattern;
-  Playback.state.bpm = 20000;
+  Playback.state.bpm = 60000;
   const events = [];
 
   let counter = 0;
