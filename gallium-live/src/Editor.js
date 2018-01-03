@@ -33,6 +33,7 @@ export class Editor extends React.Component<{}, EditorState> {
     error: undefined,
     abt: undefined
   };
+  textarea: ?HTMLTextAreaElement;
   componentDidMount() {
     Playback.start();
     this.updateABT(this.state.text);
@@ -64,6 +65,38 @@ export class Editor extends React.Component<{}, EditorState> {
     const newOutput = await MIDI.connectToOutputPort(choice);
     Playback.state.output = newOutput;
   };
+
+  onKeyPress = (e: SyntheticKeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const pos = e.currentTarget.selectionStart;
+      const prefix = this.state.text.substr(0, pos);
+      const suffix = this.state.text.substr(pos);
+
+      const prePos = prefix.lastIndexOf("\n");
+      const line = prefix.substring(prePos + 1);
+      const spaceMatch = line.match(/^\ */g);
+      if (!spaceMatch) {
+        throw new Error("unexpected error: no match");
+      }
+      const indentation = spaceMatch[0];
+
+      const extraText = "\n" + indentation;
+      const newText = prefix + extraText + suffix;
+      this.setState(
+        {
+          text: newText
+        },
+        () => {
+          (this.textarea: any).focus();
+          (this.textarea: any).setSelectionRange(
+            pos + extraText.length,
+            pos + extraText.length
+          );
+        }
+      );
+    }
+  };
   render() {
     return (
       <div>
@@ -76,9 +109,13 @@ export class Editor extends React.Component<{}, EditorState> {
         <div style={{ marginTop: "20px" }}>
           <textarea
             onChange={this.onChange}
+            onKeyPress={this.onKeyPress}
             value={this.state.text}
             rows="24"
             cols="60"
+            ref={ref => {
+              this.textarea = ref;
+            }}
           />
         </div>
         <OutputSelector onChange={this.onMIDIOutputChange} />
