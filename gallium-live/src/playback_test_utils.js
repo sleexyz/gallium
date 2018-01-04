@@ -2,49 +2,47 @@
 import * as TestUtils from "./test_utils";
 import * as Playback from "./playback";
 import { type Pattern, silence } from "gallium/lib/semantics";
+import { type Action } from "./store";
 
-export function setup() {
-  afterEach(() => {
-    Object.assign(Playback.state, Playback.makeInitialState());
-  });
-
-  return { collectEventsNRT };
-}
-
-async function collectEventsNRT({
-  pattern,
-  numBeats
-}: {
-  pattern: Pattern<Uint8Array>,
-  numBeats: number
-}) {
-  Playback.state.pattern = pattern;
-  Playback.state.bpm = 60000;
+export const collectEventsNRT: Action<
+  {
+    pattern: Pattern<Uint8Array>,
+    numBeats: number
+  },
+  Promise<Array<any>>
+> = input => async store => {
+  const { pattern, numBeats } = input;
+  store.state.pattern = pattern;
+  store.state.bpm = 60000;
   const events = [];
 
   let counter = 0;
   let _resolve;
 
-  Playback.state.output.send = (midiMessage: Uint8Array, timestamp: number) => {
+  store.state.output.send = (midiMessage: Uint8Array, timestamp: number) => {
     events.push({ midiMessage, timestamp });
   };
 
-  TestUtils.modifyGlobalProperty(Playback, "queryAndSend", queryAndSend => {
-    return () => {
-      queryAndSend();
-      counter += 1;
-      if (counter === numBeats) {
-        _resolve();
-      }
-    };
-  });
+  TestUtils.modifyGlobalProperty(
+    Playback.Player.prototype,
+    "queryAndSend",
+    queryAndSend => {
+      return function mockQueryAndSend() {
+        queryAndSend.call(this);
+        counter += 1;
+        if (counter === numBeats) {
+          _resolve();
+        }
+      };
+    }
+  );
 
-  Playback.start();
+  store.dispatch(Playback.start());
 
   await new Promise(resolve => {
     _resolve = resolve;
   });
 
-  Playback.stop();
+  store.dispatch(Playback.stop());
   return events;
-}
+};

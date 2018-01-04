@@ -1,6 +1,6 @@
 // @flow
 
-type Event<A> = {
+export type Event<A> = {
   start: number,
   end: number,
   value: A

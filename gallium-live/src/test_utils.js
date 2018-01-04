@@ -1,15 +1,18 @@
-import { configure } from "enzyme";
+// @flow
+import { configure, mount } from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
 import "jest-enzyme";
+import * as React from "react";
 
 import * as MIDI from "./midi";
+import { Provider, Store, makeInitialState } from "./store";
 
 configure({ adapter: new Adapter() });
 
 beforeAll(() => {
   const rootNode = document.createElement("div");
   rootNode.id = "react-root";
-  document.body.appendChild(rootNode);
+  (document.body: any).appendChild(rootNode);
 });
 
 let cleanupFns: Array<(void) => void> = [];
@@ -45,6 +48,10 @@ export function modifyGlobalProperty(
 
 export function mockPerformanceNow(n: number) {
   modifyGlobalProperty(performance, "now", realNow => () => n);
+}
+
+export function spyOn(object: any, path: string): void {
+  modifyGlobalProperty(object, path, jest.fn);
 }
 
 export function spyOnAsync(object: any, path: string): void {
@@ -92,4 +99,17 @@ export function withMIDIOutputDevices(devices: Array<MIDI.Device>) {
   beforeEach(() => {
     stubMIDIOutputDevices(devices);
   });
+}
+
+type MountWithStoreOptions = {
+  store?: Store
+};
+
+export function mountWithStore(
+  element: React.Node,
+  options: MountWithStoreOptions = {}
+) {
+  const store = options.store || new Store(makeInitialState());
+  const wrapper = mount(<Provider store={store}>{element}</Provider>);
+  return { wrapper, store };
 }

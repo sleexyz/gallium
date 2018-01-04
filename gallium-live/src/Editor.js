@@ -6,8 +6,16 @@ import { type ABT, T, Term, resolve } from "gallium/lib/resolver";
 import { globalContext } from "./context";
 import { silence } from "gallium/lib/semantics";
 import { OutputSelector } from "./OutputSelector";
-import * as Playback from "./playback";
 import * as MIDI from "./midi";
+import * as LocalStorage from "./local_storage";
+import { connect, type Connect } from "./store";
+import * as Playback from "./playback";
+
+type OwnProps = {};
+
+type ContainerProps = {
+  text: string
+};
 
 type EditorState = {
   text: string,
@@ -15,55 +23,60 @@ type EditorState = {
   error: ?string
 };
 
-const initialCode = `note 24 48
-fast 2 1
-fast 1 1 .5
-add 0 2 7 15 31
-stack
-  i
-  do
-    add 12 14
-    shift 1 2 3
-fast 2 0.5 2 1
-`;
+export class Editor extends React.Component<
+  Connect<OwnProps, ContainerProps>,
+  EditorState
+> {
+  constructor(props: *) {
+    super(props);
+    this.state = {
+      text: props.text,
+      error: undefined,
+      abt: undefined
+    };
+  }
 
-export class Editor extends React.Component<{}, EditorState> {
-  state = {
-    text: initialCode,
-    error: undefined,
-    abt: undefined
-  };
   textarea: ?HTMLTextAreaElement;
+
   componentDidMount() {
-    Playback.start();
+    this.props.dispatch(Playback.start());
     this.updateABT(this.state.text);
   }
+
   componentWillUnmount() {
-    Playback.stop();
+    this.props.dispatch(Playback.stop());
   }
+
   onChange = (e: *) => {
     this.setState({
       text: e.target.value
     });
     this.updateABT(e.target.value);
   };
-  updateABT(code: string) {
+
+  updateABT(text: string) {
     try {
-      const abt = resolve(globalContext, parseTopLevel(code));
+      const abt = resolve(globalContext, parseTopLevel(text));
       this.setState({
         abt,
         error: undefined
       });
-      Playback.state.pattern = (abt.payload.getValue(): any)(silence);
+      this.props.dispatch(store => {
+        store.state.pattern = (abt.payload.getValue(): any)(silence);
+      });
+      LocalStorage.saveText(text);
     } catch (e) {
       this.setState({
         error: e.toString()
       });
     }
   }
+
   onMIDIOutputChange = async (choice: string) => {
     const newOutput = await MIDI.connectToOutputPort(choice);
-    Playback.state.output = newOutput;
+    this.props.dispatch(store => {
+      store.state.output = newOutput;
+    });
   };
 
   onKeyPress = (e: SyntheticKeyboardEvent<HTMLTextAreaElement>) => {
@@ -97,6 +110,7 @@ export class Editor extends React.Component<{}, EditorState> {
       );
     }
   };
+
   render() {
     return (
       <div>
@@ -123,3 +137,5 @@ export class Editor extends React.Component<{}, EditorState> {
     );
   }
 }
+
+export default connect(Editor, ({ text }) => ({ text }));
