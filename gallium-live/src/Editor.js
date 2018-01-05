@@ -169,6 +169,7 @@ const Pane = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  padding: 0px 20px;
   ${Styles.transition};
   opacity: 0.5;
   &:hover {
