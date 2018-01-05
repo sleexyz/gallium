@@ -1,7 +1,7 @@
 // @flow
 import * as React from "react";
 import * as TestUtils from "./test_utils";
-import Editor, { Editor as EditorInner } from "./Editor.js";
+import Editor, { Editor as EditorInner, Textarea } from "./Editor.js";
 import * as Playback from "./playback";
 import { setText, setCursor, pressKey } from "./Editor_test_utils";
 
@@ -46,6 +46,6 @@ describe("Editor", () => {
 describe("when no devices are loaded", () => {
   it("still renders the editor", () => {
     const { wrapper } = TestUtils.mountWithStore(<Editor />);
-    expect(wrapper.find("h1").text()).toEqual("gallium");
+    expect(wrapper.find(Textarea)).toBePresent();
   });
 });

@@ -5,6 +5,7 @@
     }
   }]],
   plugins: [
+    "styled-components",
     "transform-react-jsx",
     "transform-flow-strip-types",
     "transform-object-rest-spread",

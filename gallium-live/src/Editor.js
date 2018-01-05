@@ -1,6 +1,6 @@
 // @flow
 import * as React from "react";
-import * as ReactDOM from "react-dom";
+import styled from "styled-components";
 import { parseTopLevel } from "gallium/lib/parser";
 import { type ABT, T, Term, resolve } from "gallium/lib/resolver";
 import { globalContext } from "./context";
@@ -10,6 +10,7 @@ import * as MIDI from "./midi";
 import * as LocalStorage from "./local_storage";
 import { connect, type Connect } from "./store";
 import * as Playback from "./playback";
+import * as Styles from "./styles";
 
 type OwnProps = {};
 
@@ -20,7 +21,8 @@ type ContainerProps = {
 type EditorState = {
   text: string,
   abt: ?ABT,
-  error: ?string
+  error: ?string,
+  isInitialized: boolean
 };
 
 export class Editor extends React.Component<
@@ -32,7 +34,8 @@ export class Editor extends React.Component<
     this.state = {
       text: props.text,
       error: undefined,
-      abt: undefined
+      abt: undefined,
+      isInitialized: false
     };
   }
 
@@ -41,6 +44,7 @@ export class Editor extends React.Component<
   componentDidMount() {
     this.props.dispatch(Playback.start());
     this.updateABT(this.state.text);
+    setTimeout(() => this.setState({ isInitialized: true }), 0);
   }
 
   componentWillUnmount() {
@@ -111,31 +115,108 @@ export class Editor extends React.Component<
     }
   };
 
+  onTextareaRefLoad = (ref: HTMLTextAreaElement) => {
+    this.textarea = ref;
+    if (!this.textarea) {
+      return;
+    }
+    this.textarea.focus();
+  };
+
   render() {
     return (
-      <div>
-        <h1>
-          <i style={{ letterSpacing: "0.5em" }}>gallium</i>
-        </h1>
-        <div>
-          <a href="https://github.com/sleexyz/gallium">github</a>
-        </div>
-        <div style={{ marginTop: "20px" }}>
-          <textarea
+      <Container isInitialized={this.state.isInitialized}>
+        <Pane>
+          <PaneChild>
+            <Description>gallium.live</Description>
+          </PaneChild>
+          <PaneChild>
+            <Link href="https://github.com/sleexyz/gallium">source</Link>
+          </PaneChild>
+        </Pane>
+        <Content>
+          <Textarea
             onChange={this.onChange}
             onKeyPress={this.onKeyPress}
             value={this.state.text}
-            rows="24"
-            cols="60"
-            ref={ref => {
-              this.textarea = ref;
-            }}
+            innerRef={this.onTextareaRefLoad}
           />
-        </div>
-        <OutputSelector onChange={this.onMIDIOutputChange} />
-      </div>
+        </Content>
+        <Pane>
+          <PaneChild>
+            <OutputSelector onChange={this.onMIDIOutputChange} />
+          </PaneChild>
+        </Pane>
+      </Container>
     );
   }
 }
 
 export default connect(Editor, ({ text }) => ({ text }));
+
+const Container: React$ComponentType<{ isInitialized: boolean }> = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  opacity: ${props => (props.isInitialized ? 1 : 0)};
+  transition: opacity 500ms ease-in-out;
+`;
+
+const Pane = styled.div`
+  flex: 0 1 auto;
+  min-height: 50px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  ${Styles.transition};
+  opacity: 0.5;
+  &:hover {
+    opacity: 1;
+  }
+`;
+
+const PaneChild = styled.div`
+  padding: 10px 20px;
+`;
+
+const Content = styled.div`
+  padding: 25px 50px;
+  flex-grow: 1;
+  flex-shrink: 0;
+  display: flex;
+  background-color: white;
+`;
+
+export const Textarea = styled.textarea`
+  ${Styles.transition};
+  border: 0;
+  font-size: 20px;
+  background-color: transparent;
+  margin: 0;
+  flex-grow: 1;
+  font-family: monospace;
+  box-shadow: -1px 0 0 0 #dfdfdf;
+  outline: none;
+  padding-left: 50px;
+  opacity: 0.75;
+  line-height: 1.5em;
+  &:focus {
+    opacity: 1;
+    box-shadow: -1px 0 0 0 #aaa;
+  }
+`;
+
+const Description = styled.div`
+  ${Styles.text};
+  font-style: italic;
+  letter-spacing: 0.25em;
+`;
+
+const Link = styled.a`
+  ${Styles.text};
+  opacity: 0.25;
+  &:visited {
+    color: inherit;
+  }
+`;
