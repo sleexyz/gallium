@@ -19,7 +19,7 @@ export class Player {
     const timestampOn =
       now + (event.start - this.state.beat) * getBeatLength(this.state.bpm);
     const timestampOff =
-      now + (event.end - this.state.beat) * getBeatLength(this.state.bpm);
+      now + (event.end - this.state.beat) * getBeatLength(this.state.bpm) - 1;
     const messageOn = new Uint8Array([
       event.value[0],
       event.value[1] & 127,

@@ -13,7 +13,7 @@ export const collectEventsNRT: Action<
 > = input => async store => {
   const { pattern, numBeats } = input;
   store.state.pattern = pattern;
-  store.state.bpm = 60000;
+  store.state.bpm = 6000;
   const events = [];
 
   let counter = 0;

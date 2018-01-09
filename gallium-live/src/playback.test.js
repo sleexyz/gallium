@@ -27,7 +27,7 @@ describe("playback", () => {
 
     expect(events[1]).toEqual({
       midiMessage: new Uint8Array([0x80, 60, 0]),
-      timestamp: 1
+      timestamp: 10 - 1
     });
   });
 
@@ -48,11 +48,11 @@ describe("playback", () => {
 
       expect(events[1]).toEqual({
         midiMessage: new Uint8Array([0x80, 60, 0]),
-        timestamp: 1
+        timestamp: 10 - 1
       });
     }
     {
-      TestUtils.mockPerformanceNow(1);
+      TestUtils.mockPerformanceNow(10);
 
       const events = await store.dispatch(
         collectEventsNRT({ numBeats: 1, pattern })
@@ -60,12 +60,12 @@ describe("playback", () => {
 
       expect(events[0]).toEqual({
         midiMessage: new Uint8Array([0x90, 60, 127]),
-        timestamp: 1
+        timestamp: 10
       });
 
       expect(events[1]).toEqual({
         midiMessage: new Uint8Array([0x80, 60, 0]),
-        timestamp: 2
+        timestamp: 20 - 1
       });
     }
   });
