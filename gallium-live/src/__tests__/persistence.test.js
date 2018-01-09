@@ -17,7 +17,6 @@ test("text is preserved across reloads", () => {
   }
   {
     const { wrapper } = TestUtils.mountWithStore(<Editor />);
-    console.log(wrapper.debug());
     expect(getText({ wrapper })).toBe("note 1 2 3");
   }
 });

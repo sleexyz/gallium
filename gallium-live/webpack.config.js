@@ -6,7 +6,8 @@ module.exports = {
   entry: ["babel-polyfill", "./src/index.js"],
   devServer: {
     port: 8081,
-    contentBase: "./dist"
+    contentBase: "./dist",
+    disableHostCheck: true,
   },
   module: {
     rules: [

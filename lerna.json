@@ -3,7 +3,8 @@
   "npmClient": "yarn",
   "packages": [
     "gallium",
-    "gallium-live"
+    "gallium-live",
+    "gallium-relay"
   ],
   "useWorkspaces": true,
   "version": "0.1.0"

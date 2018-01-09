@@ -5,16 +5,20 @@ import Editor from "./Editor";
 import { Store, makeInitialState, Provider } from "./store";
 import { type AppState } from "./state";
 import { applyGlobalStyles } from "./styles";
+import { RelayConnection } from "./relay_connection";
 
-const root = document.getElementById("react-root");
+applyGlobalStyles();
 
-if (root) {
-  applyGlobalStyles();
-  const store = new Store(makeInitialState());
-  ReactDOM.render(
-    <Provider store={store}>
-      <Editor />
-    </Provider>,
-    root
-  );
-}
+const store = new Store(makeInitialState());
+
+ReactDOM.render(
+  <Provider store={store}>
+    <Editor />
+  </Provider>,
+  (document.getElementById("react-root"): any)
+);
+
+new RelayConnection({
+  id: "gallium-textarea",
+  destination: "ws://localhost:58121"
+});

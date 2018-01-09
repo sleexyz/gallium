@@ -23,9 +23,9 @@
     "clean": "rm -rf ./lib",
     "build-babel": "babel src --out-dir lib --ignore '*.test.js'",
     "build-flow": "flow-copy-source --ignore '*.test.js' src lib",
-    "check-all": "flow && jest && yarn format-check",
+    "check-all": "flow && yarn test && yarn format-check",
     "format": "prettier --write 'src/**/*.js'",
     "format-check": "prettier -l 'src/**/*.js'",
-    "jest": "jest"
+    "test": "jest"
   }
 }

@@ -48,6 +48,6 @@ yarn start
 A useful shell one-liner that checks your code as it changes. Uses [ag](https://github.com/ggreer/the_silver_searcher) and [entr](http://entrproject.org/):
 
 ```
-ag -l | grep '.js' | entr -cdrs 'yarn flow && yarn jest && yarn format'     
+ag -l | grep '.js' | entr -cdrs 'yarn flow && yarn test && yarn format'
 ```
 

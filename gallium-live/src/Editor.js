@@ -136,6 +136,7 @@ export class Editor extends React.Component<
         </Pane>
         <Content>
           <Textarea
+            id="gallium-textarea"
             onChange={this.onChange}
             onKeyPress={this.onKeyPress}
             value={this.state.text}

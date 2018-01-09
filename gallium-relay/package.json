@@ -1,0 +1,25 @@
+{
+  "name": "gallium-relay",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "license": "MIT",
+  "dependencies": {
+    "babel-register": "^6.26.0",
+    "osc-js": "^1.2.0",
+    "ws": "^4.0.0"
+  },
+  "devDependencies": {
+    "jest": "^21.2.1",
+    "prettier": "^1.9.2"
+  },
+  "jest": {
+    "setupTestFrameworkScriptFile": "./src/test_utils.js"
+  },
+  "scripts": {
+    "check-all": "flow && yarn test && yarn format-check",
+    "test": "jest",
+    "format": "prettier --write 'src/**/*.js'",
+    "format-check": "prettier -l 'src/**/*.js'",
+    "start": "node src/index.js"
+  }
+}

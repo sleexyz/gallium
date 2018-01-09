@@ -33,10 +33,10 @@
   "scripts": {
     "build-publish": "yarn clean && webpack -p",
     "clean": "rm -rf ./dist",
-    "check-all": "flow && jest && yarn format-check",
+    "check-all": "flow && yarn test && yarn format-check",
     "format": "prettier --write 'src/**/*.js'",
     "format-check": "prettier -l 'src/**/*.js'",
-    "jest": "jest",
+    "test": "jest",
     "start": "webpack-dev-server"
   },
   "dependencies": {
