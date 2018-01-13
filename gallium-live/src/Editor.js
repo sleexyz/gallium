@@ -7,10 +7,12 @@ import { globalContext } from "./context";
 import { silence } from "gallium/lib/semantics";
 import { OutputSelector } from "./OutputSelector";
 import * as MIDI from "./midi";
+import * as MIDIActions from "./midi_actions";
 import * as LocalStorage from "./local_storage";
 import { connect, type Connect } from "./store";
-import * as Playback from "./playback";
 import * as Styles from "./styles";
+import * as Playback from "./playback";
+import * as AppActions from "./app_actions";
 
 type OwnProps = {};
 
@@ -25,7 +27,7 @@ type EditorState = {
   isInitialized: boolean
 };
 
-export class Editor extends React.Component<
+export class _Editor extends React.Component<
   Connect<OwnProps, ContainerProps>,
   EditorState
 > {
@@ -42,7 +44,7 @@ export class Editor extends React.Component<
   textarea: ?HTMLTextAreaElement;
 
   componentDidMount() {
-    this.props.dispatch(Playback.start());
+    this.props.dispatch(AppActions.initialize());
     this.updateABT(this.state.text);
     setTimeout(() => this.setState({ isInitialized: true }), 0);
   }
@@ -153,7 +155,7 @@ export class Editor extends React.Component<
   }
 }
 
-export default connect(Editor, ({ text }) => ({ text }));
+export const Editor = connect(_Editor, ({ text }) => ({ text }));
 
 const Container: React$ComponentType<{ isInitialized: boolean }> = styled.div`
   width: 100%;

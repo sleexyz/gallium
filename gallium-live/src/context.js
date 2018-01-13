@@ -58,7 +58,7 @@ export const globalContext = {
   }),
   fast: new Term({
     type: T.function(T.list(T.number), T.transformer),
-    value: xs => alt(xs.map(fast))
+    value: xs => alt(xs.map(x => fast(Math.min(x, 256))))
   }),
   add: new Term({
     type: T.function(T.list(T.number), T.transformer),

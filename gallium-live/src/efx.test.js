@@ -119,6 +119,11 @@ describe("connect", () => {
     wrapper.unmount();
     expect(store.subscriptions).toEqual([undefined]);
   });
+
+  it("throws an error when mounted without a provider", () => {
+    const Connected = connect(ExampleComponent, ({ foo }) => ({ foo }));
+    expect(() => mount(<Connected id={2} />)).toThrow(Error);
+  });
 });
 
 function mountWithStore<S>(

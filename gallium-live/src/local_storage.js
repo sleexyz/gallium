@@ -1,11 +1,11 @@
 //@flow
 
-export function saveOutputPort(name: string) {
-  window.localStorage.setItem("outputPort", name);
+export function saveOutputPortName(name: string) {
+  window.localStorage.setItem("outputPortName", name);
 }
 
-export function loadOutputPort(): string {
-  return window.localStorage.getItem("outputPort");
+export function loadOutputPortName(): string {
+  return window.localStorage.getItem("outputPortName");
 }
 
 export function saveText(text: string) {

@@ -1,7 +1,7 @@
 // @flow
 import * as React from "react";
 import * as TestUtils from "./test_utils";
-import Editor, { Editor as EditorInner, Textarea } from "./Editor.js";
+import { Editor, Textarea } from "./Editor.js";
 import * as Playback from "./playback";
 import { setText, setCursor, pressKey } from "./Editor_test_utils";
 

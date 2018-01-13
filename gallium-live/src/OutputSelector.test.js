@@ -1,17 +1,16 @@
 // @flow
 import * as React from "react";
-import { mount } from "enzyme";
 import * as TestUtils from "./test_utils";
-import { OutputSelector } from "./OutputSelector";
+import { Editor } from "./Editor";
+import { OutputSelector, _OutputSelector } from "./OutputSelector";
 import * as MIDI from "./midi";
+import * as MIDIActions from "./midi_actions";
 
-TestUtils.withAsyncSpy(OutputSelector.prototype, "loadOptions");
-
-async function mountOutputSelector({ onChange = jest.fn() }) {
-  const wrapper = mount(<OutputSelector onChange={onChange} />);
-  await wrapper.instance().loadOptions.toFinish();
+async function mountOutputSelector() {
+  const { wrapper, store } = await TestUtils.mountWithStore(<Editor />);
+  await MIDIActions.selectInitialPort.toFinish();
   wrapper.update();
-  return { wrapper };
+  return { wrapper, store };
 }
 
 async function selectOption({ wrapper, value }): Promise<void> {
@@ -28,43 +27,36 @@ describe("OutputSelector", () => {
   ]);
 
   it("shows a selection for each device", async () => {
-    const { wrapper } = await mountOutputSelector({});
+    const { wrapper } = await mountOutputSelector();
     expect(wrapper.find("option").map(x => x.text())).toEqual(["foo", "bar"]);
-  });
-
-  it("fires props.onChange when selection is selected", async () => {
-    const onChange = jest.fn();
-    const { wrapper } = await mountOutputSelector({ onChange });
-    selectOption({ wrapper, value: "foo" });
-    expect(onChange).toHaveBeenCalled();
   });
 
   describe("behavior across mounts", () => {
     beforeEach(async () => {
-      const { wrapper } = await mountOutputSelector({});
+      const { wrapper } = await mountOutputSelector();
       selectOption({ wrapper, value: "foo" });
       wrapper.unmount();
     });
 
     it("persists choices across mounts", async () => {
-      const { wrapper } = await mountOutputSelector({});
-      expect(wrapper.instance().state.value).toBe("foo");
-    });
-
-    it("calls onChange when initialized to last choice", async () => {
-      const onChange = jest.fn();
-      const { wrapper } = await mountOutputSelector({ onChange });
-      expect(onChange).toHaveBeenCalledWith("foo");
+      {
+        const { wrapper } = await mountOutputSelector();
+        selectOption({ wrapper, value: "bar" });
+      }
+      {
+        const { store } = await mountOutputSelector();
+        expect(store.state.output.name).toBe("bar");
+      }
     });
   });
 });
 
 describe("when navigator.requestMIDIAccess doesn't exist", () => {
   it("shows an error message", async () => {
-    const wrapper = mount(<OutputSelector onChange={async () => {}} />);
-    await wrapper.instance().loadOptions.toFinish();
-    expect(wrapper.text()).toEqual(
-      "Your browser does not seem to support WebMIDI"
+    TestUtils.stubGlobalProperty(navigator, "requestMIDIAccess", undefined);
+    const { wrapper } = await mountOutputSelector();
+    expect(wrapper.find(OutputSelector).text()).toEqual(
+      "Error: Your browser does not seem to support WebMIDI"
     );
   });
 });

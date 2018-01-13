@@ -1,5 +1,5 @@
 // @flow
-import { Editor as EditorInner } from "./Editor.js";
+import { _Editor } from "./Editor.js";
 
 export function setText({
   wrapper,
@@ -23,7 +23,7 @@ export function setCursor({
   wrapper: any,
   pos: number
 }): void {
-  const ref = wrapper.find(EditorInner).instance().textarea;
+  const ref = wrapper.find(_Editor).instance().textarea;
   ref.setSelectionRange(pos, pos);
 }
 

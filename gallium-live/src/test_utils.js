@@ -13,6 +13,7 @@ beforeAll(() => {
   const rootNode = document.createElement("div");
   rootNode.id = "react-root";
   (document.body: any).appendChild(rootNode);
+  localStorage.clear();
 });
 
 let cleanupFns: Array<(void) => void> = [];

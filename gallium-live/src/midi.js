@@ -1,5 +1,4 @@
 // @flow
-
 export type Device = {
   name: string,
   send: (Uint8Array, number) => void,

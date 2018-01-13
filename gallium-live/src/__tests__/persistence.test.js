@@ -1,6 +1,6 @@
 // @flow
 import * as React from "react";
-import Editor from "../Editor.js";
+import { Editor } from "../Editor.js";
 import { getText, setText } from "../Editor_test_utils";
 import * as TestUtils from "../test_utils";
 

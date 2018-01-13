@@ -51,6 +51,11 @@ export function connect<OP: {}, CP: {}, S: {}, DP: {}>(
     };
     constructor(props, context) {
       super(props, context);
+      if (!context.store) {
+        throw new Error(
+          "You must mount EFX-connected components with a Provider"
+        );
+      }
       this.store = context.store;
       this.state = mapStateToProps(this.store.state);
       this.subscriptionId = this.store.subscribe(state => {
@@ -110,4 +115,42 @@ export class Provider<S> extends React.Component<ProviderProps<S>> {
   render() {
     return this.props.children;
   }
+}
+
+export function makeAction<Store, A, B>(
+  rawAction: A => Store => B
+): A => Store => B {
+  if (!process.env.NODE_ENV === "test") {
+    return rawAction;
+  }
+
+  let toHaveBeenCalledResolver: void => void;
+  let toHaveBeenCalledPromise = new Promise(resolve => {
+    toHaveBeenCalledResolver = resolve;
+  });
+
+  const action = arg => {
+    return store => {
+      const returnValue = rawAction(arg)(store);
+      toHaveBeenCalledResolver();
+
+      if (returnValue instanceof Promise) {
+        // We reassign the method to return the promise result of the last invocation.
+        action.toFinish = async () => {
+          try {
+            await returnValue;
+          } catch (e) {}
+        };
+      }
+      return returnValue;
+    };
+  };
+
+  action.toFinish = async () => {
+    await toHaveBeenCalledPromise;
+    // The following is not a recursive call. The method gets reassigned on invocation of the action.
+    await action.toFinish();
+  };
+
+  return action;
 }
