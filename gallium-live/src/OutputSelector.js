@@ -8,7 +8,6 @@ import * as MIDI from "./midi";
 import * as MIDIActions from "./midi_actions";
 
 type OwnProps = {
-  onChange: string => Promise<void>
 };
 
 type ContainerProps = {

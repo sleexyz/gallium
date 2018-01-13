@@ -20,7 +20,7 @@ type ContainerProps = {
   text: string
 };
 
-type EditorState = {
+type State = {
   text: string,
   abt: ?ABT,
   error: ?string,
@@ -29,7 +29,7 @@ type EditorState = {
 
 export class _Editor extends React.Component<
   Connect<OwnProps, ContainerProps>,
-  EditorState
+  State
 > {
   constructor(props: *) {
     super(props);
@@ -77,13 +77,6 @@ export class _Editor extends React.Component<
       });
     }
   }
-
-  onMIDIOutputChange = async (choice: string) => {
-    const newOutput = await MIDI.connectToOutputPort(choice);
-    this.props.dispatch(store => {
-      store.state.output = newOutput;
-    });
-  };
 
   onKeyPress = (e: SyntheticKeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
@@ -147,7 +140,7 @@ export class _Editor extends React.Component<
         </Content>
         <Pane>
           <PaneChild>
-            <OutputSelector onChange={this.onMIDIOutputChange} />
+            <OutputSelector />
           </PaneChild>
         </Pane>
       </Container>
