@@ -7,8 +7,7 @@ import * as Styles from "./styles";
 import * as MIDI from "./midi";
 import * as MIDIActions from "./midi_actions";
 
-type OwnProps = {
-};
+type OwnProps = {};
 
 type ContainerProps = {
   output: MIDI.Device,
