@@ -1,6 +1,6 @@
 # EFX
 
-An effectful state management system for React, designed for simplicity, testability and type-safety. Inspired by redux and reader monads.
+An effectful state management system for React applications, designed for simplicity, testability and type-safety. Inspired by redux and reader monads.
 
 **Table of Contents**
 
@@ -56,7 +56,7 @@ export function connect<CP: {}, OP: {}>(
 
 ## Actions
 
-An *Action* is an effectful function.
+An Action is an effectful function.
 
 It is the single unit of abstraction in EFX; no reducers, no action creators, no constants.
 
@@ -213,9 +213,9 @@ export const initialize: Action<void, Promise<void>> = makeAction(() => async st
 
 ## Why not Redux?
 
-EFX started as a set of opinionated utility functions and classes built on top of `redux` + `react-redux` + `redux-thunk` for a simpler, more testable and more type-safe Redux stack.
+EFX started as a set of opinionated utility functions and classes built on top of redux + react-redux + redux-thunk for a simpler, more testable and more type-safe Redux stack.
 
-Instead of publishing yet another set of opinionated design patterns and utility functions on top of Redux, we thought that there was enough noise in the ecosystem and that it would provide a better developer experience to put together an all-in-one solution. Therefore, we made the decision to start fresh, borrow the good parts of redux and write a simpler yet more comprehensive state management solution.
+Instead of publishing yet another set of opinionated design patterns and utility functions for Redux, we thought that there was enough noise in the ecosystem and that it would provide a better developer experience to put together an all-in-one solution. Therefore, we made the decision to start fresh, borrow the good parts of Redux and write a simpler yet more comprehensive state management solution.
 
 In other words, EFX seeks to improve the developer experience for state management in the same way that [Jest](https://facebook.github.io/jest/) does for testing by packaging Mocha + Chai + Sinon into a single solution.
 
