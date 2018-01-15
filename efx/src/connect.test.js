@@ -2,7 +2,7 @@
 import * as React from "react";
 import { mount } from "enzyme";
 import * as TestUtils from "./test_utils";
-import * as EFX from "./efx";
+import * as EFX from "./";
 
 type AppState = {
   foo: number

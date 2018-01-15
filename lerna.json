@@ -2,6 +2,7 @@
   "lerna": "2.5.1",
   "npmClient": "yarn",
   "packages": [
+    "efx",
     "gallium",
     "gallium-live",
     "gallium-relay"

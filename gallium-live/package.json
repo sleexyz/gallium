@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
+    "efx": "^1.0.0",
     "gallium": "^0.1.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",

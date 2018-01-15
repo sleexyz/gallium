@@ -1,6 +1,6 @@
 // @flow
 import * as React from "react";
-import * as EFX from "./efx";
+import * as EFX from "efx";
 import * as MIDI from "./midi";
 import * as LocalStorage from "./local_storage";
 import { type Pattern, silence } from "gallium/lib/semantics";

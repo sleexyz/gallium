@@ -1,5 +1,5 @@
 // @flow
-import * as EFX from "./efx";
+import * as EFX from "./";
 
 type State = {
   foo: number
