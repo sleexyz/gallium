@@ -1,7 +1,7 @@
 {
   "name": "efx",
-  "version": "1.0.0",
-  "description": "a effectful state management system for React designed for simplicity, testability and type-safety",
+  "version": "0.2.1",
+  "description": "Effectful state management system for React applications",
   "main": "lib/index.js",
   "repository": "https://github.com/sleexyz/gallium/tree/master/efx",
   "author": "Sean Lee",
@@ -23,7 +23,10 @@
     "prettier": "^1.8.2"
   },
   "jest": {
-    "testPathIgnorePatterns": ["/node_modules/", "/lib/"]
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/lib/"
+    ]
   },
   "scripts": {
     "build": "yarn clean && yarn build-babel && yarn build-flow",

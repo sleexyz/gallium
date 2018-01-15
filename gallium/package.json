@@ -1,6 +1,6 @@
 {
   "name": "gallium",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "description": "liquid metal",
   "license": "MIT",
   "devDependencies": {
@@ -16,7 +16,10 @@
     "prettier": "^1.8.2"
   },
   "jest": {
-    "testPathIgnorePatterns": ["/node_modules/", "/lib/"]
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/lib/"
+    ]
   },
   "scripts": {
     "build": "yarn clean && yarn build-babel && yarn build-flow",
