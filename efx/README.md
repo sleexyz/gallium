@@ -29,13 +29,13 @@ To achieve full type coverage, EFX requires a single file of boilerplate, conven
 // @flow
 import * as EFX from "efx";
 
-export type State = {
+export type AppState = {
   foo: number
 };
 
-export const Store: Class<EFX.Store<State>> = EFX.Store;
+export const Store: Class<EFX.Store<AppState>> = EFX.Store;
 
-export const Provider: Class<EFX.Provider<State>> = EFX.Provider;
+export const Provider: Class<EFX.Provider<AppState>> = EFX.Provider;
 
 export type Action<A, B> = A => Store => B;
 
