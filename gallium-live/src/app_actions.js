@@ -1,5 +1,5 @@
 // @flow
-import { type Action, makeAction } from "./store";
+import { type Action, makeAction } from "./efx";
 import * as Playback from "./playback";
 import * as MIDIActions from "./midi_actions.js";
 

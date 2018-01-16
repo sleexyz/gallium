@@ -3,7 +3,7 @@ import * as React from "react";
 import * as TestUtils from "./test_utils";
 import { collectEventsNRT } from "./playback_test_utils";
 import * as Playback from "./playback";
-import { Store, makeInitialState } from "./store";
+import { Store, makeInitialState } from "./efx";
 import { parseAndResolve } from "./context";
 
 describe("playback", () => {

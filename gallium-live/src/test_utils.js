@@ -5,7 +5,7 @@ import "jest-enzyme";
 import * as React from "react";
 
 import * as MIDI from "./midi";
-import { Provider, Store, makeInitialState } from "./store";
+import { Provider, Store, makeInitialState } from "./efx";
 
 configure({ adapter: new Adapter() });
 

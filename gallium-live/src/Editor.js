@@ -9,7 +9,7 @@ import { OutputSelector } from "./OutputSelector";
 import * as MIDI from "./midi";
 import * as MIDIActions from "./midi_actions";
 import * as LocalStorage from "./local_storage";
-import { connect, type Connect } from "./store";
+import { connect, type Connect } from "./efx";
 import * as Styles from "./styles";
 import * as Playback from "./playback";
 import * as AppActions from "./app_actions";

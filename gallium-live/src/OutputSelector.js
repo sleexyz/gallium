@@ -1,6 +1,6 @@
 // @flow
 import * as React from "react";
-import { connect, type Connect } from "./store";
+import { connect, type Connect } from "./efx";
 import styled from "styled-components";
 import * as LocalStorage from "./local_storage";
 import * as Styles from "./styles";

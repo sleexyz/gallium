@@ -1,6 +1,6 @@
 // @flow
-import { makeInitialState, type AppState } from "./store";
-import { Store, type Action } from "./store";
+import { makeInitialState, type AppState } from "./efx";
+import { Store, type Action } from "./efx";
 import { type Event } from "gallium/lib/semantics";
 
 function getBeatLength(bpm: number): number {

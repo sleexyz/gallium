@@ -2,7 +2,7 @@
 import * as TestUtils from "./test_utils";
 import * as Playback from "./playback";
 import { type Pattern, silence } from "gallium/lib/semantics";
-import { type Action } from "./store";
+import { type Action } from "./efx";
 
 export const collectEventsNRT: Action<
   {

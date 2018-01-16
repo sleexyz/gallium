@@ -1,5 +1,5 @@
 // @flow
-import { type Action, makeAction } from "./store";
+import { type Action, makeAction } from "./efx";
 import * as LocalStorage from "./local_storage";
 
 const updateAvailableOutputs: Action<
