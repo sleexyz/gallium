@@ -5,16 +5,16 @@ import {
   parse,
   parseName,
   parseNumLit,
-  parseSExpr,
-  parseOpenSExpr,
-  parseIExpr
+  parseParen,
+  parseHApp,
+  parseVApp
 } from "./parser";
 
 describe("parseTopLevel", () => {
   it("can parse expressions", () => {
     const result = parseTopLevel("foo");
     expect(result).toEqual({
-      type: "IExpr",
+      type: "VApp",
       children: [{ type: "Name", value: "do" }, { type: "Name", value: "foo" }],
       extraSpaces: [""],
       indent: 0
@@ -27,7 +27,7 @@ foo
 
 `);
     expect(result).toEqual({
-      type: "IExpr",
+      type: "VApp",
       children: [{ type: "Name", value: "do" }, { type: "Name", value: "foo" }],
       extraSpaces: ["\n"],
       indent: 0
@@ -45,7 +45,7 @@ baz
 
 `);
     expect(result).toEqual({
-      type: "IExpr",
+      type: "VApp",
       children: [
         { type: "Name", value: "do" },
         { type: "Name", value: "foo" },
@@ -61,23 +61,24 @@ baz
 describe("parse", () => {
   it("parses 0", () => {
     const result = parse("0");
-    expect(result).toEqual({ type: "NumLit", value: 0 });
+    expect(result).toMatchSnapshot();
   });
 
   it("parses decimals", () => {
     const result = parse("0.5");
-    expect(result).toEqual({ type: "NumLit", value: 0.5 });
+    expect(result).toMatchSnapshot();
   });
 
-  it("parses openSExprs", () => {
+  it("parses VApp's", () => {
     const result = parse(`compose
   note 1
 `);
-    expect((result: any).children[1]).toEqual({
-      type: "OpenSExpr",
-      children: [{ type: "Name", value: "note" }, { type: "NumLit", value: 1 }],
-      spaces: [" ", ""]
-    });
+    expect(result).toMatchSnapshot();
+  });
+
+  it("parses multiple levels of parens", () => {
+    const result = parse("( ( 1 ) )");
+    expect(result).toMatchSnapshot();
   });
 });
 
@@ -116,46 +117,33 @@ describe("parseNumLit", () => {
   });
 });
 
-describe("parseSExpr", () => {
-  it("parses lists", () => {
+describe("parseParen", () => {
+  it("parses with application inside", () => {
     const ctx = new ParseContext({
       text: `(foo 1 2 1)`,
       indents: [0]
     });
-    const result = parseSExpr(ctx);
-    expect(result).toEqual({
-      type: "SExpr",
-      spaces: ["", " ", " ", " ", ""],
-      children: [
-        { type: "Name", value: "foo" },
-        { type: "NumLit", value: 1 },
-        { type: "NumLit", value: 2 },
-        { type: "NumLit", value: 1 }
-      ]
-    });
+    const result = parseParen(ctx);
+    expect(result).toMatchSnapshot();
   });
 
   it("parses unary lists", () => {
     const ctx = new ParseContext({ text: `(foo)`, indents: [0] });
-    const result = parseSExpr(ctx);
-    expect(result).toEqual({
-      type: "SExpr",
-      spaces: ["", ""],
-      children: [{ type: "Name", value: "foo" }]
-    });
+    const result = parseParen(ctx);
+    expect(result).toMatchSnapshot();
   });
 });
 
-describe("parseOpenSExpr", () => {
+describe("parseHApp", () => {
   it("parses lists", () => {
     const ctx = new ParseContext({
       text: `foo 1 2 1`,
       indents: [0]
     });
-    const result = parseOpenSExpr(ctx);
+    const result = parseHApp(ctx);
     expect(result).toEqual({
-      type: "OpenSExpr",
-      spaces: [" ", " ", " ", ""],
+      type: "HApp",
+      spaces: [" ", " ", " "],
       children: [
         { type: "Name", value: "foo" },
         { type: "NumLit", value: 1 },
@@ -166,15 +154,15 @@ describe("parseOpenSExpr", () => {
   });
 });
 
-describe("parseIExpr", () => {
+describe("parseVApp", () => {
   it("parses indentation-based lists", () => {
     const text = `foo
   1
   2`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIExpr(ctx);
+    const result = parseVApp(ctx);
     expect(result).toEqual({
-      type: "IExpr",
+      type: "VApp",
       indent: 2,
       extraSpaces: ["", ""],
       children: [
@@ -188,9 +176,9 @@ describe("parseIExpr", () => {
     const text = `foo
   bar`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIExpr(ctx);
+    const result = parseVApp(ctx);
     expect(result).toEqual({
-      type: "IExpr",
+      type: "VApp",
       indent: 2,
       extraSpaces: [""],
       children: [{ type: "Name", value: "foo" }, { type: "Name", value: "bar" }]
@@ -202,9 +190,9 @@ describe("parseIExpr", () => {
 
   bar`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIExpr(ctx);
+    const result = parseVApp(ctx);
     expect(result).toEqual({
-      type: "IExpr",
+      type: "VApp",
       indent: 2,
       extraSpaces: ["\n"],
       children: [{ type: "Name", value: "foo" }, { type: "Name", value: "bar" }]
@@ -217,9 +205,9 @@ describe("parseIExpr", () => {
 
   bar`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIExpr(ctx);
+    const result = parseVApp(ctx);
     expect(result).toEqual({
-      type: "IExpr",
+      type: "VApp",
       indent: 2,
       extraSpaces: ["\n\n"],
       children: [{ type: "Name", value: "foo" }, { type: "Name", value: "bar" }]
@@ -233,15 +221,15 @@ describe("parseIExpr", () => {
     1
   2`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIExpr(ctx);
+    const result = parseVApp(ctx);
     expect(result).toEqual({
-      type: "IExpr",
+      type: "VApp",
       indent: 2,
       extraSpaces: ["", ""],
       children: [
         { type: "Name", value: "foo" },
         {
-          type: "IExpr",
+          type: "VApp",
           indent: 4,
           extraSpaces: ["", ""],
           children: [
@@ -262,21 +250,21 @@ describe("parseIExpr", () => {
       1
   2`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIExpr(ctx);
+    const result = parseVApp(ctx);
     expect(result).toEqual({
-      type: "IExpr",
+      type: "VApp",
       indent: 2,
       extraSpaces: ["", ""],
       children: [
         { type: "Name", value: "foo" },
         {
-          type: "IExpr",
+          type: "VApp",
           indent: 4,
           extraSpaces: [""],
           children: [
             { type: "Name", value: "bar" },
             {
-              type: "IExpr",
+              type: "VApp",
               indent: 6,
               extraSpaces: [""],
               children: [
@@ -298,21 +286,21 @@ describe("parseIExpr", () => {
           2
     2`;
     const ctx = new ParseContext({ text, indents: [0] });
-    const result = parseIExpr(ctx);
+    const result = parseVApp(ctx);
     expect(result).toEqual({
-      type: "IExpr",
+      type: "VApp",
       indent: 4,
       extraSpaces: ["", ""],
       children: [
         { type: "Name", value: "foo" },
         {
-          type: "IExpr",
+          type: "VApp",
           indent: 5,
           extraSpaces: [""],
           children: [
             { type: "Name", value: "bar" },
             {
-              type: "IExpr",
+              type: "VApp",
               indent: 10,
               extraSpaces: ["", ""],
               children: [

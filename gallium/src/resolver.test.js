@@ -11,7 +11,6 @@ describe("resolve", () => {
     const context = {};
     const abt = resolve(context, ast);
     expect(abt.payload).toEqual({
-      type: "number",
       value: 1
     });
   });
@@ -27,33 +26,21 @@ describe("resolve", () => {
   describe("name resolution", () => {
     const context = {
       foo: new Term({
-        type: {
-          type: "function",
-          input: { type: "list", param: "number" },
-          output: "transformer"
-        },
         value: (x: Array<number>) => {
           return `mockTransformer ${JSON.stringify(x)}`;
         }
       }),
       bar: new Term({
-        type: "number",
         value: 100
       })
     };
     it("should return terms for bound variables", () => {
       const ast = parse("(foo bar 2 3)");
       const abt = resolve(context, ast);
-      expect((abt: any).children[0].payload).toEqual({
-        type: {
-          type: "function",
-          input: { type: "list", param: "number" },
-          output: "transformer"
-        },
+      expect((abt: any).children[0].children[0].payload).toEqual({
         value: context.foo.value
       });
-      expect((abt: any).children[1].payload).toEqual({
-        type: "number",
+      expect((abt: any).children[0].children[1].payload).toEqual({
         value: 100
       });
     });
@@ -63,17 +50,11 @@ describe("resolve", () => {
 describe("interpretation", () => {
   const context = {
     foo: new Term({
-      type: {
-        type: "function",
-        input: { type: "list", param: "number" },
-        output: "transformer"
-      },
       value: (x: Array<number>) => {
         return `fooTransformer ${JSON.stringify(x)}`;
       }
     }),
     bar: new Term({
-      type: "number",
       value: 100
     })
   };
@@ -90,13 +71,13 @@ describe("interpretation", () => {
     expect(abt.payload.getValue()).toBe(0.5);
   });
 
-  it("should be able to interpret s-expressions", () => {
+  it("should be able to interpret horizontal application", () => {
     const ast = parse("(foo bar 2 3)");
     const abt = resolve(context, ast);
     expect(abt.payload.getValue()).toBe("fooTransformer [100,2,3]");
   });
 
-  it("should be able to interpret i-expressions", () => {
+  it("should be able to interpret vertical application", () => {
     const ast = parse(`foo
   bar
   2
@@ -105,15 +86,10 @@ describe("interpretation", () => {
     expect(abt.payload.getValue()).toBe("fooTransformer [100,2,3]");
   });
 
-  it("should be able to interpret open SExprs", () => {
+  it("should be able to interpret function application", () => {
     const ast = parse("foo 1 2");
     const context = {
       foo: new Term({
-        type: {
-          type: "function",
-          input: { type: "list", param: "number" },
-          output: "transformer"
-        },
         value: (x: Array<number>) => {
           return `mockTransformer ${JSON.stringify(x)}`;
         }

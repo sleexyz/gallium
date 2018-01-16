@@ -1,0 +1,144 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parse parses 0 1`] = `
+NumLit {
+  "payload": undefined,
+  "type": "NumLit",
+  "value": 0,
+}
+`;
+
+exports[`parse parses VApp's 1`] = `
+VApp {
+  "children": Array [
+    Name {
+      "payload": undefined,
+      "type": "Name",
+      "value": "compose",
+    },
+    HApp {
+      "children": Array [
+        Name {
+          "payload": undefined,
+          "type": "Name",
+          "value": "note",
+        },
+        NumLit {
+          "payload": undefined,
+          "type": "NumLit",
+          "value": 1,
+        },
+      ],
+      "payload": undefined,
+      "spaces": Array [
+        " ",
+      ],
+      "type": "HApp",
+    },
+  ],
+  "extraSpaces": Array [
+    "",
+  ],
+  "indent": 2,
+  "payload": undefined,
+  "type": "VApp",
+}
+`;
+
+exports[`parse parses decimals 1`] = `
+NumLit {
+  "payload": undefined,
+  "type": "NumLit",
+  "value": 0.5,
+}
+`;
+
+exports[`parse parses multiple levels of parens 1`] = `
+Paren {
+  "children": Array [
+    Paren {
+      "children": Array [
+        NumLit {
+          "payload": undefined,
+          "type": "NumLit",
+          "value": 1,
+        },
+      ],
+      "payload": undefined,
+      "spaces": Array [
+        " ",
+        " ",
+      ],
+      "type": "Paren",
+    },
+  ],
+  "payload": undefined,
+  "spaces": Array [
+    " ",
+    " ",
+  ],
+  "type": "Paren",
+}
+`;
+
+exports[`parseParen parses unary lists 1`] = `
+Paren {
+  "children": Array [
+    Name {
+      "payload": undefined,
+      "type": "Name",
+      "value": "foo",
+    },
+  ],
+  "payload": undefined,
+  "spaces": Array [
+    "",
+    "",
+  ],
+  "type": "Paren",
+}
+`;
+
+exports[`parseParen parses with application inside 1`] = `
+Paren {
+  "children": Array [
+    HApp {
+      "children": Array [
+        Name {
+          "payload": undefined,
+          "type": "Name",
+          "value": "foo",
+        },
+        NumLit {
+          "payload": undefined,
+          "type": "NumLit",
+          "value": 1,
+        },
+        NumLit {
+          "payload": undefined,
+          "type": "NumLit",
+          "value": 2,
+        },
+        NumLit {
+          "payload": undefined,
+          "type": "NumLit",
+          "value": 1,
+        },
+      ],
+      "payload": undefined,
+      "spaces": Array [
+        " ",
+        " ",
+        " ",
+      ],
+      "type": "HApp",
+    },
+  ],
+  "payload": undefined,
+  "spaces": Array [
+    "",
+    "",
+  ],
+  "type": "Paren",
+}
+`;

@@ -12,7 +12,7 @@ import {
   stack,
   compose
 } from "gallium/lib/semantics";
-import { type ABT, T, Term, resolve } from "gallium/lib/resolver";
+import { type ABT, Term, resolve } from "gallium/lib/resolver";
 import { parseTopLevel } from "gallium/lib/parser";
 
 export function pitchMap(f: number => number): Transformer<Uint8Array> {
@@ -27,7 +27,6 @@ export function pitchMap(f: number => number): Transformer<Uint8Array> {
 
 export const globalContext = {
   note: new Term({
-    type: T.function(T.list(T.number), T.transformer),
     value: children =>
       alt(
         children.map(x => () =>
@@ -41,47 +40,36 @@ export const globalContext = {
       )
   }),
   do: new Term({
-    type: T.function(T.list(T.transformer), T.transformer),
     value: compose
   }),
   compose: new Term({
-    type: T.function(T.list(T.transformer), T.transformer),
     value: compose
   }),
   alt: new Term({
-    type: T.function(T.list(T.transformer), T.transformer),
     value: alt
   }),
   slow: new Term({
-    type: T.function(T.list(T.number), T.transformer),
     value: xs => alt(xs.map(slow))
   }),
   fast: new Term({
-    type: T.function(T.list(T.number), T.transformer),
     value: xs => alt(xs.map(x => fast(Math.min(x, 256))))
   }),
   add: new Term({
-    type: T.function(T.list(T.number), T.transformer),
     value: xs => alt(xs.map(n => pitchMap(x => x + n)))
   }),
   sub: new Term({
-    type: T.function(T.list(T.number), T.transformer),
     value: xs => alt(xs.map(n => pitchMap(x => x - n)))
   }),
   i: new Term({
-    type: T.transformer,
     value: x => x
   }),
   m: new Term({
-    type: T.transformer,
     value: () => silence
   }),
   stack: new Term({
-    type: T.function(T.list(T.transformer), T.transformer),
     value: stack
   }),
   shift: new Term({
-    type: T.function(T.list(T.number), T.transformer),
     value: xs => alt(xs.map(shift))
   })
 };

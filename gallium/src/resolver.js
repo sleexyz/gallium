@@ -5,47 +5,26 @@ import {
   type ASTx,
   Name,
   NumLit,
-  SExpr,
-  OpenSExpr,
-  IExpr,
+  Paren,
+  HApp,
+  VApp,
   traverse
 } from "./AST";
 import { type Transformer } from "./semantics";
 
-export type TypeRep =
-  | { type: "function", input: TypeRep, output: TypeRep }
-  | { type: "list", param: TypeRep }
-  | "transformer"
-  | "number";
-
-export const T = {
-  number: "number",
-  transformer: "transformer",
-  list: (param: TypeRep): TypeRep => ({ type: "list", param }),
-  function: (input: TypeRep, output: TypeRep): TypeRep => ({
-    type: "function",
-    input,
-    output
-  })
-};
-
 type TermConstructor =
   | {
-      type: TypeRep,
       value: any
     }
   | {
-      type: TypeRep,
       thunkValue: () => any
     };
 
 export class Term {
-  type: TypeRep;
   value: any;
   thunkValue: () => any;
   evaluated: boolean;
   constructor(data: TermConstructor) {
-    this.type = data.type;
     if (data.value != null) {
       this.value = data.value;
       Object.defineProperty(this, "evaluated", { value: true });
@@ -99,6 +78,23 @@ const runMiddleware = <T>(
   middleware: StepMiddleware<T>
 ): Step<T> => middleware(context, failure);
 
+const resolveParenMiddleware = <T>(
+  context: BindingContext<T>,
+  fallback: Step<T>
+): Step<T> => (node: any): ASTxF<T, AST> => {
+  if (node instanceof Paren) {
+    const boundNode = node.setPayload(
+      new Term({
+        thunkValue: () => {
+          return (boundNode: any).children[0].payload.getValue();
+        }
+      })
+    );
+    return boundNode;
+  }
+  return fallback(node);
+};
+
 const resolveNameMiddleware = <T>(
   context: BindingContext<T>,
   fallback: Step<T>
@@ -128,14 +124,11 @@ const resolveNumLitMiddleware: StepMiddleware<Term> = (
   return fallback(node);
 };
 
-const resolveSExprMiddleware: StepMiddleware<Term> = (context, fallback) => (
-  node: any
-) => {
-  if (
-    node instanceof SExpr ||
-    node instanceof IExpr ||
-    node instanceof OpenSExpr
-  ) {
+const resolveFunctionApplicationMiddleware: StepMiddleware<Term> = (
+  context,
+  fallback
+) => (node: any) => {
+  if (node instanceof VApp || node instanceof HApp) {
     const boundNode = node.setPayload(
       new Term({
         type: { type: "list", param: "number" },
@@ -162,7 +155,8 @@ export const resolve = (context: BindingContext<Term>, node: AST): ABT => {
     composeMiddleware([
       resolveNameMiddleware,
       resolveNumLitMiddleware,
-      resolveSExprMiddleware
+      resolveParenMiddleware,
+      resolveFunctionApplicationMiddleware
     ])
   );
   return traverse(step)(node);

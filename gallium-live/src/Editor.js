@@ -2,7 +2,7 @@
 import * as React from "react";
 import styled from "styled-components";
 import { parseTopLevel } from "gallium/lib/parser";
-import { type ABT, T, Term, resolve } from "gallium/lib/resolver";
+import { type ABT, Term, resolve } from "gallium/lib/resolver";
 import { globalContext } from "./context";
 import { silence } from "gallium/lib/semantics";
 import { OutputSelector } from "./OutputSelector";

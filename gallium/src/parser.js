@@ -18,7 +18,7 @@ import {
   popIndent
 } from "./parser_combinators";
 
-import { type AST, Name, NumLit, OpenSExpr, IExpr, SExpr } from "./AST";
+import { type AST, Paren, Name, NumLit, HApp, VApp } from "./AST";
 
 export { ParseContext } from "./parser_combinators.js";
 
@@ -75,17 +75,17 @@ const sameIndentationNewline: Parser<{
   throw new Error("not same indentation");
 };
 
-export const parseIExpr: Parser<AST> = ctx => {
+export const parseVApp: Parser<AST> = ctx => {
   const term = ctx.run(parseTerm1);
   const { extraSpace, indent } = ctx.run(increasedIndentationNewline);
   const child = ctx.run(parseTerm0);
   const { children, extraSpaces } = ctx.run(
-    parseIExprAux({ children: [child], extraSpaces: [extraSpace] })
+    parseVAppAux({ children: [child], extraSpaces: [extraSpace] })
   );
-  return new IExpr([term, ...children], extraSpaces, indent, undefined);
+  return new VApp([term, ...children], extraSpaces, indent, undefined);
 };
 
-function parseIExprAux({
+function parseVAppAux({
   children,
   extraSpaces
 }: {
@@ -97,7 +97,7 @@ function parseIExprAux({
       const { extraSpace } = ctx.run(sameIndentationNewline);
       const child = ctx.run(parseTerm0);
       return ctx.run(
-        parseIExprAux({
+        parseVAppAux({
           children: [...children, child],
           extraSpaces: [...extraSpaces, extraSpace]
         })
@@ -110,83 +110,56 @@ function parseIExprAux({
   ]);
 }
 
-export const parseOpenSExpr: Parser<AST> = ctx => {
+export const parseParen: Parser<AST> = ctx => {
+  ctx.run(constant("("));
+  const space1 = ctx.run(withFallback(getSpaces, ""));
+  const child = ctx.run(parseTerm1);
+  const space2 = ctx.run(withFallback(getSpaces, ""));
+  ctx.run(constant(")"));
+  return new Paren([child], [space1, space2], undefined);
+};
+
+export const parseHApp: Parser<AST> = ctx => {
   const child1 = ctx.run(parseTerm2);
   const space = ctx.run(withFallback(getSpaces, ""));
   const child2 = ctx.run(parseTerm2);
   const { children, spaces } = ctx.run(
-    parseOpenSExprAux({ children: [child1, child2], spaces: [space] })
+    parseHAppAux({ children: [child1, child2], spaces: [space] })
   );
-  return new OpenSExpr(children, spaces, undefined);
+  return new HApp(children, spaces, undefined);
 };
 
-const parseOpenSExprAux = ({
+const parseHAppAux = ({
   children,
   spaces
 }: {
   children: Array<AST>,
   spaces: Array<string>
 }): Parser<{ children: Array<AST>, spaces: Array<string> }> => ctx => {
-  const space = ctx.run(withFallback(getSpaces, ""));
   return ctx.run(
     alternate([
       ctx => {
+        const space = ctx.run(withFallback(getSpaces, ""));
         const child = ctx.run(parseTerm2);
         return ctx.run(
-          parseOpenSExprAux({
+          parseHAppAux({
             children: [...children, child],
             spaces: [...spaces, space]
           })
         );
       },
       ctx => {
-        return { children, spaces: [...spaces, space] };
-      }
-    ])
-  );
-};
-export const parseSExpr: Parser<AST> = ctx => {
-  ctx.run(constant("("));
-  const space = ctx.run(withFallback(whitespace, ""));
-  const child = ctx.run(parseTerm2);
-  const { children, spaces } = ctx.run(
-    parseSExprAux({ children: [child], spaces: [space] })
-  );
-  return new SExpr(children, spaces, undefined);
-};
-
-const parseSExprAux = ({
-  children,
-  spaces
-}: {
-  children: Array<AST>,
-  spaces: Array<string>
-}): Parser<{ children: Array<AST>, spaces: Array<string> }> => ctx => {
-  const space = ctx.run(withFallback(whitespace, ""));
-  return ctx.run(
-    alternate([
-      ctx => {
-        ctx.run(constant(")"));
-        return { children, spaces: [...spaces, space] };
-      },
-      ctx => {
-        const child = ctx.run(parseTerm2);
-        return ctx.run(
-          parseSExprAux({
-            children: [...children, child],
-            spaces: [...spaces, space]
-          })
-        );
+        return { children, spaces };
       }
     ])
   );
 };
 
-const parseTerm2: Parser<AST> = alternate([parseSExpr, parseName, parseNumLit]);
+const parseTerm2: Parser<AST> = alternate([parseParen, parseName, parseNumLit]);
 
-const parseTerm1: Parser<AST> = alternate([parseOpenSExpr, parseTerm2]);
+const parseTerm1: Parser<AST> = alternate([parseHApp, parseTerm2]);
 
-const parseTerm0: Parser<AST> = alternate([parseIExpr, parseTerm1]);
+const parseTerm0: Parser<AST> = alternate([parseVApp, parseTerm1]);
 
 export function parse(input: string): AST {
   const ctx = new ParseContext({ text: input, indents: [0] });
@@ -198,9 +171,9 @@ const parseTopLevelExpr: Parser<AST> = ctx => {
   const extraSpace = ctx.run(withFallback(regExp(/^\s*\n+/), ""));
   const child = ctx.run(parseTerm0);
   const { children, extraSpaces } = ctx.run(
-    parseIExprAux({ children: [child], extraSpaces: [extraSpace] })
+    parseVAppAux({ children: [child], extraSpaces: [extraSpace] })
   );
-  return new IExpr([term, ...children], extraSpaces, 0, undefined);
+  return new VApp([term, ...children], extraSpaces, 0, undefined);
 };
 
 export function parseTopLevel(input: string): AST {
