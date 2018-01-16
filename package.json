@@ -1,7 +1,6 @@
 {
     "private": true,
     "workspaces": [
-        "efx",
         "gallium",
         "gallium-live",
         "gallium-relay"
