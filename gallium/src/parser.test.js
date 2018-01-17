@@ -67,7 +67,7 @@ baz
   });
 });
 
-describe("parse", () => {
+describe("parse - success cases", () => {
   it("parses 0", () => {
     const result = parse("0");
     expect(result).toMatchSnapshot();
@@ -88,6 +88,20 @@ describe("parse", () => {
   it("parses multiple levels of parens", () => {
     const result = parse("( ( 1 ) )");
     expect(result).toMatchSnapshot();
+  });
+});
+
+describe("parse - error cases", () => {
+  it("fails on unmatched parens", () => {
+    expect(() => parse("(")).toThrow();
+  });
+
+  it("fails on unmatched parens within a VApp", () => {
+    expect(() =>
+      parse(`do
+  stack i (
+`)
+    ).toThrow();
   });
 });
 

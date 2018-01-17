@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`parse parses 0 1`] = `
+exports[`parse - success cases parses 0 1`] = `
 NumLit {
   "data": Object {},
   "type": "NumLit",
@@ -8,7 +8,7 @@ NumLit {
 }
 `;
 
-exports[`parse parses VApp's 1`] = `
+exports[`parse - success cases parses VApp's 1`] = `
 VApp {
   "children": Array [
     Name {
@@ -45,7 +45,7 @@ VApp {
 }
 `;
 
-exports[`parse parses decimals 1`] = `
+exports[`parse - success cases parses decimals 1`] = `
 NumLit {
   "data": Object {},
   "type": "NumLit",
@@ -53,7 +53,7 @@ NumLit {
 }
 `;
 
-exports[`parse parses multiple levels of parens 1`] = `
+exports[`parse - success cases parses multiple levels of parens 1`] = `
 Paren {
   "children": Array [
     Paren {

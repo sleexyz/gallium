@@ -166,7 +166,12 @@ const parseTerm0: Parser<AST.Base> = alternate([parseVApp, parseTerm1]);
 
 export function parse(input: string): AST.Base {
   const ctx = new ParseContext({ text: input, indents: [0] });
-  return parseTerm0(ctx);
+  const ret = parseTerm0(ctx);
+  ctx.run(maybe(whitespace));
+  if (ctx.getText().length !== 0) {
+    throw new Error("Parse error)");
+  }
+  return ret;
 }
 
 const parseTopLevelExpr: Parser<AST.Base> = ctx => {
