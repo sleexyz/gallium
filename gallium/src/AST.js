@@ -1,119 +1,119 @@
 // @flow
 
-export interface ASTxF<+P: {}, +X> {
+export interface PartiallyWith<+Data: {}, +Child> {
   type: string;
-  payload: P;
-  children?: Array<X>;
-  copy(): ASTxF<P, X>;
-  mapPayload<Q>(f: (P) => Q): ASTxF<Q, X>;
+  data: Data;
+  children?: Array<Child>;
+  copy(): PartiallyWith<Data, Child>;
+  mapData<NextData>(f: (Data) => NextData): PartiallyWith<NextData, Child>;
 }
 
-export type ASTx<+P> = ASTxF<P, ASTx<P>>;
+export type With<+Data> = PartiallyWith<Data, With<Data>>;
 
-export type AST = ASTx<{}>;
+export type Base = With<{}>;
 
-class ASTxF_Abstract<P: {}, X> {
+class Shared<Data: {}, Child> {
   type: string;
-  payload: P;
-  children: Array<X>;
-  copy(): ASTxF<P, X> {
+  data: Data;
+  children: Array<Child>;
+  copy(): PartiallyWith<Data, Child> {
     throw new Error("abstract class");
   }
-  mapPayload<Q>(f: P => Q): ASTxF<Q, X> {
+  mapData<NextData>(f: Data => NextData): PartiallyWith<NextData, Child> {
     const node: any = this.copy();
-    node.payload = f(this.payload);
+    node.data = f(this.data);
     return node;
   }
 }
 
-export class Name<P: {}, X> extends ASTxF_Abstract<P, X>
-  implements ASTxF<P, X> {
+export class Name<Data: {}, Child> extends Shared<Data, Child>
+  implements PartiallyWith<Data, Child> {
   type = "Name";
   value: string;
-  constructor(value: string, payload: P) {
+  constructor(value: string, data: Data) {
     super();
     this.value = value;
-    this.payload = payload;
+    this.data = data;
   }
-  copy(): Name<P, X> {
-    return new Name(this.value, this.payload);
+  copy(): Name<Data, Child> {
+    return new Name(this.value, this.data);
   }
 }
 
-export class NumLit<P: {}, X> extends ASTxF_Abstract<P, X>
-  implements ASTxF<P, X> {
+export class NumLit<Data: {}, Child> extends Shared<Data, Child>
+  implements PartiallyWith<Data, Child> {
   type = "NumLit";
   value: number;
-  constructor(value: number, payload: P) {
+  constructor(value: number, data: Data) {
     super();
     this.value = value;
-    this.payload = payload;
+    this.data = data;
   }
-  copy(): NumLit<P, X> {
-    return new NumLit(this.value, this.payload);
+  copy(): NumLit<Data, Child> {
+    return new NumLit(this.value, this.data);
   }
 }
 
-export class HApp<P: {}, X> extends ASTxF_Abstract<P, X>
-  implements ASTxF<P, X> {
+export class HApp<Data: {}, Child> extends Shared<Data, Child>
+  implements PartiallyWith<Data, Child> {
   type = "HApp";
-  children: Array<X>;
+  children: Array<Child>;
   spaces: Array<string>;
 
-  constructor(children: Array<X>, spaces: Array<string>, payload: P) {
+  constructor(children: Array<Child>, spaces: Array<string>, data: Data) {
     super();
     this.children = [...children];
     this.spaces = spaces;
-    this.payload = payload;
+    this.data = data;
   }
-  copy(): HApp<P, X> {
-    return new HApp(this.children, this.spaces, this.payload);
+  copy(): HApp<Data, Child> {
+    return new HApp(this.children, this.spaces, this.data);
   }
 }
 
-export class Paren<P: {}, X> extends ASTxF_Abstract<P, X>
-  implements ASTxF<P, X> {
+export class Paren<Data: {}, Child> extends Shared<Data, Child>
+  implements PartiallyWith<Data, Child> {
   type = "Paren";
-  children: Array<X>;
+  children: Array<Child>;
   spaces: Array<string>;
 
-  constructor(children: Array<X>, spaces: Array<string>, payload: P) {
+  constructor(children: Array<Child>, spaces: Array<string>, data: Data) {
     super();
     this.children = [...children];
     this.spaces = spaces;
-    this.payload = payload;
+    this.data = data;
   }
-  copy(): Paren<P, X> {
-    return new Paren(this.children, this.spaces, this.payload);
+  copy(): Paren<Data, Child> {
+    return new Paren(this.children, this.spaces, this.data);
   }
 }
 
-export class VApp<P: {}, X> extends ASTxF_Abstract<P, X>
-  implements ASTxF<P, X> {
+export class VApp<Data: {}, Child> extends Shared<Data, Child>
+  implements PartiallyWith<Data, Child> {
   type = "VApp";
-  children: Array<X>;
+  children: Array<Child>;
   indent: number;
   extraSpaces: Array<string>;
   constructor(
-    children: Array<X>,
+    children: Array<Child>,
     extraSpaces: Array<string>,
     indent: number,
-    payload: P
+    data: Data
   ) {
     super();
     this.children = [...children];
     this.indent = indent;
     this.extraSpaces = extraSpaces;
-    this.payload = payload;
+    this.data = data;
   }
-  copy(): VApp<P, X> {
-    return new VApp(this.children, this.extraSpaces, this.indent, this.payload);
+  copy(): VApp<Data, Child> {
+    return new VApp(this.children, this.extraSpaces, this.indent, this.data);
   }
 }
 
-export function traverse<P, Q>(
-  step: (ASTx<P>) => ASTxF<Q, ASTx<P>>
-): (ASTx<P>) => ASTx<Q> {
+export function traverse<Data, NextData>(
+  step: (With<Data>) => PartiallyWith<NextData, With<Data>>
+): (With<Data>) => With<NextData> {
   const recurse = node => {
     const ret: any = step(node);
     if (ret.children) {

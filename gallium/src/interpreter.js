@@ -1,6 +1,6 @@
 // @flow
 
-import { type ABT } from "./resolver";
+import type { ABT } from "./resolver";
 import * as AST from "./AST";
 
 type IContext<State: {}> = {
@@ -13,7 +13,7 @@ export const interpret = (node: ABT): any => {
   }
 
   if (node instanceof AST.NumLit || node instanceof AST.Name) {
-    return node.payload.value;
+    return node.data.value;
   }
 
   if (node instanceof AST.HApp || node instanceof AST.VApp) {

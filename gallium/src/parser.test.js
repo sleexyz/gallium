@@ -15,10 +15,10 @@ describe("parseTopLevel", () => {
     const result = parseTopLevel("foo");
     expect(result).toEqual({
       type: "VApp",
-      payload: {},
+      data: {},
       children: [
-        { type: "Name", payload: {}, value: "do" },
-        { type: "Name", payload: {}, value: "foo" }
+        { type: "Name", data: {}, value: "do" },
+        { type: "Name", data: {}, value: "foo" }
       ],
       extraSpaces: [""],
       indent: 0
@@ -32,10 +32,10 @@ foo
 `);
     expect(result).toEqual({
       type: "VApp",
-      payload: {},
+      data: {},
       children: [
-        { type: "Name", payload: {}, value: "do" },
-        { type: "Name", payload: {}, value: "foo" }
+        { type: "Name", data: {}, value: "do" },
+        { type: "Name", data: {}, value: "foo" }
       ],
       extraSpaces: ["\n"],
       indent: 0
@@ -54,12 +54,12 @@ baz
 `);
     expect(result).toEqual({
       type: "VApp",
-      payload: {},
+      data: {},
       children: [
-        { type: "Name", payload: {}, value: "do" },
-        { type: "Name", payload: {}, value: "foo" },
-        { type: "Name", payload: {}, value: "bar" },
-        { type: "Name", payload: {}, value: "baz" }
+        { type: "Name", data: {}, value: "do" },
+        { type: "Name", data: {}, value: "foo" },
+        { type: "Name", data: {}, value: "bar" },
+        { type: "Name", data: {}, value: "baz" }
       ],
       extraSpaces: ["\n\n", "\n", ""],
       indent: 0
@@ -93,15 +93,15 @@ describe("parse", () => {
 
 describe("parseName", () => {
   it("parses names", () => {
-    const ctx = new ParseContext({ text: "foo 1", payload: {}, indents: [0] });
+    const ctx = new ParseContext({ text: "foo 1", data: {}, indents: [0] });
     const result = parseName(ctx);
-    expect(result).toEqual({ type: "Name", payload: {}, value: "foo" });
+    expect(result).toEqual({ type: "Name", data: {}, value: "foo" });
   });
 
   it("fails on whitespace", () => {
     const ctx = new ParseContext({
       text: "   foo 1",
-      payload: {},
+      data: {},
       indents: [0]
     });
     expect(() => parseName(ctx)).toThrow("not a name");
@@ -112,19 +112,19 @@ describe("parseNumLit", () => {
   it("parses numeric literals", () => {
     const ctx = new ParseContext({ text: "100 asdf", indents: [0] });
     const result = parseNumLit(ctx);
-    expect(result).toEqual({ type: "NumLit", payload: {}, value: 100 });
+    expect(result).toEqual({ type: "NumLit", data: {}, value: 100 });
   });
 
   it("parses decimal literals", () => {
     const ctx = new ParseContext({ text: "0.5", indents: [0] });
     const result = parseNumLit(ctx);
-    expect(result).toEqual({ type: "NumLit", payload: {}, value: 0.5 });
+    expect(result).toEqual({ type: "NumLit", data: {}, value: 0.5 });
   });
 
   it("fails on whitespace", () => {
     const input = new ParseContext({
       text: "  100 asdf",
-      payload: {},
+      data: {},
       indents: [0]
     });
     expect(() => parseNumLit(input)).toThrow("not a number");
@@ -158,12 +158,12 @@ describe("parseHApp", () => {
     expect(result).toEqual({
       type: "HApp",
       spaces: [" ", " ", " "],
-      payload: {},
+      data: {},
       children: [
-        { type: "Name", payload: {}, value: "foo" },
-        { type: "NumLit", payload: {}, value: 1 },
-        { type: "NumLit", payload: {}, value: 2 },
-        { type: "NumLit", payload: {}, value: 1 }
+        { type: "Name", data: {}, value: "foo" },
+        { type: "NumLit", data: {}, value: 1 },
+        { type: "NumLit", data: {}, value: 2 },
+        { type: "NumLit", data: {}, value: 1 }
       ]
     });
   });
@@ -180,11 +180,11 @@ describe("parseVApp", () => {
       type: "VApp",
       indent: 2,
       extraSpaces: ["", ""],
-      payload: {},
+      data: {},
       children: [
-        { type: "Name", payload: {}, value: "foo" },
-        { type: "NumLit", payload: {}, value: 1 },
-        { type: "NumLit", payload: {}, value: 2 }
+        { type: "Name", data: {}, value: "foo" },
+        { type: "NumLit", data: {}, value: 1 },
+        { type: "NumLit", data: {}, value: 2 }
       ]
     });
   });

@@ -13,7 +13,7 @@
     "scripts": {
       "build": "lerna run build",
       "clean": "lerna run clean",
-      "check-all": "flow && yarn format-check && yarn test",
+      "check-all": "flow check && yarn format-check && yarn test",
       "format": "lerna run format",
       "format-check": "lerna run format-check",
       "test": "lerna run test"

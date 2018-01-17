@@ -2,15 +2,14 @@
 import { print } from "./printer";
 import { pretty } from "./pretty";
 import { parse } from "./parser";
-import { type AST, type ASTxF, type ASTx, Name, traverse } from "./AST";
-import { type Term, resolve } from "./resolver";
+import { resolve } from "./resolver";
 
 describe("resolve", () => {
   it("should resolve numeric literals ", () => {
     const ast = parse("1");
     const context = {};
     const abt = resolve(context, ast);
-    expect(abt.payload).toEqual({
+    expect(abt.data).toEqual({
       value: 1
     });
   });
@@ -37,10 +36,10 @@ describe("resolve", () => {
     it("should return terms for bound variables", () => {
       const ast = parse("(foo bar 2 3)");
       const abt = resolve(context, ast);
-      expect((abt: any).children[0].children[0].payload).toEqual({
+      expect((abt: any).children[0].children[0].data).toEqual({
         value: context.foo.value
       });
-      expect((abt: any).children[0].children[1].payload).toEqual({
+      expect((abt: any).children[0].children[1].data).toEqual({
         value: 100
       });
     });

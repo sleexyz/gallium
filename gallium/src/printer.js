@@ -1,8 +1,8 @@
 // @flow
 
-import { type ASTx, Name, HApp, NumLit, VApp, Paren } from "./AST";
+import { type With, Name, HApp, NumLit, VApp, Paren } from "./AST";
 
-export function print(node: ASTx<*>): string {
+export function print(node: With<*>): string {
   if (node instanceof Name) {
     return node.value;
   }
