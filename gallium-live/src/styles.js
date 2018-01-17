@@ -17,3 +17,8 @@ export const transition = css`
 export const text = css`
   font-family: monospace;
 `;
+
+export const box = css`
+  padding: 8px;
+  box-shadow: 0 0 0 1px #dfdfdf;
+`;

@@ -13,12 +13,16 @@ import { connect, type Connect } from "./efx";
 import * as Styles from "./styles";
 import * as Playback from "./playback";
 import * as AppActions from "./app_actions";
+import { ToggleInvert } from "./ToggleInvert";
 
 type OwnProps = {};
 
 type ContainerProps = {
-  text: string
+  text: string,
+  invert: boolean
 };
+
+const mapStateToProps = ({ text, invert }) => ({ text, invert });
 
 type State = {
   text: string,
@@ -120,7 +124,10 @@ export class _Editor extends React.Component<
 
   render() {
     return (
-      <Container isInitialized={this.state.isInitialized}>
+      <Container
+        isInitialized={this.state.isInitialized}
+        style={{ filter: this.props.invert ? "invert()" : "" }}
+      >
         <Pane>
           <PaneChild>
             <Description>gallium.live</Description>
@@ -140,6 +147,9 @@ export class _Editor extends React.Component<
         </Content>
         <Pane>
           <PaneChild>
+            <ToggleInvert />
+          </PaneChild>
+          <PaneChild>
             <OutputSelector />
           </PaneChild>
         </Pane>
@@ -148,15 +158,18 @@ export class _Editor extends React.Component<
   }
 }
 
-export const Editor = connect(_Editor, ({ text }) => ({ text }));
+export const Editor = connect(_Editor, mapStateToProps);
 
-const Container: React$ComponentType<{ isInitialized: boolean }> = styled.div`
+export const Container: React$ComponentType<{
+  isInitialized: boolean
+}> = styled.div`
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   opacity: ${props => (props.isInitialized ? 1 : 0)};
   transition: opacity 500ms ease-in-out;
+  background-color: white;
 `;
 
 const Pane = styled.div`
@@ -212,7 +225,7 @@ const Description = styled.div`
 
 const Link = styled.a`
   ${Styles.text};
-  opacity: 0.25;
+  opacity: 0.75;
   &:visited {
     color: inherit;
   }

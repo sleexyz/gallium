@@ -57,14 +57,13 @@ export const OutputSelector = connect(
 
 const Selector = styled.select`
   ${Styles.transition};
+  ${Styles.box};
   background: none;
   border: none;
   font-family: monospace;
-  box-shadow: 0 0 0 1px #dfdfdf;
   cursor: pointer;
   outline: none;
   color: #252525;
-  padding: 2px;
   &:active,
   &:hover {
     box-shadow: 0 0 0 1px #252525;

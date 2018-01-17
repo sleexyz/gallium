@@ -15,3 +15,11 @@ export function saveText(text: string) {
 export function loadText(): string {
   return window.localStorage.getItem("text");
 }
+
+export function saveInvert(invert: boolean) {
+  window.localStorage.setItem("invert", invert);
+}
+
+export function loadInvert(): boolean {
+  return window.localStorage.getItem("invert");
+}
