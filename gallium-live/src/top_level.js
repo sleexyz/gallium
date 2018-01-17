@@ -1,5 +1,4 @@
 // @flow
-
 import {
   type Pattern,
   type Transformer,
@@ -12,8 +11,9 @@ import {
   stack,
   compose
 } from "gallium/lib/semantics";
-import { type ABT, Term, resolve } from "gallium/lib/resolver";
+import { type ABT, resolve } from "gallium/lib/resolver";
 import { parseTopLevel } from "gallium/lib/parser";
+import * as Interpreter from "gallium/lib/interpreter";
 
 export function pitchMap(f: number => number): Transformer<Uint8Array> {
   return pattern => (start, end) => {
@@ -25,8 +25,8 @@ export function pitchMap(f: number => number): Transformer<Uint8Array> {
   };
 }
 
-export const globalContext = {
-  note: new Term({
+const globalContext = {
+  note: {
     value: children =>
       alt(
         children.map(x => () =>
@@ -38,44 +38,47 @@ export const globalContext = {
           })
         )
       )
-  }),
-  do: new Term({
+  },
+  do: {
     value: compose
-  }),
-  compose: new Term({
+  },
+  compose: {
     value: compose
-  }),
-  alt: new Term({
+  },
+  alt: {
     value: alt
-  }),
-  slow: new Term({
+  },
+  slow: {
     value: xs => alt(xs.map(slow))
-  }),
-  fast: new Term({
+  },
+  fast: {
     value: xs => alt(xs.map(x => fast(Math.min(x, 256))))
-  }),
-  add: new Term({
+  },
+  add: {
     value: xs => alt(xs.map(n => pitchMap(x => x + n)))
-  }),
-  sub: new Term({
+  },
+  sub: {
     value: xs => alt(xs.map(n => pitchMap(x => x - n)))
-  }),
-  i: new Term({
+  },
+  i: {
     value: x => x
-  }),
-  m: new Term({
+  },
+  m: {
     value: () => silence
-  }),
-  stack: new Term({
+  },
+  stack: {
     value: stack
-  }),
-  shift: new Term({
+  },
+  shift: {
     value: xs => alt(xs.map(shift))
-  })
+  }
 };
 
-export function parseAndResolve(code: string): Pattern<any> {
-  return resolve(globalContext, parseTopLevel(code)).payload.getValue()(
-    silence
-  );
+export function parseAndResolve(code: string): ABT {
+  return resolve(globalContext, parseTopLevel(code));
+}
+
+export function interpret(code: string): Pattern<Uint8Array> {
+  const abt = parseAndResolve(code);
+  return Interpreter.interpret(abt)(silence);
 }

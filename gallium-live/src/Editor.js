@@ -2,8 +2,9 @@
 import * as React from "react";
 import styled from "styled-components";
 import { parseTopLevel } from "gallium/lib/parser";
-import { type ABT, Term, resolve } from "gallium/lib/resolver";
-import { globalContext } from "./context";
+import { type ABT, resolve } from "gallium/lib/resolver";
+import * as Interpreter from "gallium/lib/interpreter";
+import * as TopLevel from "./top_level";
 import { silence } from "gallium/lib/semantics";
 import { OutputSelector } from "./OutputSelector";
 import * as MIDI from "./midi";
@@ -66,13 +67,14 @@ export class _Editor extends React.Component<
 
   updateABT(text: string) {
     try {
-      const abt = resolve(globalContext, parseTopLevel(text));
+      const abt = TopLevel.parseAndResolve(text);
       this.setState({
         abt,
         error: undefined
       });
       this.props.dispatch(store => {
-        store.state.pattern = (abt.payload.getValue(): any)(silence);
+        const patternTransformer = Interpreter.interpret(abt);
+        store.state.pattern = patternTransformer(silence);
       });
       LocalStorage.saveText(text);
     } catch (e) {

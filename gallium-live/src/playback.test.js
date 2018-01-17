@@ -4,7 +4,7 @@ import * as TestUtils from "./test_utils";
 import { collectEventsNRT } from "./playback_test_utils";
 import * as Playback from "./playback";
 import { Store, makeInitialState } from "./efx";
-import { parseAndResolve } from "./context";
+import * as TopLevel from "./top_level";
 
 describe("playback", () => {
   let store: Store;
@@ -15,7 +15,7 @@ describe("playback", () => {
   it("registers a noteOn and then a noteOff", async () => {
     TestUtils.mockPerformanceNow(0);
 
-    const pattern = parseAndResolve("note 60");
+    const pattern = TopLevel.interpret("note 60");
     const events = await store.dispatch(
       collectEventsNRT({ numBeats: 1, pattern })
     );
@@ -32,7 +32,7 @@ describe("playback", () => {
   });
 
   it("repeats patterns", async () => {
-    const pattern = parseAndResolve("note 60");
+    const pattern = TopLevel.interpret("note 60");
 
     {
       TestUtils.mockPerformanceNow(0);
@@ -71,7 +71,7 @@ describe("playback", () => {
   });
 
   it("wraps MIDI note values over 127", async () => {
-    const pattern = parseAndResolve("note 128");
+    const pattern = TopLevel.interpret("note 128");
     const events = await store.dispatch(
       collectEventsNRT({ numBeats: 1, pattern })
     );
@@ -80,7 +80,7 @@ describe("playback", () => {
   });
 
   it("wraps negative MIDI note values", async () => {
-    const pattern = parseAndResolve("do (note 0) (sub 12)");
+    const pattern = TopLevel.interpret("do (note 0) (sub 12)");
     const events = await store.dispatch(
       collectEventsNRT({ numBeats: 1, pattern })
     );

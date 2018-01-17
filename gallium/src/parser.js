@@ -30,7 +30,7 @@ export const parseName: Parser<AST> = ctx => {
   }
   const name = match[0];
   ctx.setText(text.substring(name.length));
-  return new Name(name, undefined);
+  return new Name(name, {});
 };
 
 export const parseNumLit: Parser<AST> = ctx => {
@@ -41,7 +41,7 @@ export const parseNumLit: Parser<AST> = ctx => {
   }
   const numString = match[0];
   ctx.setText(text.substring(numString.length));
-  return new NumLit(parseFloat(numString), undefined);
+  return new NumLit(parseFloat(numString), {});
 };
 
 const increasedIndentationNewline: Parser<{
@@ -82,7 +82,7 @@ export const parseVApp: Parser<AST> = ctx => {
   const { children, extraSpaces } = ctx.run(
     parseVAppAux({ children: [child], extraSpaces: [extraSpace] })
   );
-  return new VApp([term, ...children], extraSpaces, indent, undefined);
+  return new VApp([term, ...children], extraSpaces, indent, {});
 };
 
 function parseVAppAux({
@@ -116,7 +116,7 @@ export const parseParen: Parser<AST> = ctx => {
   const child = ctx.run(parseTerm1);
   const space2 = ctx.run(withFallback(getSpaces, ""));
   ctx.run(constant(")"));
-  return new Paren([child], [space1, space2], undefined);
+  return new Paren([child], [space1, space2], {});
 };
 
 export const parseHApp: Parser<AST> = ctx => {
@@ -126,7 +126,7 @@ export const parseHApp: Parser<AST> = ctx => {
   const { children, spaces } = ctx.run(
     parseHAppAux({ children: [child1, child2], spaces: [space] })
   );
-  return new HApp(children, spaces, undefined);
+  return new HApp(children, spaces, {});
 };
 
 const parseHAppAux = ({
@@ -167,13 +167,13 @@ export function parse(input: string): AST {
 }
 
 const parseTopLevelExpr: Parser<AST> = ctx => {
-  const term = new Name("do", undefined);
+  const term = new Name("do", {});
   const extraSpace = ctx.run(withFallback(regExp(/^\s*\n+/), ""));
   const child = ctx.run(parseTerm0);
   const { children, extraSpaces } = ctx.run(
     parseVAppAux({ children: [child], extraSpaces: [extraSpace] })
   );
-  return new VApp([term, ...children], extraSpaces, 0, undefined);
+  return new VApp([term, ...children], extraSpaces, 0, {});
 };
 
 export function parseTopLevel(input: string): AST {

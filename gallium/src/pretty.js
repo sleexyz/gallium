@@ -2,7 +2,7 @@
 
 import { type ASTx, Name, NumLit, VApp, Paren, HApp } from "./AST";
 
-function _pretty<X>(indent: number, node: ASTx<X>): ASTx<X> {
+function _pretty<P: {}>(indent: number, node: ASTx<P>): ASTx<P> {
   if (node instanceof Name) {
     return node.copy();
   }
@@ -34,6 +34,6 @@ function _pretty<X>(indent: number, node: ASTx<X>): ASTx<X> {
   throw new Error("Non exhaustive match");
 }
 
-export function pretty<X>(node: ASTx<X>): ASTx<X> {
+export function pretty<P: {}>(node: ASTx<P>): ASTx<P> {
   return _pretty(0, node);
 }

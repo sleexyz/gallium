@@ -1,32 +1,33 @@
 // @flow
 
-export interface ASTxF<P, X> {
+export interface ASTxF<+P: {}, +X> {
   type: string;
   payload: P;
   children?: Array<X>;
   copy(): ASTxF<P, X>;
-  setPayload<Q>(payload: Q): ASTxF<Q, X>;
+  mapPayload<Q>(f: (P) => Q): ASTxF<Q, X>;
 }
 
-export type ASTx<P> = ASTxF<P, ASTx<P>>;
+export type ASTx<+P> = ASTxF<P, ASTx<P>>;
 
-export type AST = ASTx<void>;
+export type AST = ASTx<{}>;
 
-class ASTxF_Abstract<P, X> {
+class ASTxF_Abstract<P: {}, X> {
   type: string;
   payload: P;
   children: Array<X>;
   copy(): ASTxF<P, X> {
     throw new Error("abstract class");
   }
-  setPayload<Q>(payload: Q): ASTxF<Q, X> {
+  mapPayload<Q>(f: P => Q): ASTxF<Q, X> {
     const node: any = this.copy();
-    node.payload = payload;
+    node.payload = f(this.payload);
     return node;
   }
 }
 
-export class Name<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
+export class Name<P: {}, X> extends ASTxF_Abstract<P, X>
+  implements ASTxF<P, X> {
   type = "Name";
   value: string;
   constructor(value: string, payload: P) {
@@ -39,7 +40,8 @@ export class Name<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
   }
 }
 
-export class NumLit<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
+export class NumLit<P: {}, X> extends ASTxF_Abstract<P, X>
+  implements ASTxF<P, X> {
   type = "NumLit";
   value: number;
   constructor(value: number, payload: P) {
@@ -52,7 +54,8 @@ export class NumLit<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
   }
 }
 
-export class HApp<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
+export class HApp<P: {}, X> extends ASTxF_Abstract<P, X>
+  implements ASTxF<P, X> {
   type = "HApp";
   children: Array<X>;
   spaces: Array<string>;
@@ -68,7 +71,8 @@ export class HApp<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
   }
 }
 
-export class Paren<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
+export class Paren<P: {}, X> extends ASTxF_Abstract<P, X>
+  implements ASTxF<P, X> {
   type = "Paren";
   children: Array<X>;
   spaces: Array<string>;
@@ -84,7 +88,8 @@ export class Paren<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
   }
 }
 
-export class VApp<P, X> extends ASTxF_Abstract<P, X> implements ASTxF<P, X> {
+export class VApp<P: {}, X> extends ASTxF_Abstract<P, X>
+  implements ASTxF<P, X> {
   type = "VApp";
   children: Array<X>;
   indent: number;
