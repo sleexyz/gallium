@@ -186,5 +186,10 @@ const parseTopLevelExpr: Parser<AST.Base> = ctx => {
 
 export function parseTopLevel(input: string): AST.Base {
   const ctx = new ParseContext({ text: input, indents: [0] });
-  return parseTopLevelExpr(ctx);
+  const ret = parseTopLevelExpr(ctx);
+  ctx.run(maybe(whitespace));
+  if (ctx.getText().length !== 0) {
+    throw new Error("Parse error)");
+  }
+  return ret;
 }

@@ -66,7 +66,19 @@ baz
     });
   });
 });
+describe("parseTopLevel - error cases", () => {
+  it("fails on unmatched parens", () => {
+    expect(() => parseTopLevel("(")).toThrow();
+  });
 
+  it("fails on unmatched parens within a VApp", () => {
+    expect(() =>
+      parseTopLevel(`do
+  stack i (
+`)
+    ).toThrow();
+  });
+});
 describe("parse - success cases", () => {
   it("parses 0", () => {
     const result = parse("0");
