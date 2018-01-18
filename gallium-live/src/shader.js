@@ -18,8 +18,9 @@ uniform float time;
 uniform float kick;
 
 void main() {
-  float t = time;
-  float i = 1.*(4. * uv.x) - sin(uv.x*10. * uv.x *uv.x* 100. + t);
+  float t = time * .25;
+  float s = uv.x * uv.x;
+  float i = 1.*(4. * uv.x) - sin(s*25. + t) * sin(s*299. + t);
   i = clamp(i,0.,1.);
   i = (i*2. - 1.);
   i = i * (kick*2. - 1.);
@@ -30,10 +31,11 @@ void main() {
 
 export function registerWebGL(canvas: HTMLCanvasElement) {
   const gl = canvas.getContext("webgl");
-
   if (!gl) {
     throw new Error("Your browser doesn't seem to support webgl");
   }
+  resize(gl);
+  gl.viewport(0,0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
   const program = createProgram(gl, {
     fragmentShader: frag,
@@ -151,5 +153,16 @@ function drawScene(gl: WebGLRenderingContext, programInfo, buffers) {
     const offset = 0;
     const vertexCount = 4;
     gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+  }
+}
+function resize(gl: WebGLRenderingContext) {
+  const realToCSSPixels = window.devicePixelRatio;
+
+  const displayWidth  = Math.floor(gl.canvas.clientWidth  * realToCSSPixels);
+  const displayHeight = Math.floor(gl.canvas.clientHeight * realToCSSPixels);
+
+  if (gl.canvas.width  !== displayWidth || gl.canvas.height !== displayHeight) {
+    gl.canvas.width  = displayWidth;
+    gl.canvas.height = displayHeight;
   }
 }
