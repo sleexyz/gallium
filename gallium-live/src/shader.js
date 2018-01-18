@@ -123,7 +123,10 @@ function drawScene(gl: WebGLRenderingContext, programInfo, buffers) {
   gl.useProgram(programInfo.program);
 
   gl.uniform1f(programInfo.uniformLocations.time, performance.now() / 1000);
-  gl.uniform1f(programInfo.uniformLocations.kick, window.kick || 0.0);
+  gl.uniform1f(programInfo.uniformLocations.kick, window.kick);
+  /* if (window.strobe) {
+   *   window.kick = 1.0 - window.kick;
+   * }*/
 
   {
     const offset = 0;
