@@ -23,7 +23,6 @@ export class Player {
       now + (event.start - this.state.beat) * getBeatLength(this.state.bpm);
     const timestampOff =
       now + (event.end - this.state.beat) * getBeatLength(this.state.bpm) - 1;
-
     this.state.output.send(
       MIDIUtils.noteOn({
         channel: event.value.channel,
@@ -41,6 +40,12 @@ export class Player {
       }),
       timestampOff
     );
+    if (event.value[1] === 127) {
+      window.kick = 1.0;
+      requestAnimationFrame(() => {
+        window.kick = 0.0;
+      });
+    }
   }
 
   queryAndSend(): void {

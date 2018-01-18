@@ -15,6 +15,7 @@ import * as Playback from "./playback";
 import * as AppActions from "./app_actions";
 import { BPMSelector } from "./BPMSelector";
 import { ToggleInvert } from "./ToggleInvert";
+import * as Shader from "./shader";
 
 type OwnProps = {};
 
@@ -120,6 +121,13 @@ export class _Editor extends React.Component<
     this.textarea.focus();
   };
 
+  registerCanvas = (ref: HTMLCanvasElement) => {
+    if (!ref) {
+      return;
+    }
+    Shader.registerWebGL(ref);
+  };
+
   render() {
     const barStyle = this.state.error ? "dotted" : "solid";
     return (
@@ -144,6 +152,7 @@ export class _Editor extends React.Component<
             innerRef={this.onTextareaRefLoad}
             barStyle={barStyle}
           />
+          <Canvas innerRef={this.registerCanvas} />
         </Content>
         <Pane>
           <PaneChild>
@@ -168,16 +177,13 @@ export const Container: React$ComponentType<{
 }> = styled.div`
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
   opacity: ${props => (props.isInitialized ? 1 : 0)};
   transition: opacity 500ms ease-in-out;
   background-color: white;
 `;
 
 const Pane = styled.div`
-  flex: 0 1 auto;
-  min-height: 50px;
+  height: 10%;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -194,31 +200,38 @@ const PaneChild = styled.div`
 `;
 
 const Content = styled.div`
-  padding: 10vh 10vw;
-  flex-grow: 1;
-  flex-shrink: 0;
   display: flex;
-  background-color: white;
+  background-color: transparent;
+  position: relative;
+  height: 80%;
+`;
+
+const Canvas = styled.canvas`
+  position: absolute;
+  z-index: 0;
+  height: 100%;
+  width: 100%;
+  background-color: black;
 `;
 
 export const Textarea: React.ComponentType<{
   barStyle: string
 }> = styled.textarea`
-  ${Styles.transition};
   border: 0;
   font-size: 16px;
-  background-color: transparent;
   margin: 0;
   flex-grow: 1;
+  background-color: transparent;
   font-family: monospace;
   outline: none;
   padding: 0;
   padding-left: 0.2em;
-  border-left: 1px ${props => props.barStyle} #000;
-  opacity: 0.75;
-  &:focus {
-    opacity: 1;
-  }
+  border-left: 1px ${props => props.barStyle} #fff;
+  opacity: 1;
+  margin: 0 10vw;
+  color: white;
+  mix-blend-mode: difference;
+  z-index: 1;
 `;
 
 const Description = styled.div`
