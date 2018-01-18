@@ -125,6 +125,7 @@ export class _Editor extends React.Component<
   };
 
   render() {
+    const barStyle = this.state.error ? "dotted" : "solid";
     return (
       <Container
         isInitialized={this.state.isInitialized}
@@ -145,6 +146,7 @@ export class _Editor extends React.Component<
             onKeyPress={this.onKeyPress}
             value={this.state.text}
             innerRef={this.onTextareaRefLoad}
+            barStyle={barStyle}
           />
         </Content>
         <Pane>
@@ -200,7 +202,9 @@ const Content = styled.div`
   background-color: white;
 `;
 
-export const Textarea = styled.textarea`
+export const Textarea: React.ComponentType<{
+  barStyle: string
+}> = styled.textarea`
   ${Styles.transition};
   border: 0;
   font-size: 16px;
@@ -208,14 +212,13 @@ export const Textarea = styled.textarea`
   margin: 0;
   flex-grow: 1;
   font-family: monospace;
-  border-left: 1px solid #dfdfdf;
   outline: none;
   padding: 0;
   padding-left: 0.2em;
+  border-left: 1px ${props => props.barStyle} #000;
   opacity: 0.75;
   &:focus {
     opacity: 1;
-    border-left: 1px solid #000000;
   }
 `;
 
