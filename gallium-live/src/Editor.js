@@ -193,7 +193,7 @@ const PaneChild = styled.div`
 `;
 
 const Content = styled.div`
-  padding: 25px 50px;
+  padding: 10vh 10vw;
   flex-grow: 1;
   flex-shrink: 0;
   display: flex;
@@ -203,19 +203,19 @@ const Content = styled.div`
 export const Textarea = styled.textarea`
   ${Styles.transition};
   border: 0;
-  font-size: 20px;
+  font-size: 16px;
   background-color: transparent;
   margin: 0;
   flex-grow: 1;
   font-family: monospace;
-  box-shadow: -1px 0 0 0 #dfdfdf;
+  border-left: 1px solid #dfdfdf;
   outline: none;
-  padding-left: 50px;
+  padding: 0;
+  padding-left: 0.2em;
   opacity: 0.75;
-  line-height: 1.5em;
   &:focus {
     opacity: 1;
-    box-shadow: -1px 0 0 0 #aaa;
+    border-left: 1px solid #000000;
   }
 `;
 

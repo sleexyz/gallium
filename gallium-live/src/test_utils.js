@@ -9,7 +9,7 @@ import { Provider, Store, makeInitialState } from "./efx";
 
 configure({ adapter: new Adapter() });
 
-beforeAll(() => {
+beforeEach(() => {
   const rootNode = document.createElement("div");
   rootNode.id = "react-root";
   (document.body: any).appendChild(rootNode);

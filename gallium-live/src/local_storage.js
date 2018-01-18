@@ -17,9 +17,9 @@ export function loadText(): string {
 }
 
 export function saveInvert(invert: boolean) {
-  window.localStorage.setItem("invert", invert);
+  window.localStorage.setItem("invert", JSON.stringify(invert));
 }
 
 export function loadInvert(): boolean {
-  return window.localStorage.getItem("invert");
+  return JSON.parse(window.localStorage.getItem("invert"));
 }

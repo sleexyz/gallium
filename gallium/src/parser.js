@@ -169,7 +169,7 @@ export function parse(input: string): AST.Base {
   const ret = parseTerm0(ctx);
   ctx.run(maybe(whitespace));
   if (ctx.getText().length !== 0) {
-    throw new Error("Parse error)");
+    throw new Error("Parse error");
   }
   return ret;
 }
@@ -189,7 +189,7 @@ export function parseTopLevel(input: string): AST.Base {
   const ret = parseTopLevelExpr(ctx);
   ctx.run(maybe(whitespace));
   if (ctx.getText().length !== 0) {
-    throw new Error("Parse error)");
+    throw new Error("Parse error");
   }
   return ret;
 }
