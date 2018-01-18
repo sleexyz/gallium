@@ -9,8 +9,9 @@ import * as MIDIUtils from "gallium/lib/midi_utils";
 function getBeatLength(bpm: number): number {
   return 1000 * 60 / bpm;
 }
-window.strobe = false;
-window.kick = 0.0;
+
+//invariant: kickQueue is ordered by timestamp
+window.kickQueue = [];
 
 
 export class Player {
@@ -44,10 +45,8 @@ export class Player {
       timestampOff
     );
     if (event.value[1] === 127) {
-      window.kick = Math.random();
-      /* setTimeout(() => {
-       *   window.strobe = false;
-       * }, (timestampOff - timestampOn) /2);*/
+      window.kickQueue.push({ value: 1.0, timestamp: timestampOn});
+      window.kickQueue.push({ value: 0.0, timestamp: timestampOn + 30});
     }
   }
 

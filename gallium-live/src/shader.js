@@ -18,9 +18,13 @@ uniform float time;
 uniform float kick;
 
 void main() {
-  float t = sin(time* 0.5);
-  float i = 1.0*(4.0 * uv.x) - sin(uv.x*10.0 * uv.x *uv.x* 100.0 + t);
-  gl_FragColor = vec4(i, i, i, 1.0) * (1.0 - kick);
+  float t = time;
+  float i = 1.*(4. * uv.x) - sin(uv.x*10. * uv.x *uv.x* 100. + t);
+  i = clamp(i,0.,1.);
+  i = (i*2. - 1.);
+  i = i * (kick*2. - 1.);
+  i = i/2. + 0.5;
+  gl_FragColor = vec4(i, i, i, 1.0);
 }
 `;
 
@@ -122,11 +126,26 @@ function drawScene(gl: WebGLRenderingContext, programInfo, buffers) {
 
   gl.useProgram(programInfo.program);
 
-  gl.uniform1f(programInfo.uniformLocations.time, performance.now() / 1000);
-  gl.uniform1f(programInfo.uniformLocations.kick, window.kick);
-  /* if (window.strobe) {
-   *   window.kick = 1.0 - window.kick;
-   * }*/
+  const now = performance.now();
+  gl.uniform1f(programInfo.uniformLocations.time, now/1000);
+
+  let kick;
+
+  //compute kick value
+  for (let i = 0; i < window.kickQueue.length; i += 1) {
+    const { timestamp, value } = window.kickQueue[i];
+    if (timestamp > now) {
+      window.kickQueue = window.kickQueue.slice(i);
+      break;
+    }
+    kick = value;
+  }
+
+  gl.uniform1f(programInfo.uniformLocations.kick, kick);
+
+  if (window.strobe) {
+    window.kick = 1.0 - window.kick;
+  }
 
   {
     const offset = 0;
