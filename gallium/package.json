@@ -22,7 +22,7 @@
     ]
   },
   "scripts": {
-    "build": "yarn clean && yarn build-babel && yarn build-flow",
+    "build": "yarn build-babel && yarn build-flow",
     "clean": "rm -rf ./lib",
     "build-babel": "babel src --out-dir lib --ignore '*.test.js'",
     "build-flow": "flow-copy-source --ignore '*.test.js' src lib",
