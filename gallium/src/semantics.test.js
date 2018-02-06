@@ -146,7 +146,7 @@ describe("alt", () => {
 
 describe("and", () => {
   describe("bd ; and sn", () => {
-    const pattern = and(() => sn)(bd);
+    const pattern = and([() => sn])(bd);
     testQuery(pattern, 0, 1, [0, 0], ["bd", "sn"]);
     testQuery(pattern, 0, 2, [0, 0, 1, 1], ["bd", "sn", "bd", "sn"]);
   });

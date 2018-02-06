@@ -9,7 +9,8 @@ import {
   slow,
   shift,
   stack,
-  compose
+  compose,
+  and
 } from "gallium/lib/semantics";
 import { type Term, type BindingContext, type ABT, resolve } from "./resolver";
 import { parseTopLevel } from "./parser";
@@ -36,6 +37,7 @@ function altWithNumLitInterpreter(numLitInterpreter: number => any): Term {
     }
   };
 }
+
 
 const note = (x: number): Transformer<Uint8Array> => {
   return () =>
@@ -67,6 +69,10 @@ const globalContext: BindingContext = {
   stack: {
     type: Types.listProcessor(Types.transformer, Types.transformer),
     value: stack
+  },
+  and: {
+    type: Types.listProcessor(Types.transformer, Types.transformer),
+    value: and
   },
   alt: {
     type: Types.listProcessor(Types.transformer, Types.transformer),

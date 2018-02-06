@@ -125,8 +125,8 @@ export function stack<A>(children: Array<Transformer<A>>): Transformer<A> {
   };
 }
 
-export function and<A>(transform: Transformer<A>): Transformer<A> {
+export function and<A>(children: Array<Transformer<A>>): Transformer<A> {
   return pattern => {
-    return stackPat([pattern, transform(pattern)]);
+    return stackPat([pattern, compose(children)(pattern)]);
   };
 }
