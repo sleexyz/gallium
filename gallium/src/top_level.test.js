@@ -20,3 +20,8 @@ it("throws a type error when given a list processor with no arguments", () => {
   const parsePattern = () => parse(`note`);
   expect(parsePattern).toThrow();
 });
+
+it("throws a type error when given an invalid parenthesized argument", () => {
+  const parsePattern = () => parse(`do (shift) 0.5`);
+  expect(parsePattern).toThrow();
+});

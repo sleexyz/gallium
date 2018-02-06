@@ -30,4 +30,8 @@ export const check = (node: ABT, ctx: Context): void => {
       throw new Error("type error");
     }
   }
+
+  if (node instanceof AST.Paren) {
+    check(node.children[0], ctx);
+  }
 };
