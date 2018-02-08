@@ -2,11 +2,12 @@
 import * as TestUtils from "./test_utils";
 import * as Playback from "./playback";
 import { type Pattern, silence } from "gallium/lib/semantics";
+import { type Parameters } from "gallium/lib/top_level";
 import { type Action } from "./efx";
 
 export const collectEventsNRT: Action<
   {
-    pattern: Pattern<Uint8Array>,
+    pattern: Pattern<Parameters>,
     numBeats: number
   },
   Promise<Array<any>>

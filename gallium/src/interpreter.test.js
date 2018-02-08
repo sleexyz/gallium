@@ -1,34 +1,44 @@
 // @flow
 import { parse } from "./parser";
-import { resolve, type BindingContext } from "./resolver";
+import { pure, resolve, type BindingContext } from "./resolver";
 import { interpret, IContext } from "./interpreter";
-
-type State = {
-  literalIntepretation: number => any
-};
 
 const bindingContext: BindingContext = {
   join: {
     value: (xs: Array<string>) => {
-      return `(${xs.join(",")})`;
+      return pure(`(${xs.join(",")})`);
     }
   },
-  joinWithDoubledNumbers: {
+  lexicalJoinWithDoubledNumbers: {
     impureValue: (ctx: IContext) => {
+      const oldState = ctx.state;
       ctx.state = {
         ...ctx.state,
-        numLitInterpreter: x => `${x * 2}`
+        numLitInterpreter: x => ctx => `${x * 2}`
       };
-      return bindingContext.join.value;
+      return xs => ctx => {
+        ctx.state = {
+          ...ctx.state,
+          numLitInterpreter: oldState.numLitInterpreter
+        };
+        return `(${xs.join(",")})`;
+      };
     }
   },
-  joinWithTripledNumbers: {
+  lexicalJoinWithTripledNumbers: {
     impureValue: (ctx: IContext) => {
+      const oldState = ctx.state;
       ctx.state = {
         ...ctx.state,
-        numLitInterpreter: x => `${x * 3}`
+        numLitInterpreter: x => ctx => `${x * 3}`
       };
-      return bindingContext.join.value;
+      return xs => ctx => {
+        ctx.state = {
+          ...ctx.state,
+          numLitInterpreter: oldState.numLitInterpreter
+        };
+        return `(${xs.join(",")})`;
+      };
     }
   },
   asdf: {
@@ -38,7 +48,8 @@ const bindingContext: BindingContext = {
 
 const makeInterpreterContext = (): IContext => {
   return new IContext({
-    numLitInterpreter: x => `${x}`
+    numLitInterpreter: x => ctx => `${x}`,
+    channel: 0
   });
 };
 
@@ -82,9 +93,9 @@ describe("interpretation", () => {
   });
 });
 
-describe("scoped impure computations", () => {
-  test("top-level scoped impure computations", () => {
-    const ast = parse(`joinWithDoubledNumbers
+describe("lexical impure computations", () => {
+  test("top-level lexical impure computations", () => {
+    const ast = parse(`lexicalJoinWithDoubledNumbers
   1
   2
   3`);
@@ -93,28 +104,28 @@ describe("scoped impure computations", () => {
     expect(ctx.run(interpret(abt))).toBe(`(2,4,6)`);
   });
 
-  test("scoped impure computations should not leak", () => {
+  test("lexical impure computations should not leak", () => {
     const ast = parse(`join
   1
-  joinWithDoubledNumbers 1
+  lexicalJoinWithDoubledNumbers 1
   1`);
     const abt = resolve(bindingContext, ast);
     const ctx = makeInterpreterContext();
     expect(ctx.run(interpret(abt))).toBe(`(1,(2),1)`);
   });
 
-  test("scoped impure computations can be nested", () => {
-    const ast = parse(`joinWithDoubledNumbers
+  test("lexical impure computations can be nested", () => {
+    const ast = parse(`lexicalJoinWithDoubledNumbers
   1
-  joinWithTripledNumbers 1
+  lexicalJoinWithTripledNumbers 1
   1`);
     const abt = resolve(bindingContext, ast);
     const ctx = makeInterpreterContext();
     expect(ctx.run(interpret(abt))).toBe(`(2,(3),2)`);
   });
 
-  test("scoped impure computations should persist throughout scope", () => {
-    const ast = parse(`joinWithDoubledNumbers
+  test("lexical impure computations should persist throughout scope", () => {
+    const ast = parse(`lexicalJoinWithDoubledNumbers
   1
   join 1
   1`);

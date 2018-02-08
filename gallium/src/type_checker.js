@@ -22,6 +22,19 @@ export const check = (node: ABT, ctx: Context): void => {
       for (const input of node.children.slice(1)) {
         check(input, { type: inputType });
       }
+    } else if (funType.tag == "func") {
+      const outputType = funType.output;
+      const inputType = funType.input;
+
+      if (outputType !== ctx.type) {
+        throw new Error("type error");
+      }
+
+      if (node.children.length > 2) {
+        throw new Error("too many arguments: expected just one");
+      }
+
+      check(node.children[1], { type: inputType });
     }
   }
 
