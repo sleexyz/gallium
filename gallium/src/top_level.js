@@ -28,13 +28,18 @@ import * as TypeChecker from "./type_checker";
 export function pitchMap(f: number => number): Transformer<Parameters> {
   return pattern => (start, end) => {
     const events = pattern(start, end);
-    return events.map(event => ({
-      ...event,
-      value: {
-        ...event.value,
-        pitch: f(event.value.pitch)
+    return events.map(event => {
+      if (!event.value.pitch) {
+        return event;
       }
-    }));
+      return {
+        ...event,
+        value: {
+          ...event.value,
+          pitch: f(event.value.pitch)
+        }
+      };
+    });
   };
 }
 
@@ -55,12 +60,23 @@ function altWithNumLitInterpreter<A>(
   };
 }
 
+function fmap<A>(f: A => A): Transformer<A> {
+  return pattern => (start, end) => {
+    const events = pattern(start, end);
+    return events.map(event => ({
+      ...event,
+      value: f(event.value)
+    }));
+  };
+}
+
 export type Parameters = {
-  channel: number,
-  pitch: number
+  channel?: number,
+  pitch?: number,
+  mute?: boolean
 };
 
-const note = (pitch: number): Impure<Transformer<Parameters>> => {
+const oldnote = (pitch: number): Impure<Transformer<Parameters>> => {
   return ctx => {
     const value = {
       channel: ctx.state.channel,
@@ -75,6 +91,18 @@ const note = (pitch: number): Impure<Transformer<Parameters>> => {
       });
   };
 };
+
+const note = (pitch: number): Impure<Transformer<Parameters>> => {
+  return ctx => {
+    const value = {
+      channel: ctx.state.channel,
+      pitch
+    };
+    return fmap(() => value);
+  };
+};
+
+const mute: Transformer<Parameters> = fmap(value => ({ ...value, mute: true }));
 
 const backtrackPureFn = f => ctx => {
   const oldState = ctx.state;
@@ -94,7 +122,7 @@ const globalContext: BindingContext = {
   },
   m: {
     type: Types.transformer,
-    value: () => silence
+    value: mute
   },
   do: {
     type: Types.listProcessor(Types.transformer, Types.transformer),
@@ -148,9 +176,16 @@ export function parseAndResolve(code: string): ABT {
   return node;
 }
 
+const initialPattern: Pattern<Parameters> = periodic({
+  period: 1,
+  duration: 1,
+  phase: 0,
+  value: {}
+});
+
 export function interpret(node: ABT): Pattern<Parameters> {
   const ctx = makeDefaultInterpreterContext();
   const transform = ctx.run(Interpreter.interpret(node));
-  const pattern = transform(silence);
+  const pattern = transform(initialPattern);
   return pattern;
 }

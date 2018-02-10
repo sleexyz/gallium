@@ -83,7 +83,12 @@ export function fast<A>(k: number): Transformer<A> {
   return slow(1 / k);
 }
 
-export const silence: Pattern<any> = () => [];
+export const silence: Pattern<any> = periodic({
+  period: 1,
+  duration: 1,
+  phase: 0,
+  value: undefined
+});
 
 const splitQueries = <A>(pattern: Pattern<A>): Pattern<A> => (start, end) => {
   let events = [];

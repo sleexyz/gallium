@@ -74,3 +74,9 @@ test("i is a no-op", () => {
 test("m mutes", () => {
   expect(parse(`do (note 0) m`)(0, 1)).toEqual([]);
 });
+
+test.only("river of time flows even silence", () => {
+  expect(parse(`do (fast 2) (note 0)`)(0, 1)).toEqual(
+    parse(`do (note 0) (fast 2)`)(0, 1)
+  );
+});
