@@ -44,7 +44,7 @@ export class Player {
       }),
       timestampOff
     );
-    if (event.value[1] === 127) {
+    if (event.value.pitch === 127) {
       window.kickQueue.push({ value: 1.0, timestamp: timestampOn});
       window.kickQueue.push({ value: 0.0, timestamp: timestampOn  + Math.max((timestampOff - timestampOn) / 4, 30)});
     }
