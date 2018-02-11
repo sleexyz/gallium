@@ -84,10 +84,20 @@ describe("playback", () => {
   });
 
   it("wraps negative MIDI note values", async () => {
+    TestUtils.mockPerformanceNow(0);
     const pattern = parseAndInterpret("do (note 0) (sub 12)");
     const events = await store.dispatch(
       collectEventsNRT({ numBeats: 1, pattern })
     );
     expect(events[0].midiMessage[1]).toEqual(116);
+  });
+
+  it("does not play muted notes", async () => {
+    TestUtils.mockPerformanceNow(0);
+    const pattern = parseAndInterpret("do (note 0) m");
+    const events = await store.dispatch(
+      collectEventsNRT({ numBeats: 1, pattern })
+    );
+    expect(events).toEqual([]);
   });
 });

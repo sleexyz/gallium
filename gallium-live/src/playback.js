@@ -17,11 +17,19 @@ export class Player {
   }
 
   sendEvent(event: Event<Parameters>): void {
+    if (event.value.mute) {
+      return;
+    }
     const now = performance.now();
     const timestampOn =
       now + (event.start - this.state.beat) * getBeatLength(this.state.bpm);
     const timestampOff =
       now + (event.end - this.state.beat) * getBeatLength(this.state.bpm) - 1;
+
+    // HACK: flow
+    if (event.value.channel == null || event.value.pitch == null) {
+      return;
+    }
 
     this.state.output.send(
       MIDIUtils.noteOn({
@@ -31,6 +39,11 @@ export class Player {
       }),
       timestampOn
     );
+
+    // HACK: flow
+    if (event.value.channel == null || event.value.pitch == null) {
+      return;
+    }
 
     this.state.output.send(
       MIDIUtils.noteOff({

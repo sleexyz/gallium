@@ -29,7 +29,7 @@ export function pitchMap(f: number => number): Transformer<Parameters> {
   return pattern => (start, end) => {
     const events = pattern(start, end);
     return events.map(event => {
-      if (!event.value.pitch) {
+      if (event.value.pitch == null) {
         return event;
       }
       return {
@@ -76,7 +76,7 @@ export type Parameters = {
   mute?: boolean
 };
 
-const oldnote = (pitch: number): Impure<Transformer<Parameters>> => {
+const note = (pitch: number): Impure<Transformer<Parameters>> => {
   return ctx => {
     const value = {
       channel: ctx.state.channel,
@@ -92,13 +92,14 @@ const oldnote = (pitch: number): Impure<Transformer<Parameters>> => {
   };
 };
 
-const note = (pitch: number): Impure<Transformer<Parameters>> => {
+const pitch = (pitch: number): Impure<Transformer<Parameters>> => {
   return ctx => {
     const value = {
       channel: ctx.state.channel,
+      mute: false,
       pitch
     };
-    return fmap(() => value);
+    return fmap(oldValue => ({...oldValue, ...value}));
   };
 };
 
@@ -180,7 +181,7 @@ const initialPattern: Pattern<Parameters> = periodic({
   period: 1,
   duration: 1,
   phase: 0,
-  value: {}
+  value: { pitch: 0, channel: 0 }
 });
 
 export function interpret(node: ABT): Pattern<Parameters> {

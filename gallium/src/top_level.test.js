@@ -72,11 +72,18 @@ test("i is a no-op", () => {
 });
 
 test("m mutes", () => {
-  expect(parse(`do (note 0) m`)(0, 1)).toEqual([]);
+  const events = parse(`do (note 0) m`)(0, 1);
+  expect(events[0].value.mute).toBe(true);
 });
 
-test.only("river of time flows even silence", () => {
+test("river of time flows even silence", () => {
   expect(parse(`do (fast 2) (note 0)`)(0, 1)).toEqual(
     parse(`do (note 0) (fast 2)`)(0, 1)
+  );
+});
+
+test("can do pitch transformations when pitch is zero", () => {
+  expect(parse(`do (note 0) (add 12)`)(0, 1)).toEqual(
+    parse(`do (note 12)`)(0, 1)
   );
 });

@@ -4,7 +4,6 @@ import styled from "styled-components";
 import { parseTopLevel } from "gallium/lib/parser";
 import { type ABT, resolve } from "gallium/lib/resolver";
 import * as TopLevel from "gallium/lib/top_level";
-import { silence } from "gallium/lib/semantics";
 import { OutputSelector } from "./OutputSelector";
 import * as MIDI from "./midi";
 import * as MIDIActions from "./midi_actions";
