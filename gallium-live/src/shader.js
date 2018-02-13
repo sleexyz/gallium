@@ -26,7 +26,12 @@ void main() {
   i = i*2. - 1.;
   i = i * (kick*2. - 1.);
   i = i/2. + 0.5;
-  gl_FragColor = vec4(0., 0., 0., 1.0) + texture2D(text, 0.5 * uv + 0.5);
+  gl_FragColor = vec4(0., 0., 0., 1.0)
+    + texture2D(text, 0.5 * uv + 0.5 + vec2(0, 0.5))
+    + texture2D(text, 0.5 * uv + 0.5 + vec2(-0.5, 0.25))
+    + texture2D(text, 0.5 * uv + 0.5 + vec2(-0.5, 0.5))
+    + texture2D(text, 0.5 * uv + 0.5 + vec2(-0.25, 0.5))
+    + texture2D(text, 0.5 * uv + 0.5 + vec2(-0.25, 0.75));
 }
 `;
 

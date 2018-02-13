@@ -125,8 +125,8 @@ export class _Editor extends React.Component<
     }
     const canvas: HTMLCanvasElement = (ref.children[1]: any);
     const textCanvas: HTMLCanvasElement = (ref.children[2]: any);
-    textCanvas.width = 256;
-    textCanvas.height = 256;
+    textCanvas.width = 1024;
+    textCanvas.height = 1024;
 
     this.textCanvas = textCanvas;
     this.drawText(this.state.text);
@@ -144,7 +144,8 @@ export class _Editor extends React.Component<
   drawText(text: string) {
     const ctx = this.textCanvas.getContext("2d");
     ctx.clearRect(0, 0, this.textCanvas.width, this.textCanvas.height);
-    ctx.font = "12px Serif";
+    ctx.font = "16px mono";
+    ctx.fillStyle= "white";
     const lineHeight = ctx.measureText("M").width * 1.2;
     const lines = text.split("\n");
     let y = 0;
@@ -263,7 +264,7 @@ export const Textarea: React.ComponentType<{
   padding: 0;
   padding-left: 0.2em;
   border-left: 1px ${props => props.barStyle} #fff;
-  opacity: 1;
+  opacity: 0.1;
   margin: 0 10vw;
   color: white;
   mix-blend-mode: difference;
