@@ -45,7 +45,9 @@ export class _Editor extends React.Component<
     };
   }
 
-  textarea: ?HTMLTextAreaElement;
+  textarea: HTMLTextAreaElement;
+
+  textCanvas: HTMLCanvasElement;
 
   componentDidMount() {
     this.props.dispatch(AppActions.initialize());
@@ -58,10 +60,14 @@ export class _Editor extends React.Component<
   }
 
   onChange = (e: *) => {
+    const text = e.target.value;
     this.setState({
-      text: e.target.value
+      text
     });
-    this.updateABT(e.target.value);
+    this.updateABT(text);
+    if (this.textCanvas) {
+      this.drawText(text);
+    }
   };
 
   updateABT(text: string) {
@@ -113,20 +119,40 @@ export class _Editor extends React.Component<
     }
   };
 
-  onTextareaRefLoad = (ref: HTMLTextAreaElement) => {
-    this.textarea = ref;
-    if (!this.textarea) {
-      return;
-    }
-    this.textarea.focus();
-  };
-
-  registerCanvas = (ref: HTMLCanvasElement) => {
+  registerContent = (ref: HTMLElement) => {
     if (!ref) {
       return;
     }
-    Shader.registerWebGL(ref);
+    const canvas: HTMLCanvasElement = (ref.children[1]: any);
+    const textCanvas: HTMLCanvasElement = (ref.children[2]: any);
+    textCanvas.width = 256;
+    textCanvas.height = 256;
+
+    this.textCanvas = textCanvas;
+    this.drawText(this.state.text);
+    Shader.registerWebGL({ canvas, textCanvas });
   };
+
+  registerTextarea = (ref: HTMLTextAreaElement) => {
+    if (!ref) {
+      return;
+    }
+    ref.focus();
+    this.textarea = ref;
+  };
+
+  drawText(text: string) {
+    const ctx = this.textCanvas.getContext("2d");
+    ctx.clearRect(0, 0, this.textCanvas.width, this.textCanvas.height);
+    ctx.font = "12px Serif";
+    const lineHeight = ctx.measureText("M").width * 1.2;
+    const lines = text.split("\n");
+    let y = 0;
+    for (const line of lines) {
+      ctx.fillText(line, 0, y);
+      y += lineHeight;
+    }
+  }
 
   render() {
     const barStyle = this.state.error ? "dotted" : "solid";
@@ -143,16 +169,17 @@ export class _Editor extends React.Component<
             <Link href="https://github.com/sleexyz/gallium">source</Link>
           </PaneChild>
         </Pane>
-        <Content>
+        <Content innerRef={this.registerContent}>
           <Textarea
             id="gallium-textarea"
             onChange={this.onChange}
             onKeyPress={this.onKeyPress}
             value={this.state.text}
-            innerRef={this.onTextareaRefLoad}
+            innerRef={this.registerTextarea}
             barStyle={barStyle}
           />
-          <Canvas innerRef={this.registerCanvas} />
+          <Canvas />
+          <TextCanvas />
         </Content>
         <Pane>
           <PaneChild>
@@ -212,6 +239,15 @@ const Canvas = styled.canvas`
   height: 100%;
   width: 100%;
   background-color: black;
+`;
+
+const TextCanvas = styled.canvas`
+  display: none;
+  position: absolute;
+  z-index: 2;
+  height: 100%;
+  width: 100%;
+  background-color: blue;
 `;
 
 export const Textarea: React.ComponentType<{

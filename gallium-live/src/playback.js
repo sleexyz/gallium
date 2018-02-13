@@ -13,7 +13,6 @@ function getBeatLength(bpm: number): number {
 //invariant: kickQueue is ordered by timestamp
 window.kickQueue = [];
 
-
 export class Player {
   +state: AppState;
 
@@ -45,8 +44,11 @@ export class Player {
       timestampOff
     );
     if (event.value.pitch === 127) {
-      window.kickQueue.push({ value: 1.0, timestamp: timestampOn});
-      window.kickQueue.push({ value: 0.0, timestamp: timestampOn  + Math.max((timestampOff - timestampOn) / 4, 30)});
+      window.kickQueue.push({ value: 1.0, timestamp: timestampOn });
+      window.kickQueue.push({
+        value: 0.0,
+        timestamp: timestampOn + Math.max((timestampOff - timestampOn) / 4, 30)
+      });
     }
   }
 
