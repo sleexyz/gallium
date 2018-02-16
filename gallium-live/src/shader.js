@@ -21,17 +21,12 @@ uniform sampler2D text;
 void main() {
   float t = time * .25;
   float s = uv.x * uv.x;
-  float i = 1.*(4. * uv.x) - sin(s*25. + t) * sin(s*299. + t);
-  i = clamp(i,0.,1.);
-  i = i*2. - 1.;
-  i = i * (kick*2. - 1.);
-  i = i/2. + 0.5;
-  gl_FragColor = vec4(0., 0., 0., 1.0)
-    + texture2D(text, 0.5 * uv + 0.5 + vec2(0, 0.5))
-    + texture2D(text, 0.5 * uv + 0.5 + vec2(-0.5, 0.25))
-    + texture2D(text, 0.5 * uv + 0.5 + vec2(-0.5, 0.5))
-    + texture2D(text, 0.5 * uv + 0.5 + vec2(-0.25, 0.5))
-    + texture2D(text, 0.5 * uv + 0.5 + vec2(-0.25, 0.75));
+  float i = 1.*(4.2* uv.x) - sin(s*25. + t) * sin(s*299. + t);
+  vec4 val = vec4(0., 0., 0., 1.0);
+  for (int i = 0; i < 40; i++) {
+    val += texture2D(text, float(i)*1.01 * uv + 0.5);
+  }
+  gl_FragColor = val;
 }
 `;
 
@@ -205,8 +200,14 @@ function drawScene(input: {
   {
     gl.bindTexture(gl.TEXTURE_2D, state.textCanvasTexture);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
-          gl.UNSIGNED_BYTE, textCanvas);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      textCanvas
+    );
 
     // compute text texture
     gl.uniform1i(programInfo.uniformLocations.text, 0);
@@ -224,8 +225,12 @@ function drawScene(input: {
 function resize(gl: WebGLRenderingContext) {
   const realToCSSPixels = window.devicePixelRatio;
 
-  const displayWidth = Math.floor(gl.canvas.clientWidth * realToCSSPixels);
-  const displayHeight = Math.floor(gl.canvas.clientHeight * realToCSSPixels);
+  const maxDim = Math.max(
+    Math.floor(gl.canvas.clientWidth * realToCSSPixels),
+    Math.floor(gl.canvas.clientHeight * realToCSSPixels)
+  );
+  const displayWidth = maxDim;
+  const displayHeight = maxDim;
 
   if (gl.canvas.width !== displayWidth || gl.canvas.height !== displayHeight) {
     gl.canvas.width = displayWidth;

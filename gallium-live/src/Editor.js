@@ -125,8 +125,9 @@ export class _Editor extends React.Component<
     }
     const canvas: HTMLCanvasElement = (ref.children[1]: any);
     const textCanvas: HTMLCanvasElement = (ref.children[2]: any);
-    textCanvas.width = 1024;
-    textCanvas.height = 1024;
+
+    (textCanvas.width = Math.max(window.innerHeight, window.innerWidth)),
+      (textCanvas.height = textCanvas.width);
 
     this.textCanvas = textCanvas;
     this.drawText(this.state.text);
@@ -145,8 +146,8 @@ export class _Editor extends React.Component<
     const ctx = this.textCanvas.getContext("2d");
     ctx.clearRect(0, 0, this.textCanvas.width, this.textCanvas.height);
     ctx.font = "16px mono";
-    ctx.fillStyle= "white";
-    const lineHeight = ctx.measureText("M").width * 1.2;
+    ctx.fillStyle = "white";
+    const lineHeight = ctx.measureText("M").width * 1.8;
     const lines = text.split("\n");
     let y = 0;
     for (const line of lines) {
@@ -162,7 +163,7 @@ export class _Editor extends React.Component<
         isInitialized={this.state.isInitialized}
         style={{ filter: this.props.invert ? "invert()" : "" }}
       >
-        <Pane>
+        <Pane style={{ top: 0 }}>
           <PaneChild>
             <Description>gallium.live</Description>
           </PaneChild>
@@ -182,7 +183,7 @@ export class _Editor extends React.Component<
           <Canvas />
           <TextCanvas />
         </Content>
-        <Pane>
+        <Pane style={{ bottom: 0 }}>
           <PaneChild>
             <BPMSelector />
           </PaneChild>
@@ -207,20 +208,23 @@ export const Container: React$ComponentType<{
   height: 100%;
   opacity: ${props => (props.isInitialized ? 1 : 0)};
   transition: opacity 500ms ease-in-out;
-  background-color: white;
 `;
 
+const paneHeight = 60;
+
 const Pane = styled.div`
-  height: 10%;
+  height: ${paneHeight}px;
   display: flex;
+  width: 100%;
   justify-content: flex-end;
   align-items: center;
-  padding: 0px 20px;
   ${Styles.transition};
-  opacity: 0.5;
+  opacity: 1;
   &:hover {
     opacity: 1;
   }
+  position: fixed;
+  background-color: white;
 `;
 
 const PaneChild = styled.div`
@@ -229,26 +233,25 @@ const PaneChild = styled.div`
 
 const Content = styled.div`
   display: flex;
-  background-color: transparent;
-  position: relative;
-  height: 80%;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  display: 0;
+  height: 100%;
 `;
 
 const Canvas = styled.canvas`
-  position: absolute;
-  z-index: 0;
-  height: 100%;
-  width: 100%;
+  position: fixed;
+  z-index: -1;
+  height: 100vmax;
+  width: 100vmax;
+  top: 0;
+  left: 0;
   background-color: black;
 `;
 
 const TextCanvas = styled.canvas`
   display: none;
-  position: absolute;
-  z-index: 2;
-  height: 100%;
-  width: 100%;
-  background-color: blue;
 `;
 
 export const Textarea: React.ComponentType<{
@@ -257,18 +260,17 @@ export const Textarea: React.ComponentType<{
   border: 0;
   font-size: 16px;
   margin: 0;
-  flex-grow: 1;
+  height: calc(100% - 2*${paneHeight}px);
   background-color: transparent;
   font-family: monospace;
   outline: none;
   padding: 0;
   padding-left: 0.2em;
-  border-left: 1px ${props => props.barStyle} #fff;
-  opacity: 0.1;
-  margin: 0 10vw;
-  color: white;
-  mix-blend-mode: difference;
-  z-index: 1;
+  border-left: 1px ${props => props.barStyle} #000;
+  opacity: 1;
+  width: calc(100% - 10px);
+  margin-left: 10px;
+  z-index: 0;
 `;
 
 const Description = styled.div`
