@@ -13,6 +13,7 @@ import { connect, type Connect } from "./efx";
 import * as Styles from "./styles";
 import * as Playback from "./playback";
 import * as AppActions from "./app_actions";
+import { BPMSelector } from "./BPMSelector";
 import { ToggleInvert } from "./ToggleInvert";
 
 type OwnProps = {};
@@ -145,6 +146,9 @@ export class _Editor extends React.Component<
           />
         </Content>
         <Pane>
+          <PaneChild>
+            <BPMSelector />
+          </PaneChild>
           <PaneChild>
             <ToggleInvert />
           </PaneChild>

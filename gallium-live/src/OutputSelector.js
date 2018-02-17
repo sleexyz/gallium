@@ -18,10 +18,6 @@ type ContainerProps = {
 export class _OutputSelector extends React.Component<
   Connect<OwnProps, ContainerProps>
 > {
-  constructor(props: *) {
-    super(props);
-  }
-
   onChange = (e: *) => {
     const outputPortName = e.target.value;
     this.props.dispatch(MIDIActions.changePort(outputPortName));

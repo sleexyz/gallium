@@ -1,8 +1,9 @@
 // @flow
 import { makeInitialState, type AppState } from "./efx";
-import { Store, type Action } from "./efx";
+import { makeAction, Store, type Action } from "./efx";
 import { type Event } from "gallium/lib/semantics";
 import { type Parameters } from "gallium/lib/top_level";
+import * as LocalStorage from "./local_storage";
 import * as MIDIUtils from "gallium/lib/midi_utils";
 
 function getBeatLength(bpm: number): number {
@@ -59,13 +60,20 @@ export const start: Action<void, void> = () => store => {
   );
 };
 
-export const stop: Action<void, void> = () => store => {
+export const stop: Action<void, void> = makeAction(() => store => {
   if (store.state.intervalId) {
     clearInterval(store.state.intervalId);
     store.state.intervalId = undefined;
   }
-};
+});
 
-export const isPlaying: Action<void, boolean> = () => store => {
+export const isPlaying: Action<void, boolean> = makeAction(() => store => {
   return !!store.state.intervalId;
-};
+});
+
+export const setBPM: Action<number, void> = makeAction(bpm => store => {
+  store.state.bpm = bpm;
+  LocalStorage.saveBPM(bpm);
+  store.dispatch(stop());
+  store.dispatch(start());
+});

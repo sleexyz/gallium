@@ -44,7 +44,7 @@ export function makeInitialState(): AppState {
     output: MIDI.makeDummyDevice("mockDevice"),
     outputs: {},
     beat: 0,
-    bpm: 160,
+    bpm: LocalStorage.loadBPM() || 160,
     pattern: silence
   };
 }
