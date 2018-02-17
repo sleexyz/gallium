@@ -15,3 +15,16 @@ it("allows minimum bpm of 40", () => {
   setBPM({ wrapper, value: 20 });
   expect(getBPM({ wrapper })).toBe(40);
 });
+
+it("changes bpm on Enter keypress", () => {
+  const { wrapper, store } = TestUtils.mountWithStore(<BPMSelector />);
+  wrapper
+    .find(BPMSelector)
+    .find("input")
+    .simulate("change", { target: { value: 120 } });
+  wrapper
+    .find(BPMSelector)
+    .find("input")
+    .simulate("keyPress", { key: "Enter" });
+  expect(store.state.bpm).toBe(120);
+});

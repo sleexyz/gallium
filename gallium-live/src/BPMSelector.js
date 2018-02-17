@@ -27,14 +27,24 @@ class _BPMSelector extends React.Component<
   }
 
   onBlur = (e: *) => {
-    let value = e.target.value;
+    this.commit(e.target.value);
+  };
+
+  commit(bpm: number) {
+    let value = bpm;
     value = Math.max(40, value);
     value = Math.min(800, value);
     this.props.dispatch(Playback.setBPM(value));
-  };
+  }
 
   onChange = (e: *) => {
     this.setState({ bpm: e.target.value });
+  };
+
+  onKeyPress = (e: *) => {
+    if (e.key === "Enter") {
+      this.commit(e.target.value);
+    }
   };
 
   componentWillReceiveProps(nextProps: *) {
@@ -49,6 +59,7 @@ class _BPMSelector extends React.Component<
           type="number"
           value={this.state.bpm}
           onChange={this.onChange}
+          onKeyPress={this.onKeyPress}
           onBlur={this.onBlur}
         />
       </Outer>

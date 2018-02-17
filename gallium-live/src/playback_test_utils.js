@@ -42,6 +42,7 @@ export const collectEventsNRT: Action<
 
   let counter = 0;
   let _resolve;
+  let _resolved = false;
 
   store.state.output.send = (midiMessage: Uint8Array, timestamp: number) => {
     events.push({ midiMessage, timestamp });
@@ -55,7 +56,11 @@ export const collectEventsNRT: Action<
         queryAndSend.call(this);
         counter += 1;
         if (counter === numBeats) {
-          _resolve();
+          if (_resolve) {
+            _resolve();
+          } else {
+            _resolved = true;
+          }
         }
       };
     }
@@ -65,6 +70,9 @@ export const collectEventsNRT: Action<
 
   await new Promise(resolve => {
     _resolve = resolve;
+    if (_resolved) {
+      resolve();
+    }
   });
 
   store.dispatch(Playback.stop());
