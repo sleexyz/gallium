@@ -54,10 +54,18 @@ export class Player {
 
 export const start: Action<void, void> = () => store => {
   const player = new Player(store.state);
-  store.state.intervalId = setInterval(
-    () => player.queryAndSend(),
-    getBeatLength(store.state.bpm)
-  );
+  const bpmSnapshot = store.state.bpm;
+  player.queryAndSend();
+  store.state.intervalId = setInterval(() => {
+    player.queryAndSend();
+    if (store.state.bpm === bpmSnapshot) {
+      return;
+    }
+    if (store.state.bpm !== bpmSnapshot) {
+      store.dispatch(stop());
+      store.dispatch(start());
+    }
+  }, getBeatLength(bpmSnapshot));
 };
 
 export const stop: Action<void, void> = makeAction(() => store => {
@@ -74,6 +82,4 @@ export const isPlaying: Action<void, boolean> = makeAction(() => store => {
 export const setBPM: Action<number, void> = makeAction(bpm => store => {
   store.state.bpm = bpm;
   LocalStorage.saveBPM(bpm);
-  store.dispatch(stop());
-  store.dispatch(start());
 });
