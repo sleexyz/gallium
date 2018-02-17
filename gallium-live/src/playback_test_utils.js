@@ -61,7 +61,6 @@ export const collectEventsNRT: Action<
           } else {
             _resolved = true;
           }
-
         }
       };
     }
