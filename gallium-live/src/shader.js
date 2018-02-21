@@ -19,12 +19,9 @@ uniform float kick;
 uniform sampler2D text;
 
 void main() {
-  float t = time * .25;
-  float s = uv.x * uv.x;
-  float i = 1.*(4.2* uv.x) - sin(s*25. + t) * sin(s*299. + t);
   vec4 val = vec4(0., 0., 0., 1.0);
   for (int i = 0; i < 40; i++) {
-    val += texture2D(text, float(i)*1.01 * uv + 0.5);
+    val += texture2D(text, uv * 4. + 0.25 + sin(float(i) * 100. + e) * 0.15);
   }
   gl_FragColor = val;
 }
