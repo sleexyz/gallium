@@ -123,8 +123,8 @@ export class _Editor extends React.Component<
     if (!ref) {
       return;
     }
-    const canvas: HTMLCanvasElement = (ref.children[1]: any);
-    const textCanvas: HTMLCanvasElement = (ref.children[2]: any);
+    const canvas: HTMLCanvasElement = (ref.children[0]: any);
+    const textCanvas: HTMLCanvasElement = (ref.children[1]: any);
 
     (textCanvas.width = Math.max(window.innerHeight, window.innerWidth)),
       (textCanvas.height = textCanvas.width);
@@ -163,15 +163,9 @@ export class _Editor extends React.Component<
         isInitialized={this.state.isInitialized}
         style={{ filter: this.props.invert ? "invert()" : "" }}
       >
-        <Pane style={{ top: 0 }}>
-          <PaneChild>
-            <Description>gallium.live</Description>
-          </PaneChild>
-          <PaneChild>
-            <Link href="https://github.com/sleexyz/gallium">source</Link>
-          </PaneChild>
-        </Pane>
         <Content innerRef={this.registerContent}>
+          <Canvas />
+          <TextCanvas />
           <Textarea
             id="gallium-textarea"
             onChange={this.onChange}
@@ -180,20 +174,26 @@ export class _Editor extends React.Component<
             innerRef={this.registerTextarea}
             barStyle={barStyle}
           />
-          <Canvas />
-          <TextCanvas />
+          <Pane style={{ top: 0 }}>
+            <PaneChild>
+              <Description>gallium.live</Description>
+            </PaneChild>
+            <PaneChild>
+              <Link href="https://github.com/sleexyz/gallium">source</Link>
+            </PaneChild>
+          </Pane>
+          <Pane style={{ bottom: 0 }}>
+            <PaneChild>
+              <BPMSelector />
+            </PaneChild>
+            <PaneChild>
+              <ToggleInvert />
+            </PaneChild>
+            <PaneChild>
+              <OutputSelector />
+            </PaneChild>
+          </Pane>
         </Content>
-        <Pane style={{ bottom: 0 }}>
-          <PaneChild>
-            <BPMSelector />
-          </PaneChild>
-          <PaneChild>
-            <ToggleInvert />
-          </PaneChild>
-          <PaneChild>
-            <OutputSelector />
-          </PaneChild>
-        </Pane>
       </Container>
     );
   }
@@ -219,32 +219,40 @@ const Pane = styled.div`
   justify-content: flex-end;
   align-items: center;
   ${Styles.transition};
-  opacity: 1;
+  position: fixed;
+  background-color: transparent;
+  z-index: 1;
+  pointer-events: none;
+  color: white;
+  mix-blend-mode: exclusion;
+  opacity: 0.5;
   &:hover {
     opacity: 1;
   }
-  position: fixed;
-  background-color: white;
 `;
 
 const PaneChild = styled.div`
   padding: 10px 20px;
+  pointer-events: all;
 `;
 
 const Content = styled.div`
-  display: flex;
   align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  display: 0;
+  background-color: transparent;
   height: 100%;
+  width: 100%;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const Canvas = styled.canvas`
-  position: fixed;
-  z-index: -1;
-  height: 100vmax;
-  width: 100vmax;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   top: 0;
   left: 0;
   background-color: black;
@@ -260,17 +268,19 @@ export const Textarea: React.ComponentType<{
   border: 0;
   font-size: 16px;
   margin: 0;
-  height: calc(100% - 2*${paneHeight}px);
   background-color: transparent;
   font-family: monospace;
   outline: none;
   padding: 0;
   padding-left: 0.2em;
-  border-left: 1px ${props => props.barStyle} #000;
+  border-left: 1px ${props => props.barStyle} #fff;
   opacity: 1;
   width: calc(100% - 10px);
   margin-left: 10px;
-  z-index: 0;
+  color: white;
+  mix-blend-mode: exclusion;
+  height: calc(100% - 2*${paneHeight}px);
+  z-index: 1;
 `;
 
 const Description = styled.div`

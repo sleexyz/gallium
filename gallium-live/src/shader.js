@@ -19,9 +19,13 @@ uniform float kick;
 uniform sampler2D text;
 
 void main() {
-  vec4 val = vec4(0., 0., 0., 1.0);
-  for (int i = 0; i < 40; i++) {
-    val += texture2D(text, uv * 4. + 0.25 + sin(float(i) * 100. + e) * 0.15);
+  float x = clamp(cos(time * 0.1 + cos(uv.x) + (abs(uv.y))) * 2., -1., 1.);
+  x = sin(x)/2. + 0.5;
+  x = max(kick, x);
+  vec4 val = vec4(x, x, x, 1.0);
+  float t = time * 0.001;
+  for (float i  = 0.; i < 4.; i++) {
+    val = val + texture2D(text, fract(tan(0.5 * (uv * pow(i, 1.1) + vec2(0., 0.5)) - 0.5)) + vec2(t, t));
   }
   gl_FragColor = val;
 }
@@ -178,8 +182,7 @@ function drawScene(input: {
   gl.uniform1f(programInfo.uniformLocations.time, now / 1000);
 
   {
-    // compute kick value
-    let kick: number = 0;
+    let kick = null;
     for (let i = 0; i < window.kickQueue.length; i += 1) {
       const { timestamp, value } = window.kickQueue[i];
       if (timestamp > now) {
@@ -188,9 +191,8 @@ function drawScene(input: {
       }
       kick = value;
     }
-    gl.uniform1f(programInfo.uniformLocations.kick, kick);
-    if (window.strobe) {
-      window.kick = 1.0 - window.kick;
+    if (kick != null) {
+      gl.uniform1f(programInfo.uniformLocations.kick, kick);
     }
   }
 

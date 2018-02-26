@@ -59,9 +59,9 @@ const Selector = styled.select`
   font-family: monospace;
   cursor: pointer;
   outline: none;
-  color: #252525;
+  color: white;
   &:active,
   &:hover {
-    box-shadow: 0 0 0 1px #252525;
+    box-shadow: 0 0 0 1px #white;
   }
 `;

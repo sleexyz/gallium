@@ -6,6 +6,7 @@ export function applyGlobalStyles() {
   injectGlobal`
     ${styledNormalize}
     body {
+      height: 100%;
     }
   `;
 }
