@@ -19,15 +19,12 @@ uniform float kick;
 uniform sampler2D text;
 
 void main() {
-  float x = clamp(cos(time * 0.1 + cos(uv.x) + (abs(uv.y))) * 2., -1., 1.);
+  float x = clamp(cos(time * 2.33333 * 8. + cos(uv.x) + abs((uv.y))) * 2., -1., 1.);
   x = sin(x)/2. + 0.5;
   x = max(kick, x);
   vec4 val = vec4(x, x, x, 1.0);
-  float t = time * 0.001;
-  for (float i  = 0.; i < 4.; i++) {
-    val = val + texture2D(text, fract(tan(0.5 * (uv * pow(i, 1.1) + vec2(0., 0.5)) - 0.5)) + vec2(t, t));
-  }
-  gl_FragColor = val;
+  float t = time * 0.01;
+  gl_FragColor = vec4(val.xyz, 1.0);
 }
 `;
 
