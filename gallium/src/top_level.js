@@ -38,6 +38,19 @@ export function pitchMap(f: number => number): Transformer<Parameters> {
   };
 }
 
+export function chanMap(f: number => number): Transformer<Parameters> {
+  return pattern => (start, end) => {
+    const events = pattern(start, end);
+    return events.map(event => ({
+      ...event,
+      value: {
+        ...event.value,
+        channel: f(event.value.channel)
+      }
+    }));
+  };
+}
+
 function altWithNumLitInterpreter<A>(
   numLitInterpreter: number => IContext => A
 ): Term<(Array<Transformer<A>>) => Impure<Transformer<A>>> {
@@ -117,6 +130,7 @@ const globalContext: BindingContext = {
   fast: altWithNumLitInterpreter(pureFn(x => fast(Math.min(x, 128)))),
   add: altWithNumLitInterpreter(pureFn(x => pitchMap(p => p + x))),
   sub: altWithNumLitInterpreter(pureFn(x => pitchMap(p => p - x))),
+  chan: altWithNumLitInterpreter(pureFn(x => chanMap(() => x))),
   shift: altWithNumLitInterpreter(pureFn(shift)),
   channel: {
     type: Types.func(Types.number, Types.transformer),
