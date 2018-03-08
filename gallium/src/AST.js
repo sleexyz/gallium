@@ -3,6 +3,7 @@
 export interface PartiallyWith<+Data: {}, +Child> {
   type: string;
   data: Data;
+  // TODO: getData
   children?: Array<Child>;
   copy(): PartiallyWith<Data, Child>;
   mapData<NextData>(f: (Data) => NextData): PartiallyWith<NextData, Child>;

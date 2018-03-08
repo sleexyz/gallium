@@ -74,6 +74,7 @@ export class _Editor extends React.Component<
       });
       LocalStorage.saveText(text);
     } catch (e) {
+      console.error(e);
       this.setState({
         error: e.toString()
       });

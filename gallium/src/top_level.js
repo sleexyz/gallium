@@ -101,6 +101,10 @@ const backtrackPureFn = f => ctx => {
 };
 
 const globalContext: BindingContext = {
+  "out": {
+    type: Types.func(Types.number, Types.func(Types.listProcessor, Types.listProcessor)),
+    value: n => () => f => () => f
+  },
   i: {
     type: Types.transformer,
     value: x => x
