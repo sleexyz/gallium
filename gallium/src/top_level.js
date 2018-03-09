@@ -101,9 +101,35 @@ const backtrackPureFn = f => ctx => {
 };
 
 const globalContext: BindingContext = {
+  "in": {
+    type: Types.func(Types.number, Types.func(Types.listProcessor, Types.listProcessor)),
+    impureValue: (ctx: IContext) => {
+      const oldState = ctx.state;
+      ctx.state = { ...ctx.state, numLitInterpreter: numberNumLitInterpreter };
+      return ([n]) => ctx => {
+        ctx.state = oldState;
+        return ([f]) => () => {
+          return transformers => () => {
+            return p => fast(n)(alt(transformers.map(t => p => slow(n)(t(p))))(p));
+          };
+        };
+      };
+    }
+  },
   "out": {
     type: Types.func(Types.number, Types.func(Types.listProcessor, Types.listProcessor)),
-    value: n => () => f => () => f
+    impureValue: (ctx: IContext) => {
+      const oldState = ctx.state;
+      ctx.state = { ...ctx.state, numLitInterpreter: numberNumLitInterpreter };
+      return ([n]) => ctx => {
+        ctx.state = oldState;
+        return ([f]) => () => {
+          return transformers => () => {
+            return p => slow(n)(alt(transformers.map(t => p => fast(n)(t(p))))(p));
+          };
+        };
+      };
+    }
   },
   i: {
     type: Types.transformer,
@@ -152,6 +178,8 @@ const globalContext: BindingContext = {
     }
   }
 };
+
+const numberNumLitInterpreter: number => IContext => number = n => () => n;
 
 const makeDefaultInterpreterContext = () => {
   return new IContext({
