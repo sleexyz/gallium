@@ -60,12 +60,20 @@ function altWithNumLitInterpreter<A>(
       const oldState = ctx.state;
       ctx.state = { ...ctx.state, numLitInterpreter };
       return transformers => ctx => {
-        const ret = alt(transformers);
         ctx.state = oldState;
-        return ret;
+        return alt(transformers);
       };
     }
   };
+}
+
+function altWithZoom<A>( n: number): Term<(Array<Transformer<A>>) => Transformer<A>> {
+  return {
+    type: Types.listProcessor(Types.transformer, Types.transformer),
+    value: transformers => {
+      return () => p => slow(n)(alt(transformers.map(t => p => fast(n)(t(p))))(p));
+    }
+  }
 }
 
 export type Parameters = {
@@ -101,36 +109,6 @@ const backtrackPureFn = f => ctx => {
 };
 
 const globalContext: BindingContext = {
-  "in": {
-    type: Types.func(Types.number, Types.func(Types.listProcessor, Types.listProcessor)),
-    impureValue: (ctx: IContext) => {
-      const oldState = ctx.state;
-      ctx.state = { ...ctx.state, numLitInterpreter: numberNumLitInterpreter };
-      return ([n]) => ctx => {
-        ctx.state = oldState;
-        return ([f]) => () => {
-          return transformers => () => {
-            return p => fast(n)(alt(transformers.map(t => p => slow(n)(t(p))))(p));
-          };
-        };
-      };
-    }
-  },
-  "out": {
-    type: Types.func(Types.number, Types.func(Types.listProcessor, Types.listProcessor)),
-    impureValue: (ctx: IContext) => {
-      const oldState = ctx.state;
-      ctx.state = { ...ctx.state, numLitInterpreter: numberNumLitInterpreter };
-      return ([n]) => ctx => {
-        ctx.state = oldState;
-        return ([f]) => () => {
-          return transformers => () => {
-            return p => slow(n)(alt(transformers.map(t => p => fast(n)(t(p))))(p));
-          };
-        };
-      };
-    }
-  },
   i: {
     type: Types.transformer,
     value: x => x
@@ -155,6 +133,20 @@ const globalContext: BindingContext = {
     type: Types.listProcessor(Types.transformer, Types.transformer),
     impureValue: backtrackPureFn(alt)
   },
+  out1: altWithZoom(1),
+  out2: altWithZoom(2),
+  out3: altWithZoom(4),
+  out3: altWithZoom(8),
+  out4: altWithZoom(16),
+  out5: altWithZoom(32),
+  out6: altWithZoom(64),
+  in1: altWithZoom(1/1),
+  in2: altWithZoom(1/2),
+  in3: altWithZoom(1/4),
+  in3: altWithZoom(1/8),
+  in4: altWithZoom(1/16),
+  in5: altWithZoom(1/32),
+  in5: altWithZoom(1/64),
   note: altWithNumLitInterpreter(note),
   slow: altWithNumLitInterpreter(pureFn(x => slow(Math.max(x, 1 / 128)))),
   fast: altWithNumLitInterpreter(pureFn(x => fast(Math.min(x, 128)))),
