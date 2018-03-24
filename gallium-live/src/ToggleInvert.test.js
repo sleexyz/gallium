@@ -36,6 +36,8 @@ test("invert off is preserved across reloads", async () => {
   }
   {
     const { wrapper } = await TestUtils.mountWithStore(<Editor />);
-    expect(wrapper.find(Container).props().style.filter).not.toBe("invert(100%)");
+    expect(wrapper.find(Container).props().style.filter).not.toBe(
+      "invert(100%)"
+    );
   }
 });
