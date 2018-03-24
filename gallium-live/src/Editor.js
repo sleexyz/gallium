@@ -125,7 +125,7 @@ export class _Editor extends React.Component<
     return (
       <Container
         isInitialized={this.state.isInitialized}
-        style={{ filter: this.props.invert ? "invert()" : "" }}
+        style={{ filter: this.props.invert ? "invert(100%)" : "" }}
       >
         <Pane>
           <PaneChild>

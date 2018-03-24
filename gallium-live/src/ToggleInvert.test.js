@@ -12,7 +12,7 @@ test("invert is initialized as false", async () => {
 test("toggling invert inverts the screen", async () => {
   const { wrapper } = await TestUtils.mountWithStore(<Editor />);
   wrapper.find(ToggleInvert.Box).simulate("change");
-  expect(wrapper.find(Container).props().style.filter).toBe("invert()");
+  expect(wrapper.find(Container).props().style.filter).toBe("invert(100%)");
 });
 
 test("invert on is preserved across reloads", async () => {
@@ -23,7 +23,7 @@ test("invert on is preserved across reloads", async () => {
   }
   {
     const { wrapper } = await TestUtils.mountWithStore(<Editor />);
-    expect(wrapper.find(Container).props().style.filter).toBe("invert()");
+    expect(wrapper.find(Container).props().style.filter).toBe("invert(100%)");
   }
 });
 
@@ -36,6 +36,8 @@ test("invert off is preserved across reloads", async () => {
   }
   {
     const { wrapper } = await TestUtils.mountWithStore(<Editor />);
-    expect(wrapper.find(Container).props().style.filter).not.toBe("invert()");
+    expect(wrapper.find(Container).props().style.filter).not.toBe(
+      "invert(100%)"
+    );
   }
 });
