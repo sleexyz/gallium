@@ -12,6 +12,11 @@
   Inspired by <a href="https://tidalcycles.org/">Tidal</a>.
 </p>
 
+# directories
+- `gallium` -- javascript implementation of the language `gallium`
+- `gallium-live` -- frontend to use the language for livecoding in a browser
+- `gallium-relay` -- some shit that @sleexyz came up with for a show once, which wasn't even used
+
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 <p align="center">
