@@ -8,13 +8,13 @@ type Context = {
   type: Types.Type
 };
 
-export const infer = (node: ABT, ctx: Context): Types.type => {
+export const infer = (node: ABT): Types.Type => {
   if (node instanceof AST.HApp || node instanceof AST.VApp) {
     const funType = infer(node.children[0]);
     return funType.output;
   }
   if (node instanceof AST.Paren) {
-    return infer(node.children[0], ctx);
+    return infer(node.children[0]);
   }
   if (node instanceof AST.Name) {
     return node.data.type;

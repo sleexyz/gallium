@@ -67,11 +67,12 @@ function altWithNumLitInterpreter<A>(
   };
 }
 
-function altWithZoom<A>( n: number): Term<(Array<Transformer<A>>) => Transformer<A>> {
+function altWithZoom<A>(n: number): Term<(Array<Transformer<A>>) => Transformer<A>> {
   return {
     type: Types.listProcessor(Types.transformer, Types.transformer),
     value: transformers => {
-      return () => p => slow(n)(alt(transformers.map(t => p => fast(n)(t(p))))(p));
+      // return () => (p: Pattern<A>) => slow(n)(alt(transformers.map((t: Transformer<A>) => (p1: Pattern<A>) => fast(n)(t(p1))))(p));
+      return () => (p: Pattern<A>) => slow(n)(alt(transformers.map((t: Transformer<A>) => (p1: Pattern<A>) => t(fast(n)(p1))))(p));
     }
   }
 }
@@ -133,20 +134,33 @@ const globalContext: BindingContext = {
     type: Types.listProcessor(Types.transformer, Types.transformer),
     impureValue: backtrackPureFn(alt)
   },
-  out1: altWithZoom(1),
-  out2: altWithZoom(2),
-  out3: altWithZoom(4),
+  out0: altWithZoom(1),
+  out1: altWithZoom(2),
+  out2: altWithZoom(4),
   out3: altWithZoom(8),
   out4: altWithZoom(16),
   out5: altWithZoom(32),
   out6: altWithZoom(64),
-  in1: altWithZoom(1/1),
-  in2: altWithZoom(1/2),
-  in3: altWithZoom(1/4),
+  in0: altWithZoom(1/1),
+  in1: altWithZoom(1/2),
+  in2: altWithZoom(1/4),
   in3: altWithZoom(1/8),
   in4: altWithZoom(1/16),
   in5: altWithZoom(1/32),
-  in5: altWithZoom(1/64),
+  in6: altWithZoom(1/64),
+  z: altWithZoom(1),
+  zo: altWithZoom(2),
+  zoo: altWithZoom(4),
+  zooo: altWithZoom(8),
+  zoooo: altWithZoom(16),
+  zooooo: altWithZoom(32),
+  zoooooo: altWithZoom(64),
+  zi: altWithZoom(1/2),
+  zii: altWithZoom(1/4),
+  ziii: altWithZoom(1/8),
+  ziiii: altWithZoom(1/16),
+  ziiiii: altWithZoom(1/32),
+  ziiiiii: altWithZoom(1/64),
   note: altWithNumLitInterpreter(note),
   slow: altWithNumLitInterpreter(pureFn(x => slow(Math.max(x, 1 / 128)))),
   fast: altWithNumLitInterpreter(pureFn(x => fast(Math.min(x, 128)))),
