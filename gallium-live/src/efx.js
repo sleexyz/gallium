@@ -18,21 +18,7 @@ export type AppState = {
   pattern: Pattern<*>
 };
 
-const defaultText = `alt (do (note 127 126 124 127) (shift 1 2 3)) (do (note 125) (fast 2))
-fast 2
-shift 0.5 0 0 0
-alt i m
-shift 0.5
-stack
-  i
-  do
-    note 120 60 15 127
-    slow 4
-    alt i m
-    fast 2 2 2 4 2 2 2 2
-    fast 4
-    shift 0 0 0 0 0 0 0 0 0 0.5
-`;
+const defaultText = `m`;
 
 export function makeInitialState(): AppState {
   return {

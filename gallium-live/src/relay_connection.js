@@ -2,7 +2,8 @@
 
 type RelayOptions = {
   id: string,
-  destination: string
+  destination: string,
+  mode: "control" | "listen"
 };
 
 // TODO: test
@@ -19,9 +20,13 @@ export class RelayConnection {
   async initialize() {
     try {
       await this.connectToWebsocket();
-      this.subscribeToChanges();
     } catch (e) {
       console.log(`Could not connect to ${this.options.destination}`);
+    }
+    if (this.options.mode === "control") {
+      this.initializeControlMode();
+    } else if (this.options.mode === "listen") {
+      this.initializeListenMode();
     }
   }
 
@@ -43,7 +48,24 @@ export class RelayConnection {
     this.socket = socket;
   }
 
-  subscribeToChanges(): void {
+  initializeListenMode(): void {
+    console.log("Listen mode activated.");
+
+    const node = document.getElementById(this.options.id);
+
+    if (!node) {
+      throw new Error(`Element ${this.options.id} not found!`);
+    }
+
+    this.socket.onmessage = message => {
+      Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set.call(node, message.data);
+      const event = new Event("input", { bubbles: true });
+      node.dispatchEvent(event);
+    };
+  }
+
+  initializeControlMode(): void {
+    console.log("Control mode activated.");
     const node = document.getElementById(this.options.id);
 
     if (!node) {

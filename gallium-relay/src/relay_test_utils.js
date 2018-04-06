@@ -7,44 +7,31 @@ import child_process from "child_process";
 
 export async function connectToWebsocket(destination: string) {
   const ws = new WebSocket(destination);
+  const messageQueue = [];
+  let _resolve;
   await new Promise((resolve, reject) => {
     ws.on("open", resolve);
     ws.on("error", reject);
-  });
-  return ws;
-}
-
-export function startMockOSCServer(options: { oscPort: number }) {
-  const server = dgram.createSocket("udp4");
-
-  const defaultResolvePacketPromise = (message: any) => {
-    throw new Error("not inspecting packets");
-  };
-
-  let resolvePacketPromise = defaultResolvePacketPromise;
-
-  server.on("message", message => {
-    resolvePacketPromise(message);
-  });
-  server.bind(57110);
-  TestUtils.cleanupWith(() => {
-    server.close();
-  });
-
-  async function getOSCMessage() {
-    let packetPromise = new Promise(resolve => {
-      resolvePacketPromise = resolve;
+    ws.on("message", (data) => {
+      messageQueue.push(data);
+      if (resolve) {
+        resolve();
+      }
     });
-    const packet = await packetPromise;
-    const message = new OSC.Message();
-    message.unpack(new DataView(packet.buffer), 0);
-    resolvePacketPromise = defaultResolvePacketPromise;
-    return message;
+  });
+  function getMessage() {
+    return new Promise(resolve => {
+      if (messageQueue.length > 0) {
+        const nextItem = messageQueue.pop();
+        resolve(nextItem);
+      } else {
+        _resolve = resolve;
+      }
+    });
   }
-
   return {
-    server,
-    getOSCMessage
+    ws,
+    getMessage
   };
 }
 

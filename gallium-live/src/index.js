@@ -19,7 +19,16 @@ ReactDOM.render(
   (document.getElementById("react-root"): any)
 );
 
-new RelayConnection({
-  id: "gallium-textarea",
-  destination: "ws://localhost:58121"
-});
+if (window.location.pathname === "/control") {
+  new RelayConnection({
+    id: "gallium-textarea",
+    destination: `ws://${window.location.hostname}:58121`,
+    mode: "control"
+  });
+} else if (window.location.pathname === "/listen") {
+  new RelayConnection({
+    id: "gallium-textarea",
+    destination: `ws://${window.location.hostname}:58121`,
+    mode: "listen"
+  });
+}
