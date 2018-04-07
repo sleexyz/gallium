@@ -1,6 +1,7 @@
 const webpack = require("webpack");
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: ["babel-polyfill", "./src/index.js"],
@@ -22,7 +23,10 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "src/index.html",
       filename: "index.html"
-    })
+    }),
+    new CopyWebpackPlugin([
+      { from: "src/static", to: "static" }
+    ])
   ],
   output: {
     path: path.resolve(__dirname, "dist"),

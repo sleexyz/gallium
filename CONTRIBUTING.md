@@ -8,6 +8,14 @@ Feel free to take on issues in the issue tracker. If you don't know what to work
 
 Then fork the repo and make a pull-request when you're ready! In-progress PRs are encouraged.
 
+
+## [Code of Conduct](./CODE_OF_CONDUCT)
+
+## Directories
+- [`./gallium`](./gallium) – language implementation
+- [`./gallium-live`](./gallium-live) – web based live coding environment
+- [`./gallium-relay`](./gallium-relay) - experimental server for collaboration
+
 ## Development Guide
 
 The following commands run in the root of the repo:
@@ -41,7 +49,6 @@ yarn check-all
 To start a local development server for [gallium.live](http://gallium.live):
 
 ```
-cd gallium-live
 yarn start
 ```
 
