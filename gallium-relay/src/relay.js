@@ -22,8 +22,9 @@ export function main(options: Options) {
   };
 
   wsServer.on("connection", ws => {
-    ws.on("message", text => {
-      wsServer.broadcast(text);
+    ws.on("message", data => {
+      console.log(JSON.stringify(data, null, 2));
+      wsServer.broadcast(data);
     });
     ws.on("error", () => {});
   });

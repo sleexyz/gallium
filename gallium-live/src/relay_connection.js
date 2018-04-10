@@ -6,7 +6,11 @@ type RelayOptions = {
   mode: "control" | "listen"
 };
 
-// TODO: test
+type RelayPayload = {
+  text: string,
+  scrollTop: number
+};
+
 export class RelayConnection {
   options: RelayOptions;
   socket: WebSocket;
@@ -58,9 +62,16 @@ export class RelayConnection {
     }
 
     this.socket.onmessage = message => {
-      Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set.call(node, message.data);
+      const relayPayload: RelayPayload = JSON.parse((message.data: any));
+      console.log(relayPayload);
+      const { text, scrollTop } = relayPayload;
+      Object.getOwnPropertyDescriptor(
+        window.HTMLTextAreaElement.prototype,
+        "value"
+      ).set.call(node, text);
       const event = new Event("input", { bubbles: true });
       node.dispatchEvent(event);
+      node.scrollTop = scrollTop;
     };
   }
 
@@ -77,11 +88,15 @@ export class RelayConnection {
         if (mutation.addedNodes.length !== 1) {
           continue;
         }
-        const node: any = mutation.addedNodes[0];
-        if (!node.isConnected) {
+        const mutationNode: any = mutation.addedNodes[0];
+        if (!mutationNode.isConnected) {
           continue;
         }
-        this.socket.send(node.data);
+        const relayPayload: RelayPayload = {
+          text: mutationNode.data,
+          scrollTop: node.scrollTop
+        };
+        this.socket.send(JSON.stringify(relayPayload));
       }
     });
 
