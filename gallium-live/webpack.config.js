@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = {
   entry: ["babel-polyfill", "./src/index.js"],
   devServer: {
-    port: 8081,
+    port: 8091,
     contentBase: "./dist",
     disableHostCheck: true,
   },

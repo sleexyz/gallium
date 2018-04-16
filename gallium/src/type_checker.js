@@ -19,7 +19,7 @@ export const infer = (node: ABT): Types.Type => {
   if (node instanceof AST.Name) {
     return node.data.type;
   }
-}
+};
 
 export const check = (node: ABT, ctx: Context): void => {
   if (node instanceof AST.HApp || node instanceof AST.VApp) {
