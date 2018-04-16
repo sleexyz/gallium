@@ -69,7 +69,7 @@ function altWithNumLitInterpreter<A>(
 
 function altWithPeriod<A>(
   n: number
-): Term<(Array<Transformer<A>>) => Transformer<A>> {
+): Term<(Array<Transformer<A>>) => Impure<Transformer<A>>> {
   return {
     type: Types.listProcessor(Types.transformer, Types.transformer),
     value: transformers => {
@@ -87,7 +87,7 @@ function altWithPeriod<A>(
 
 function altWithZoom<A>(
   n: number
-): Term<(Array<Transformer<A>>) => Transformer<A>> {
+): Term<(Array<Transformer<A>>) => Impure<Transformer<A>>> {
   return {
     type: Types.listProcessor(Types.transformer, Types.transformer),
     value: transformers => {
