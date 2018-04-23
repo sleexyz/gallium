@@ -299,6 +299,26 @@ Alternates between pipes on every beat.
 
 Starts a new stream of MIDI notes. `note` will ignore data from the previous pipe and overwrite it with a new stream.
 
+#### add
+```
+ add: ...P -> P
+(add): Number -> P
+````
+
+*Alternates between pipes on every beat.*
+
+Transposes a stream of MIDI notes up a given number of semitones.
+
+#### sub
+```
+ sub: ...P -> P
+(sub): Number -> P
+````
+
+*Alternates between pipes on every beat.*
+
+Transposes a stream of MIDI notes down a given number of semitones.
+
 
 #### chan
 
