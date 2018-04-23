@@ -51,6 +51,19 @@ export function chanMap(f: number => number): Transformer<Parameters> {
   };
 }
 
+export function lengthMap(f: number => number): Transformer<Parameters> {
+  return pattern => (start, end) => {
+    const events = pattern(start, end);
+    return events.map(event => ({
+      ...event,
+      value: {
+        ...event.value,
+        length: f(event.value.length)
+      }
+    }));
+  };
+}
+
 function altWithNumLitInterpreter<A>(
   numLitInterpreter: number => IContext => A
 ): Term<(Array<Transformer<A>>) => Impure<Transformer<A>>> {
@@ -98,13 +111,15 @@ function altWithZoom<A>(
 
 export type Parameters = {
   channel: number,
-  pitch: number
+  pitch: number,
+  length: number
 };
 
 const note = (pitch: number): Impure<Transformer<Parameters>> => {
   return ctx => {
     const value = {
       channel: ctx.state.channel,
+      length: 1,
       pitch
     };
     return () =>
@@ -180,6 +195,7 @@ const globalContext: BindingContext = {
   add: altWithNumLitInterpreter(pureFn(x => pitchMap(p => p + x))),
   sub: altWithNumLitInterpreter(pureFn(x => pitchMap(p => p - x))),
   chan: altWithNumLitInterpreter(pureFn(x => chanMap(() => x))),
+  len: altWithNumLitInterpreter(pureFn(x => lengthMap(() => x))),
   shift: altWithNumLitInterpreter(pureFn(shift)),
   channel: {
     type: Types.func(Types.number, Types.transformer),

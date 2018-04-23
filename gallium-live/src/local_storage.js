@@ -16,6 +16,14 @@ export function loadText(): ?string {
   return window.localStorage.getItem("text");
 }
 
+export function saveText2(text: string) {
+  window.localStorage.setItem("text2", text);
+}
+
+export function loadText2(): ?string {
+  return window.localStorage.getItem("text2");
+}
+
 export function saveInvert(invert: boolean) {
   window.localStorage.setItem("invert", JSON.stringify(invert));
 }

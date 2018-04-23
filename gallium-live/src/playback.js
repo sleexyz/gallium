@@ -1,7 +1,7 @@
 // @flow
 import { makeInitialState, type AppState } from "./efx";
 import { makeAction, Store, type Action } from "./efx";
-import { type Event } from "gallium/lib/semantics";
+import { type Event, stackPat } from "gallium/lib/semantics";
 import { type Parameters } from "gallium/lib/top_level";
 import * as LocalStorage from "./local_storage";
 import * as MIDIUtils from "gallium/lib/midi_utils";
@@ -21,8 +21,9 @@ export class Player {
     const now = performance.now();
     const timestampOn =
       now + (event.start - this.state.beat) * getBeatLength(this.state.bpm);
+    const correctedEnd = (event.end - event.start) * event.value.length + event.start;
     const timestampOff =
-      now + (event.end - this.state.beat) * getBeatLength(this.state.bpm) - 1;
+      now + (correctedEnd - this.state.beat) * getBeatLength(this.state.bpm) - 1;
 
     this.state.output.send(
       MIDIUtils.noteOn({
@@ -44,7 +45,8 @@ export class Player {
   }
 
   queryAndSend(): void {
-    const events = this.state.pattern(this.state.beat, this.state.beat + 1);
+    const combinedPattern = stackPat([this.state.pattern, this.state.pattern2]);
+    const events = combinedPattern(this.state.beat, this.state.beat + 1);
     for (let i = 0; i < events.length; i++) {
       this.sendEvent(events[i]);
     }

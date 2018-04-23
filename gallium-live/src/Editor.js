@@ -23,11 +23,13 @@ type ContainerProps = {
   invert: boolean
 };
 
-const mapStateToProps = ({ text, invert }) => ({ text, invert });
+const mapStateToProps = ({ text, text2, invert }) => ({ text, text2, invert });
 
 type State = {
   text: string,
+  text2: string,
   error: ?string,
+  error2: ?string,
   isInitialized: boolean
 };
 
@@ -39,12 +41,15 @@ export class _Editor extends React.Component<
     super(props);
     this.state = {
       text: props.text,
+      text2: props.text2,
       error: undefined,
+      error2: undefined,
       isInitialized: false
     };
   }
 
   textarea: ?HTMLTextAreaElement;
+  textarea2: ?HTMLTextAreaElement;
 
   componentDidMount() {
     this.props.dispatch(AppActions.initialize());
@@ -81,6 +86,31 @@ export class _Editor extends React.Component<
     }
   }
 
+  onChange2 = (e: *) => {
+    this.setState({
+      text2: e.target.value
+    });
+    this.updateABT2(e.target.value);
+  };
+
+  updateABT2(text: string) {
+    try {
+      const abt = TopLevel.parseAndResolve(text);
+      this.setState({
+        error2: undefined
+      });
+      this.props.dispatch(store => {
+        store.state.pattern2 = TopLevel.interpret(abt);
+      });
+      LocalStorage.saveText2(text);
+    } catch (e) {
+      console.error(e);
+      this.setState({
+        error2: e.toString()
+      });
+    }
+  }
+
   onKeyPress = (e: SyntheticKeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -113,6 +143,38 @@ export class _Editor extends React.Component<
     }
   };
 
+  onKeyPress2 = (e: SyntheticKeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const pos = e.currentTarget.selectionStart;
+      const prefix = this.state.text2.substr(0, pos);
+      const suffix = this.state.text2.substr(pos);
+
+      const prePos = prefix.lastIndexOf("\n");
+      const line = prefix.substring(prePos + 1);
+      const spaceMatch = line.match(/^\ */g);
+      if (!spaceMatch) {
+        throw new Error("unexpected error: no match");
+      }
+      const indentation = spaceMatch[0];
+
+      const extraText = "\n" + indentation;
+      const newText = prefix + extraText + suffix;
+      this.setState(
+        {
+          text2: newText
+        },
+        () => {
+          (this.textarea2: any).focus();
+          (this.textarea2: any).setSelectionRange(
+            pos + extraText.length,
+            pos + extraText.length
+          );
+        }
+      );
+    }
+  };
+
   onTextareaRefLoad = (ref: HTMLTextAreaElement) => {
     this.textarea = ref;
     if (!this.textarea) {
@@ -121,8 +183,16 @@ export class _Editor extends React.Component<
     this.textarea.focus();
   };
 
+  onTextarea2RefLoad = (ref: HTMLTextAreaElement) => {
+    this.textarea2 = ref;
+    if (!this.textarea2) {
+      return;
+    }
+  };
+
   render() {
     const barStyle = this.state.error ? "dotted" : "solid";
+    const barStyle2 = this.state.error2 ? "dotted" : "solid";
     return (
       <Container
         isInitialized={this.state.isInitialized}
@@ -144,6 +214,14 @@ export class _Editor extends React.Component<
             value={this.state.text}
             innerRef={this.onTextareaRefLoad}
             barStyle={barStyle}
+          />
+          <Textarea
+            id="gallium-textarea2"
+            onChange={this.onChange2}
+            onKeyPress={this.onKeyPress2}
+            value={this.state.text2}
+            innerRef={this.onTextarea2RefLoad}
+            barStyle={barStyle2}
           />
         </Content>
         <Pane>
@@ -195,7 +273,7 @@ const PaneChild = styled.div`
 `;
 
 const Content = styled.div`
-  padding: 10vh 10vw;
+  padding: 10vh 1vw;
   flex-grow: 1;
   flex-shrink: 0;
   display: flex;

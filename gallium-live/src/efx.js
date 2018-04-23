@@ -9,43 +9,33 @@ export type AppState = {
   loading: boolean,
   error: ?Error,
   text: string,
+  text2: string,
   intervalId: ?number,
   invert: boolean,
   output: MIDI.Device,
   outputs: { [string]: MIDI.Device },
   beat: number,
   bpm: number,
-  pattern: Pattern<*>
+  pattern: Pattern<*>,
+  pattern2: Pattern<*>
 };
 
-const defaultText = `alt (do (note 127 126 124 127) (shift 1 2 3)) (do (note 125) (fast 2))
-fast 2
-shift 0.5 0 0 0
-alt i m
-shift 0.5
-stack
-  i
-  do
-    note 120 60 15 127
-    slow 4
-    alt i m
-    fast 2 2 2 4 2 2 2 2
-    fast 4
-    shift 0 0 0 0 0 0 0 0 0 0.5
-`;
+const defaultText = `note 60`;
 
 export function makeInitialState(): AppState {
   return {
     loading: true,
     error: undefined,
     text: LocalStorage.loadText() || defaultText,
+    text2: LocalStorage.loadText2() || "",
     intervalId: undefined,
     invert: LocalStorage.loadInvert() || false,
     output: MIDI.makeDummyDevice("mockDevice"),
     outputs: {},
     beat: 0,
     bpm: LocalStorage.loadBPM() || 160,
-    pattern: silence
+    pattern: silence,
+    pattern2: silence
   };
 }
 

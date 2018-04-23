@@ -3,7 +3,6 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Editor } from "./Editor";
 import { Store, makeInitialState, Provider } from "./efx";
-import { type AppState } from "./state";
 import { applyGlobalStyles } from "./styles";
 import { RelayConnection } from "./relay_connection";
 
