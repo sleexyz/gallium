@@ -2,8 +2,7 @@
     "private": true,
     "workspaces": [
         "gallium",
-        "gallium-live",
-        "gallium-relay"
+        "gallium-live"
     ],
     "devDependencies": {
         "flow-bin": "^0.61.0",
