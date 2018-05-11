@@ -10,10 +10,10 @@ const parse = (code: string): Pattern<TopLevel.Parameters> => {
 it("allows arguments", () => {
   const pattern = parse(`note 60 72`);
   expect(pattern(0, 1)).toEqual([
-    { start: 0, end: 1, value: { channel: 0, pitch: 60 } }
+    { start: 0, end: 1, value: { channel: 0, pitch: 60, length: 1 } }
   ]);
   expect(pattern(1, 2)).toEqual([
-    { start: 1, end: 2, value: { channel: 0, pitch: 72 } }
+    { start: 1, end: 2, value: { channel: 0, pitch: 72, length: 1 } }
   ]);
 });
 
@@ -31,7 +31,7 @@ describe("channel", () => {
   test("setting", () => {
     const pattern = parse(`do (channel 1) (note 0)`);
     expect(pattern(0, 1)).toEqual([
-      { start: 0, end: 1, value: { channel: 1, pitch: 0 } }
+      { start: 0, end: 1, value: { channel: 1, pitch: 0, length: 1 } }
     ]);
   });
 
@@ -42,27 +42,27 @@ describe("channel", () => {
   test("extraneous changes result in no-op", () => {
     const pattern = parse(`do (channel 1) (note 0) (channel 1)`);
     expect(pattern(0, 1)).toEqual([
-      { start: 0, end: 1, value: { channel: 1, pitch: 0 } }
+      { start: 0, end: 1, value: { channel: 1, pitch: 0, length: 1 } }
     ]);
   });
 
   test("is block-scoped", () => {
     const pattern = parse(`alt (do (channel 1) (note 0)) (note 0)`);
     expect(pattern(0, 1)).toEqual([
-      { start: 0, end: 1, value: { channel: 1, pitch: 0 } }
+      { start: 0, end: 1, value: { channel: 1, pitch: 0, length: 1 } }
     ]);
     expect(pattern(1, 2)).toEqual([
-      { start: 1, end: 2, value: { channel: 0, pitch: 0 } }
+      { start: 1, end: 2, value: { channel: 0, pitch: 0, length: 1 } }
     ]);
   });
 
   test("is block-scoped (2)", () => {
     const pattern = parse(`alt (do (channel 1) (do (channel 2) 0)) (note 0)`);
     expect(pattern(1, 2)).toEqual([
-      { start: 1, end: 2, value: { channel: 0, pitch: 0 } }
+      { start: 1, end: 2, value: { channel: 0, pitch: 0, length: 1 } }
     ]);
     expect(pattern(0, 1)).toEqual([
-      { start: 0, end: 1, value: { channel: 2, pitch: 0 } }
+      { start: 0, end: 1, value: { channel: 2, pitch: 0, length: 1 } }
     ]);
   });
 });
@@ -91,4 +91,10 @@ test("out1 changes speed of time as arguments percieve it", () => {
   expect(parse(`do (note 0 7) (out1 (shift 0) (shift 0.5))`)(0, 4)).toEqual(
     parse(`do (note 0 7) (shift 0 0 1 1)`)(0, 4)
   );
+});
+
+test("len changes note lengths", () => {
+  expect(parse(`do (note 0) (len .5)`)(0, 1)).toEqual([
+      { start: 0, end: 1, value: { channel: 0, pitch: 0, length: .5 } }
+  ]);
 });
