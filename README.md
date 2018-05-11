@@ -286,6 +286,36 @@ alt : ...P -> P
 
 Alternates between pipes on every beat.
 
+### alt0, alt1, alt2, alt3, alt4, alt5, alt6
+
+```
+alt(n) : ...P -> P
+```
+
+Alternates between pipes every 2^n beats.
+
+Note alt0 is equivalent to alt.
+
+### out0, out1, out2, out3, out4, out5, out6
+
+```
+out(n) : ...P -> P
+```
+
+Alternates between pipes every 2^n beats. Pipes perceive time 2^n times slower.
+
+Note out0 is equivalent to alt.
+
+### in0, in1, in2, in3, in4, in5, in6
+
+```
+in(n) : ...P -> P
+```
+
+Alternates between pipes every (1/2)^n beats. Pipes perceive time 2^n times faster.
+
+Note in0 is equivalent to alt.
+
 
 ### MIDI Operators
 
@@ -295,9 +325,9 @@ Alternates between pipes on every beat.
 (note): Number -> P
 ````
 
-*Alternates between pipes on every beat.*
-
 Starts a new stream of MIDI notes. `note` will ignore data from the previous pipe and overwrite it with a new stream.
+
+*Alternates between pipes on every beat.*
 
 #### add
 ```
@@ -305,9 +335,9 @@ Starts a new stream of MIDI notes. `note` will ignore data from the previous pip
 (add): Number -> P
 ````
 
-*Alternates between pipes on every beat.*
-
 Transposes a stream of MIDI notes up a given number of semitones.
+
+*Alternates between pipes on every beat.*
 
 #### sub
 ```
@@ -315,9 +345,9 @@ Transposes a stream of MIDI notes up a given number of semitones.
 (sub): Number -> P
 ````
 
-*Alternates between pipes on every beat.*
-
 Transposes a stream of MIDI notes down a given number of semitones.
+
+*Alternates between pipes on every beat.*
 
 
 #### chan
@@ -327,9 +357,21 @@ Transposes a stream of MIDI notes down a given number of semitones.
 (chan): Number -> P
 ````
 
+Sets the MIDI channel.
+
 *Alternates between pipes on every beat.*
 
-Sets the MIDI channel.
+
+#### len
+
+```
+ len : ...P -> P
+(len): Number -> P
+````
+
+Sets the note lengths in beats. Default length is 1.
+
+*Alternates between pipes on every beat.*
 
 
 ### Time Operators
