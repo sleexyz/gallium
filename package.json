@@ -15,6 +15,7 @@
       "check-all": "flow check && yarn format-check && yarn test",
       "format": "lerna run format",
       "format-check": "lerna run format-check",
-      "test": "lerna run test"
+      "test": "lerna run test",
+      "start": "(cd gallium-live; yarn run start)"
     }
 }

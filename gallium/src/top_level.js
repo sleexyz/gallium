@@ -51,6 +51,19 @@ export function chanMap(f: number => number): Transformer<Parameters> {
   };
 }
 
+export function lengthMap(f: number => number): Transformer<Parameters> {
+  return pattern => (start, end) => {
+    const events = pattern(start, end);
+    return events.map(event => ({
+      ...event,
+      value: {
+        ...event.value,
+        length: f(event.value.length)
+      }
+    }));
+  };
+}
+
 function altWithNumLitInterpreter<A>(
   numLitInterpreter: number => IContext => A
 ): Term<(Array<Transformer<A>>) => Impure<Transformer<A>>> {
@@ -60,23 +73,53 @@ function altWithNumLitInterpreter<A>(
       const oldState = ctx.state;
       ctx.state = { ...ctx.state, numLitInterpreter };
       return transformers => ctx => {
-        const ret = alt(transformers);
         ctx.state = oldState;
-        return ret;
+        return alt(transformers);
       };
+    }
+  };
+}
+
+function altWithPeriod<A>(
+  n: number
+): Term<(Array<Transformer<A>>) => Impure<Transformer<A>>> {
+  return {
+    type: Types.listProcessor(Types.transformer, Types.transformer),
+    value: transformers => {
+      return () => (p: Pattern<A>) =>
+        slow(n)(
+          alt(
+            transformers.map((t: Transformer<A>) => (p1: Pattern<A>) =>
+              fast(n)(t(p1))
+            )
+          )(p)
+        );
+    }
+  };
+}
+
+function altWithZoom<A>(
+  n: number
+): Term<(Array<Transformer<A>>) => Impure<Transformer<A>>> {
+  return {
+    type: Types.listProcessor(Types.transformer, Types.transformer),
+    value: transformers => {
+      return () => (p: Pattern<A>) => slow(n)(alt(transformers)(fast(n)(p)));
     }
   };
 }
 
 export type Parameters = {
   channel: number,
-  pitch: number
+  pitch: number,
+  length: number
 };
 
 const note = (pitch: number): Impure<Transformer<Parameters>> => {
   return ctx => {
     const value = {
       channel: ctx.state.channel,
+      length: 1,
       pitch
     };
     return () =>
@@ -125,12 +168,34 @@ const globalContext: BindingContext = {
     type: Types.listProcessor(Types.transformer, Types.transformer),
     impureValue: backtrackPureFn(alt)
   },
+  alt0: altWithPeriod(1),
+  alt1: altWithPeriod(2),
+  alt2: altWithPeriod(4),
+  alt3: altWithPeriod(8),
+  alt4: altWithPeriod(16),
+  alt5: altWithPeriod(32),
+  alt6: altWithPeriod(64),
+  out0: altWithZoom(1),
+  out1: altWithZoom(2),
+  out2: altWithZoom(4),
+  out3: altWithZoom(8),
+  out4: altWithZoom(16),
+  out5: altWithZoom(32),
+  out6: altWithZoom(64),
+  in0: altWithZoom(1 / 1),
+  in1: altWithZoom(1 / 2),
+  in2: altWithZoom(1 / 4),
+  in3: altWithZoom(1 / 8),
+  in4: altWithZoom(1 / 16),
+  in5: altWithZoom(1 / 32),
+  in6: altWithZoom(1 / 64),
   note: altWithNumLitInterpreter(note),
   slow: altWithNumLitInterpreter(pureFn(x => slow(Math.max(x, 1 / 128)))),
   fast: altWithNumLitInterpreter(pureFn(x => fast(Math.min(x, 128)))),
   add: altWithNumLitInterpreter(pureFn(x => pitchMap(p => p + x))),
   sub: altWithNumLitInterpreter(pureFn(x => pitchMap(p => p - x))),
   chan: altWithNumLitInterpreter(pureFn(x => chanMap(() => x))),
+  len: altWithNumLitInterpreter(pureFn(x => lengthMap(() => x))),
   shift: altWithNumLitInterpreter(pureFn(shift)),
   channel: {
     type: Types.func(Types.number, Types.transformer),

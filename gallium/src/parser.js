@@ -23,7 +23,7 @@ export { ParseContext } from "./parser_combinators.js";
 
 export const parseName: Parser<AST.Base> = ctx => {
   const text = ctx.getText();
-  const match = text.match(/^[a-zA-Z]+/);
+  const match = text.match(/^[a-zA-Z][a-zA-Z0-9]*/);
   if (!match) {
     throw new ParseError("not a name");
   }

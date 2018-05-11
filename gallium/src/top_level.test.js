@@ -74,3 +74,21 @@ test("i is a no-op", () => {
 test("m mutes", () => {
   expect(parse(`do (note 0) m`)(0, 1)).toEqual([]);
 });
+
+test("alt1 switches every two beats", () => {
+  expect(parse(`do (note 0) (alt1 (add 0) (add 7))`)(0, 4)).toEqual(
+    parse(`note 0 0 7 7`)(0, 4)
+  );
+});
+
+test("alt1 does not change speed of time as arguments percieve it", () => {
+  expect(parse(`do (note 0 7) (alt1 (shift 0) (shift 0.5))`)(0, 4)).toEqual(
+    parse(`do (note 0 7) (shift 0 0 .5 .5)`)(0, 4)
+  );
+});
+
+test("out1 changes speed of time as arguments percieve it", () => {
+  expect(parse(`do (note 0 7) (out1 (shift 0) (shift 0.5))`)(0, 4)).toEqual(
+    parse(`do (note 0 7) (shift 0 0 1 1)`)(0, 4)
+  );
+});

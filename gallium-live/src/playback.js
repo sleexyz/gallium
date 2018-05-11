@@ -21,8 +21,9 @@ export class Player {
     const now = performance.now();
     const timestampOn =
       now + (event.start - this.state.beat) * getBeatLength(this.state.bpm);
+    const correctedEnd = (event.end - event.start) * event.value.length + event.start;
     const timestampOff =
-      now + (event.end - this.state.beat) * getBeatLength(this.state.bpm) - 1;
+      now + (correctedEnd - this.state.beat) * getBeatLength(this.state.bpm) - 1;
 
     this.state.output.send(
       MIDIUtils.noteOn({

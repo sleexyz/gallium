@@ -8,9 +8,22 @@ type Context = {
   type: Types.Type
 };
 
+export const infer = (node: ABT): Types.Type => {
+  if (node instanceof AST.HApp || node instanceof AST.VApp) {
+    const funType = infer(node.children[0]);
+    return funType.output;
+  }
+  if (node instanceof AST.Paren) {
+    return infer(node.children[0]);
+  }
+  if (node instanceof AST.Name) {
+    return node.data.type;
+  }
+};
+
 export const check = (node: ABT, ctx: Context): void => {
   if (node instanceof AST.HApp || node instanceof AST.VApp) {
-    const funType = node.children[0].data.type;
+    const funType = infer(node.children[0]);
     if (funType.tag === "listProcessor") {
       const outputType = funType.output;
       const inputType = funType.input;
