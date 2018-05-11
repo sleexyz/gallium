@@ -95,6 +95,6 @@ test("out1 changes speed of time as arguments percieve it", () => {
 
 test("len changes note lengths", () => {
   expect(parse(`do (note 0) (len .5)`)(0, 1)).toEqual([
-      { start: 0, end: 1, value: { channel: 0, pitch: 0, length: .5 } }
+    { start: 0, end: 1, value: { channel: 0, pitch: 0, length: 0.5 } }
   ]);
 });
