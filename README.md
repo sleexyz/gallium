@@ -369,7 +369,7 @@ Sets the MIDI channel.
 (len): Number -> P
 ````
 
-Changes then note length
+Sets the note lengths in beats. Default length is 1.
 
 *Alternates between pipes on every beat.*
 
