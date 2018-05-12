@@ -1,6 +1,6 @@
 // @flow
 
-export function throttle(callback) {
+export function throttle<A>(callback: A => void): A => void {
   let lastCallTime;
   let lastValue;
   let timeout;
