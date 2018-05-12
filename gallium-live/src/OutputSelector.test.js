@@ -1,13 +1,13 @@
 // @flow
 import * as React from "react";
 import * as TestUtils from "./test_utils";
-import { Editor } from "./Editor";
+import { App } from "./App";
 import { OutputSelector, _OutputSelector } from "./OutputSelector";
 import * as MIDI from "./midi";
 import * as MIDIActions from "./midi_actions";
 
 async function mountOutputSelector() {
-  const { wrapper, store } = await TestUtils.mountWithStore(<Editor />);
+  const { wrapper, store } = await TestUtils.mountWithStore(<App />);
   await MIDIActions.selectInitialPort.toFinish();
   wrapper.update();
   return { wrapper, store };

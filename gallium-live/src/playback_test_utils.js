@@ -75,6 +75,6 @@ export const collectEventsNRT: Action<
     }
   });
 
-  store.dispatch(Playback.stop());
+  store.dispatch(Playback.pause());
   return events;
 };

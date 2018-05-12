@@ -66,13 +66,13 @@ export const start: Action<void, void> = () => store => {
       return;
     }
     if (store.state.bpm !== bpmSnapshot) {
-      store.dispatch(stop());
+      store.dispatch(pause());
       store.dispatch(start());
     }
   }, getBeatLength(bpmSnapshot));
 };
 
-export const stop: Action<void, void> = makeAction(() => store => {
+export const pause: Action<void, void> = makeAction(() => store => {
   if (store.state.intervalId) {
     clearInterval(store.state.intervalId);
     store.state.intervalId = undefined;

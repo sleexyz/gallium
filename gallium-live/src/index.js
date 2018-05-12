@@ -1,7 +1,7 @@
 // @flow
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { Editor } from "./Editor";
+import { App } from "./App";
 import { Store, makeInitialState, Provider } from "./efx";
 import { applyGlobalStyles } from "./styles";
 
@@ -12,7 +12,7 @@ window.store = store;
 
 ReactDOM.render(
   <Provider store={store}>
-    <Editor />
+    <App />
   </Provider>,
   (document.getElementById("react-root"): any)
 );
