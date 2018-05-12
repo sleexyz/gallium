@@ -12,7 +12,7 @@ import { connect, type Connect } from "./efx";
 import * as Styles from "./styles";
 import * as Playback from "./playback";
 import * as AppActions from "./app_actions";
-import { delay } from "./delay";
+import { throttle } from "./throttle";
 
 type OwnProps = {};
 
@@ -58,7 +58,7 @@ export class _Editor extends React.Component<
     this.updateABT(e.target.value);
   };
 
-  updateABT = delay((text: string) => {
+  updateABT = throttle((text: string) => {
     try {
       const abt = TopLevel.parseAndResolve(text);
       this.setState({

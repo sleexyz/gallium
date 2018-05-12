@@ -1,6 +1,6 @@
 // @flow
 
-export function delay(callback) {
+export function throttle(callback) {
   let lastCallTime;
   let lastValue;
   let timeout;
