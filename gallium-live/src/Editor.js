@@ -12,6 +12,7 @@ import { connect, type Connect } from "./efx";
 import * as Styles from "./styles";
 import * as Playback from "./playback";
 import * as AppActions from "./app_actions";
+import { delay } from "./delay";
 
 type OwnProps = {};
 
@@ -57,7 +58,7 @@ export class _Editor extends React.Component<
     this.updateABT(e.target.value);
   };
 
-  updateABT(text: string) {
+  updateABT = delay((text: string) => {
     try {
       const abt = TopLevel.parseAndResolve(text);
       this.setState({
@@ -72,7 +73,7 @@ export class _Editor extends React.Component<
         error: e.toString()
       });
     }
-  }
+  });
 
   onKeyPress = (e: SyntheticKeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
