@@ -6,7 +6,7 @@ export function delay(callback) {
   let timeout;
   return x => {
     lastValue = x;
-    const now = new Date()
+    const now = new Date();
 
     if (timeout) {
       clearTimeout(timeout);
