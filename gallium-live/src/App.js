@@ -6,6 +6,7 @@ import { Editor } from "./Editor";
 import { OutputSelector } from "./OutputSelector";
 import { BPMSelector } from "./BPMSelector";
 import { ToggleInvert } from "./ToggleInvert";
+import { PlaybackControls } from "./PlaybackControls";
 import * as Styles from "./styles";
 
 type OwnProps = {};
@@ -40,6 +41,12 @@ export class _App extends React.Component<
       >
         <Pane>
           <PaneChild>
+<<<<<<< HEAD
+=======
+            <PlaybackControls />
+          </PaneChild>
+          <PaneChild>
+>>>>>>> reduce re-renders
             <Description>gallium.live</Description>
           </PaneChild>
           <PaneChild>

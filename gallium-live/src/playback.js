@@ -79,6 +79,10 @@ export const pause: Action<void, void> = makeAction(() => store => {
   }
 });
 
+export const resetPlayback: Action<void, void> = makeAction(() => store => {
+  store.state.beat = 0;
+});
+
 export const isPlaying: Action<void, boolean> = makeAction(() => store => {
   return !!store.state.intervalId;
 });
