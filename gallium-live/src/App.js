@@ -41,12 +41,9 @@ export class _App extends React.Component<
       >
         <Pane>
           <PaneChild>
-<<<<<<< HEAD
-=======
             <PlaybackControls />
           </PaneChild>
           <PaneChild>
->>>>>>> reduce re-renders
             <Description>gallium.live</Description>
           </PaneChild>
           <PaneChild>
