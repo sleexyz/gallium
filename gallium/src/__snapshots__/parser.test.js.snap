@@ -39,6 +39,7 @@ VApp {
   "data": Object {},
   "extraSpaces": Array [
     "",
+    "",
   ],
   "indent": 2,
   "type": "VApp",
@@ -160,6 +161,7 @@ VApp {
   "data": Object {},
   "extraSpaces": Array [
     "",
+    "",
   ],
   "indent": 2,
   "type": "VApp",
@@ -182,6 +184,7 @@ VApp {
   ],
   "data": Object {},
   "extraSpaces": Array [
+    "",
     "
 ",
   ],
@@ -206,6 +209,7 @@ VApp {
   ],
   "data": Object {},
   "extraSpaces": Array [
+    "",
     "
 
 ",
@@ -245,6 +249,7 @@ VApp {
       "extraSpaces": Array [
         "",
         "",
+        "",
       ],
       "indent": 4,
       "type": "VApp",
@@ -257,6 +262,7 @@ VApp {
   ],
   "data": Object {},
   "extraSpaces": Array [
+    "",
     "",
     "",
   ],
@@ -296,6 +302,7 @@ VApp {
           "data": Object {},
           "extraSpaces": Array [
             "",
+            "",
           ],
           "indent": 6,
           "type": "VApp",
@@ -303,6 +310,7 @@ VApp {
       ],
       "data": Object {},
       "extraSpaces": Array [
+        "",
         "",
       ],
       "indent": 4,
@@ -316,6 +324,7 @@ VApp {
   ],
   "data": Object {},
   "extraSpaces": Array [
+    "",
     "",
     "",
   ],
@@ -361,6 +370,7 @@ VApp {
           "extraSpaces": Array [
             "",
             "",
+            "",
           ],
           "indent": 10,
           "type": "VApp",
@@ -368,6 +378,7 @@ VApp {
       ],
       "data": Object {},
       "extraSpaces": Array [
+        "",
         "",
       ],
       "indent": 5,
@@ -381,6 +392,7 @@ VApp {
   ],
   "data": Object {},
   "extraSpaces": Array [
+    "",
     "",
     "",
   ],

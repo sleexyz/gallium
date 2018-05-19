@@ -29,9 +29,10 @@ export function print(node: With<*>): string {
   }
   if (node instanceof VApp) {
     let str = print(node.children[0]);
+    str += node.extraSpaces[0];
     for (let i = 1; i < node.children.length; i += 1) {
       str += "\n";
-      str += node.extraSpaces[i - 1];
+      str += node.extraSpaces[i];
       str += " ".repeat(node.indent);
       str += print(node.children[i]);
     }
