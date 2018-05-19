@@ -61,7 +61,7 @@ baz
         { type: "Name", data: {}, value: "bar" },
         { type: "Name", data: {}, value: "baz" }
       ],
-      extraSpaces: ["\n\n", "\n", ""],
+      extraSpaces: ["\n\n", "\n", "", "", ""],
       indent: 0
     });
   });
@@ -205,7 +205,7 @@ describe("parseVApp", () => {
     expect(result).toEqual({
       type: "VApp",
       indent: 2,
-      extraSpaces: ["", "", ""],
+      extraSpaces: ["", "", "", "", ""],
       data: {},
       children: [
         { type: "Name", data: {}, value: "foo" },
@@ -293,10 +293,11 @@ describe("comments", () => {
         { type: "Name", data: {}, value: "foo" },
         { type: "Name", data: {}, value: "bar" }
       ],
-      extraSpaces: ["", "  # comment 1\n\n# comment 2\n\n  # comment 3\n"],
+      extraSpaces: ["", "  # comment 1\n\n# comment 2\n\n  # comment 3\n", ""],
       indent: 2
     });
   });
+
   it("ignores lines with same line comments", () => {
     const result = parse(`foo # comment 1
   bar`);
@@ -307,7 +308,7 @@ describe("comments", () => {
         { type: "Name", data: {}, value: "foo" },
         { type: "Name", data: {}, value: "bar" }
       ],
-      extraSpaces: [" # comment 1", ""],
+      extraSpaces: [" # comment 1", "", ""],
       indent: 2
     });
   });

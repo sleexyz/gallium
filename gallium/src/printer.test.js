@@ -18,20 +18,22 @@ describe("parse/print round trip identity laws", () => {
 
   testRoundTrip(`foo
   1`);
-  testRoundTrip(`foo 
-  1`);
-  testRoundTrip(`foo # comment 1
-# comment 2
-  fun x y # comment 3
-  1`);
   testRoundTrip(`foo
-  1
+ 1`);
+  testRoundTrip(`foo
+ 1 `);
+  testRoundTrip(`foo # comment 1
+     # comment 2
+ fun x y # comment 3
+ 1`);
+  testRoundTrip(`foo
+ 1
 
-  foo 1 2
+ foo 1 2
 
 
-    bar
-      sdf
+   bar
+     sdf
 
-  baz`);
+ baz`);
 });

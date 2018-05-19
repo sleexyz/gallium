@@ -68,7 +68,6 @@ const sameIndentationNewline: Parser<{
   indent: number
 }> = ctx => {
   const currentIndent = ctx.run(headIndent);
-  ctx.run(maybe(getSpaces));
   ctx.run(getNewline);
   const extraSpace = ctx.run(withFallback(multilineWhitespaceOrComment, ""));
   const numSpaces = ctx.run(withFallback(getSpaces, "")).length;
@@ -82,8 +81,9 @@ export const parseVApp: Parser<AST.Base> = ctx => {
   const term = ctx.run(parseTerm1);
   const { extraSpaces: extraSpaces0, indent } = ctx.run(increasedIndentationNewline);
   const child = ctx.run(parseTerm0);
+  const extraSpace = ctx.run(singlelineWhitespaceOrComment);
   const { children, extraSpaces: extraSpaces1 } = ctx.run(
-    parseVAppAux({ children: [child], extraSpaces: [...extraSpaces0] })
+    parseVAppAux({ children: [child], extraSpaces: [...extraSpaces0, extraSpace] })
   );
   return new AST.VApp([term, ...children], extraSpaces1, indent, {});
 };
@@ -97,12 +97,13 @@ function parseVAppAux({
 }): Parser<{ children: Array<AST.Base>, extraSpaces: Array<string> }> {
   return alternate([
     ctx => {
-      const { extraSpace } = ctx.run(sameIndentationNewline);
+      const { extraSpace: extraSpace0 } = ctx.run(sameIndentationNewline);
       const child = ctx.run(parseTerm0);
+      const extraSpace1 = ctx.run(singlelineWhitespaceOrComment);
       return ctx.run(
         parseVAppAux({
           children: [...children, child],
-          extraSpaces: [...extraSpaces, extraSpace]
+          extraSpaces: [...extraSpaces, extraSpace0, extraSpace1]
         })
       );
     },
