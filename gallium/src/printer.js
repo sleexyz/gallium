@@ -32,10 +32,10 @@ export function print(node: With<*>): string {
     str += node.extraSpaces[0];
     for (let i = 1; i < node.children.length; i += 1) {
       str += "\n";
-      str += node.extraSpaces[2*i - 1];
+      str += node.extraSpaces[2 * i - 1];
       str += " ".repeat(node.indent);
       str += print(node.children[i]);
-      str += node.extraSpaces[2*i];
+      str += node.extraSpaces[2 * i];
     }
     return str;
   }

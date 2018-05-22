@@ -20,7 +20,9 @@ import {
 import * as AST from "./AST";
 export { ParseContext } from "./parser_combinators.js";
 
-const multilineWhitespaceOrComment: Parser<string> = regExp(/^(\s|(#.*))*(\n|$)/);
+const multilineWhitespaceOrComment: Parser<string> = regExp(
+  /^(\s|(#.*))*(\n|$)/
+);
 
 const singlelineWhitespaceOrComment: Parser<string> = regExp(/^(\ |(#.*))*/);
 
@@ -79,11 +81,16 @@ const sameIndentationNewline: Parser<{
 
 export const parseVApp: Parser<AST.Base> = ctx => {
   const term = ctx.run(parseTerm1);
-  const { extraSpaces: extraSpaces0, indent } = ctx.run(increasedIndentationNewline);
+  const { extraSpaces: extraSpaces0, indent } = ctx.run(
+    increasedIndentationNewline
+  );
   const child = ctx.run(parseTerm0);
   const extraSpace = ctx.run(singlelineWhitespaceOrComment);
   const { children, extraSpaces: extraSpaces1 } = ctx.run(
-    parseVAppAux({ children: [child], extraSpaces: [...extraSpaces0, extraSpace] })
+    parseVAppAux({
+      children: [child],
+      extraSpaces: [...extraSpaces0, extraSpace]
+    })
   );
   return new AST.VApp([term, ...children], extraSpaces1, indent, {});
 };
