@@ -79,8 +79,6 @@ export const maybe = function<A>(parser: Parser<A>): Parser<?A> {
   return alternate([ctx => parser(ctx), () => undefined]);
 };
 
-export const whitespace: Parser<string> = regExp(/^\s+/);
-
 export const headIndent: Parser<number> = ctx => {
   const indents = ctx.getIndents();
   return indents[indents.length - 1];

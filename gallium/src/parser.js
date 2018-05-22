@@ -12,7 +12,6 @@ import {
   getSpaces,
   getNewline,
   maybe,
-  whitespace,
   headIndent,
   pushIndent,
   popIndent
@@ -20,6 +19,12 @@ import {
 
 import * as AST from "./AST";
 export { ParseContext } from "./parser_combinators.js";
+
+const multilineWhitespaceOrComment: Parser<string> = regExp(
+  /^(\s|(#.*))*(\n|$)/
+);
+
+const singlelineWhitespaceOrComment: Parser<string> = regExp(/^(\ |(#.*))*/);
 
 export const parseName: Parser<AST.Base> = ctx => {
   const text = ctx.getText();
@@ -44,17 +49,18 @@ export const parseNumLit: Parser<AST.Base> = ctx => {
 };
 
 const increasedIndentationNewline: Parser<{
-  extraSpace: string,
+  extraSpaces: Array<string>,
   indent: number
 }> = ctx => {
   const currentIndent = ctx.run(headIndent);
-  ctx.run(maybe(getSpaces));
+  const extraSpaces = [];
+  extraSpaces.push(ctx.run(singlelineWhitespaceOrComment));
   ctx.run(getNewline);
-  const extraSpace = ctx.run(withFallback(regExp(/^\s*\n+/), ""));
+  extraSpaces.push(ctx.run(withFallback(multilineWhitespaceOrComment, "")));
   const numSpaces = ctx.run(getSpaces).length;
   if (numSpaces > currentIndent) {
     ctx.run(pushIndent(numSpaces));
-    return { extraSpace, indent: numSpaces };
+    return { extraSpaces, indent: numSpaces };
   }
   throw new Error("no increased indentation");
 };
@@ -64,9 +70,8 @@ const sameIndentationNewline: Parser<{
   indent: number
 }> = ctx => {
   const currentIndent = ctx.run(headIndent);
-  ctx.run(maybe(getSpaces));
   ctx.run(getNewline);
-  const extraSpace = ctx.run(withFallback(regExp(/^\s*\n+/), ""));
+  const extraSpace = ctx.run(withFallback(multilineWhitespaceOrComment, ""));
   const numSpaces = ctx.run(withFallback(getSpaces, "")).length;
   if (numSpaces === currentIndent) {
     return { extraSpace, indent: numSpaces };
@@ -76,12 +81,18 @@ const sameIndentationNewline: Parser<{
 
 export const parseVApp: Parser<AST.Base> = ctx => {
   const term = ctx.run(parseTerm1);
-  const { extraSpace, indent } = ctx.run(increasedIndentationNewline);
-  const child = ctx.run(parseTerm0);
-  const { children, extraSpaces } = ctx.run(
-    parseVAppAux({ children: [child], extraSpaces: [extraSpace] })
+  const { extraSpaces: extraSpaces0, indent } = ctx.run(
+    increasedIndentationNewline
   );
-  return new AST.VApp([term, ...children], extraSpaces, indent, {});
+  const child = ctx.run(parseTerm0);
+  const extraSpace = ctx.run(singlelineWhitespaceOrComment);
+  const { children, extraSpaces: extraSpaces1 } = ctx.run(
+    parseVAppAux({
+      children: [child],
+      extraSpaces: [...extraSpaces0, extraSpace]
+    })
+  );
+  return new AST.VApp([term, ...children], extraSpaces1, indent, {});
 };
 
 function parseVAppAux({
@@ -93,12 +104,13 @@ function parseVAppAux({
 }): Parser<{ children: Array<AST.Base>, extraSpaces: Array<string> }> {
   return alternate([
     ctx => {
-      const { extraSpace } = ctx.run(sameIndentationNewline);
+      const { extraSpace: extraSpace0 } = ctx.run(sameIndentationNewline);
       const child = ctx.run(parseTerm0);
+      const extraSpace1 = ctx.run(singlelineWhitespaceOrComment);
       return ctx.run(
         parseVAppAux({
           children: [...children, child],
-          extraSpaces: [...extraSpaces, extraSpace]
+          extraSpaces: [...extraSpaces, extraSpace0, extraSpace1]
         })
       );
     },
@@ -167,7 +179,7 @@ const parseTerm0: Parser<AST.Base> = alternate([parseVApp, parseTerm1]);
 export function parse(input: string): AST.Base {
   const ctx = new ParseContext({ text: input, indents: [0] });
   const ret = parseTerm0(ctx);
-  ctx.run(maybe(whitespace));
+  ctx.run(maybe(multilineWhitespaceOrComment));
   if (ctx.getText().length !== 0) {
     throw new Error("Parse error");
   }
@@ -176,18 +188,19 @@ export function parse(input: string): AST.Base {
 
 const parseTopLevelExpr: Parser<AST.Base> = ctx => {
   const term = new AST.Name("do", {});
-  const extraSpace = ctx.run(withFallback(regExp(/^\s*\n+/), ""));
+  const extraSpace = ctx.run(withFallback(multilineWhitespaceOrComment, ""));
   const child = ctx.run(parseTerm0);
   const { children, extraSpaces } = ctx.run(
     parseVAppAux({ children: [child], extraSpaces: [extraSpace] })
   );
+  ctx.run(withFallback(multilineWhitespaceOrComment, ""));
   return new AST.VApp([term, ...children], extraSpaces, 0, {});
 };
 
 export function parseTopLevel(input: string): AST.Base {
   const ctx = new ParseContext({ text: input, indents: [0] });
   const ret = parseTopLevelExpr(ctx);
-  ctx.run(maybe(whitespace));
+  ctx.run(maybe(multilineWhitespaceOrComment));
   if (ctx.getText().length !== 0) {
     throw new Error("Parse error");
   }

@@ -49,8 +49,6 @@ foo
 
 bar
 baz
-
-
 `);
     expect(result).toEqual({
       type: "VApp",
@@ -61,7 +59,7 @@ baz
         { type: "Name", data: {}, value: "bar" },
         { type: "Name", data: {}, value: "baz" }
       ],
-      extraSpaces: ["\n\n", "\n", ""],
+      extraSpaces: ["\n\n", "\n", "", "", ""],
       indent: 0
     });
   });
@@ -205,7 +203,7 @@ describe("parseVApp", () => {
     expect(result).toEqual({
       type: "VApp",
       indent: 2,
-      extraSpaces: ["", ""],
+      extraSpaces: ["", "", "", "", ""],
       data: {},
       children: [
         { type: "Name", data: {}, value: "foo" },
@@ -214,6 +212,7 @@ describe("parseVApp", () => {
       ]
     });
   });
+
   it("parses indentation-based lists with one child", () => {
     const text = `foo
   bar`;
@@ -273,5 +272,42 @@ describe("parseVApp", () => {
     const ctx = new ParseContext({ text, indents: [0] });
     const result = parseVApp(ctx);
     expect(result).toMatchSnapshot();
+  });
+});
+
+describe("comments", () => {
+  it("ignores lines with line comments", () => {
+    const result = parse(`foo
+  # comment 1
+
+# comment 2
+
+  # comment 3
+  bar`);
+    expect(result).toEqual({
+      type: "VApp",
+      data: {},
+      children: [
+        { type: "Name", data: {}, value: "foo" },
+        { type: "Name", data: {}, value: "bar" }
+      ],
+      extraSpaces: ["", "  # comment 1\n\n# comment 2\n\n  # comment 3\n", ""],
+      indent: 2
+    });
+  });
+
+  it("ignores lines with end of line comments", () => {
+    const result = parse(`foo # comment 1
+  bar`);
+    expect(result).toEqual({
+      type: "VApp",
+      data: {},
+      children: [
+        { type: "Name", data: {}, value: "foo" },
+        { type: "Name", data: {}, value: "bar" }
+      ],
+      extraSpaces: [" # comment 1", "", ""],
+      indent: 2
+    });
   });
 });
