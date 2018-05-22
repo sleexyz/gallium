@@ -49,8 +49,6 @@ foo
 
 bar
 baz
-
-
 `);
     expect(result).toEqual({
       type: "VApp",
@@ -278,7 +276,7 @@ describe("parseVApp", () => {
 });
 
 describe("comments", () => {
-  it("ignores lines with newline comments", () => {
+  it("ignores lines with line comments", () => {
     const result = parse(`foo
   # comment 1
 
@@ -298,7 +296,7 @@ describe("comments", () => {
     });
   });
 
-  it("ignores lines with same line comments", () => {
+  it("ignores lines with end of line comments", () => {
     const result = parse(`foo # comment 1
   bar`);
     expect(result).toEqual({

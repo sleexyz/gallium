@@ -20,7 +20,7 @@ import {
 import * as AST from "./AST";
 export { ParseContext } from "./parser_combinators.js";
 
-const multilineWhitespaceOrComment: Parser<string> = regExp(/^(\s|(#.*))*\n/);
+const multilineWhitespaceOrComment: Parser<string> = regExp(/^(\s|(#.*))*(\n|$)/);
 
 const singlelineWhitespaceOrComment: Parser<string> = regExp(/^(\ |(#.*))*/);
 
@@ -186,6 +186,7 @@ const parseTopLevelExpr: Parser<AST.Base> = ctx => {
   const { children, extraSpaces } = ctx.run(
     parseVAppAux({ children: [child], extraSpaces: [extraSpace] })
   );
+  ctx.run(withFallback(multilineWhitespaceOrComment, ""));
   return new AST.VApp([term, ...children], extraSpaces, 0, {});
 };
 
